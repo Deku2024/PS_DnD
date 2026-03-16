@@ -123,6 +123,20 @@ input:focus {
   box-shadow: 0 6px 20px rgba(89, 131, 146, 0.35);
 }
 
+/* Loader inside primary button */
+.primary .loader,
+.loader {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255,255,255,0.22);
+  border-top-color: rgba(255,255,255,0.95);
+  border-radius: 50%;
+  box-sizing: border-box;
+  animation: spin 0.9s linear infinite;
+  vertical-align: middle;
+}
+
 .ghost {
   background: none;
   border: none;
@@ -143,3 +157,4 @@ input:focus {
   font-size: 13px;
   color: var(--color-primary);
 }
+

@@ -1,2 +1,6 @@
 .home-container{max-width:900px;margin:48px auto;padding:24px;text-align:center}
 .home-container h1{font-size:32px;color:#111827}
+.welcome{color:var(--text-muted);margin-top:8px}
+.home-actions{margin-top:18px}
+.btn-signout{background:var(--color-secondary);color:var(--text-main);border:0;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:700}
+.btn-signout[disabled]{opacity:0.6;cursor:default}
