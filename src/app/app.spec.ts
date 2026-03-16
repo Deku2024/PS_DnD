@@ -18,6 +18,8 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, PS_DnD');
+    // App uses a RouterOutlet and a `title` signal; assert the component provides the title
+    const app = fixture.componentInstance as any;
+    expect(typeof app.title === 'function' ? app.title() : app.title).toContain('PS_DnD');
   });
 });

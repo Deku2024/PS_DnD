@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FirebaseService } from './firebase.service';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, User } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail, User } from 'firebase/auth';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -13,6 +13,16 @@ export class AuthService {
 
   signUp(email: string, password: string) {
     return createUserWithEmailAndPassword(this.firebase.auth, email, password);
+  }
+
+  sendEmailVerification() {
+    const user = this.firebase.auth.currentUser;
+    if (!user) return Promise.reject(new Error('No user logged in'));
+    return sendEmailVerification(user);
+  }
+
+  sendPasswordReset(email: string) {
+    return sendPasswordResetEmail(this.firebase.auth, email);
   }
 
   signOut() {
@@ -35,5 +45,38 @@ export class AuthService {
       });
       return () => unsub();
     });
+  }
+
+  /**
+   * Map Firebase Auth errors to friendly messages for the UI.
+   */
+  friendlyErrorMessage(err: any): string {
+    if (!err) return 'Unknown error. Please try again.';
+    const code: string = err.code || '';
+    switch (code) {
+      case 'auth/email-already-in-use':
+        return 'Ese correo ya está registrado. Inicia sesión o utiliza otro correo.';
+      case 'auth/invalid-email':
+        return 'La dirección de correo no es válida.';
+      case 'auth/operation-not-allowed':
+        return 'Operación no permitida. Contacta con soporte.';
+      case 'auth/weak-password':
+        return 'La contraseña es demasiado débil. Usa al menos 6 caracteres.';
+      case 'auth/missing-email':
+        return 'Por favor, introduce un correo electrónico.';
+      case 'auth/user-disabled':
+        return 'La cuenta ha sido deshabilitada. Contacta con soporte.';
+      case 'auth/user-not-found':
+        return 'No existe una cuenta con ese correo.';
+      case 'auth/wrong-password':
+        return 'Contraseña incorrecta. Intenta de nuevo.';
+      case 'auth/too-many-requests':
+        return 'Demasiados intentos. Espera un momento e inténtalo de nuevo.';
+      case 'auth/network-request-failed':
+        return 'Error de red. Revisa tu conexión e inténtalo de nuevo.';
+      default:
+        // fallback to message if provided, otherwise generic (Spanish)
+        return err.message || 'Error de autenticación. Intenta de nuevo.';
+    }
   }
 }
