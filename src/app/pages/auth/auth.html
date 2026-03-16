@@ -2,22 +2,22 @@
 	<div class="auth-card">
 		<header class="card-header">
 			<div class="brand">PS<span class="accent">_DnD</span></div>
-			<h2>{{ isLogin ? 'Welcome back' : 'Create your account' }}</h2>
-			<p class="subtitle">{{ isLogin ? 'Sign in to continue to your campaign' : 'Sign up to start playing' }}</p>
+			<h2>{{ isLogin ? 'Bienvenido' : 'Crea tu cuenta' }}</h2>
+			<p class="subtitle">{{ isLogin ? 'Inicia sesión para continuar' : 'Regístrate para empezar a jugar' }}</p>
 		</header>
 
-		<form class="card-form" (ngSubmit)="submit()">
+		<form class="card-form" (ngSubmit)="submit()" role="form" aria-label="Formulario de autenticación">
 			<label class="field">
-				<span class="label-text">Email</span>
+				<span class="label-text">Correo</span>
 				<div class="input-row">
-					<input type="email" [(ngModel)]="email" name="email" required placeholder="you@domain.com" />
+					<input type="email" [(ngModel)]="email" name="email" required placeholder="tu@correo.com" aria-required="true" />
 				</div>
 			</label>
 
 			<label class="field">
-				<span class="label-text">Password</span>
+				<span class="label-text">Contraseña</span>
 				<div class="input-row">
-					<input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" name="password" required minlength="6" placeholder="••••••••" />
+					<input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" name="password" required minlength="8" placeholder="••••••••" aria-required="true" aria-describedby="pw-requirements" />
 					<button type="button" class="eye" (click)="togglePassword()" aria-label="Toggle password" [attr.aria-pressed]="showPassword">
 						<svg *ngIf="!showPassword" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 							<path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
@@ -30,24 +30,36 @@
 				</div>
 			</label>
 
+			<!-- Password requirements shown during sign up -->
+			<div class="pw-hint" *ngIf="!isLogin">
+				<ul id="pw-requirements" class="pw-requirements" aria-live="polite">
+					<li [class.ok]="passwordLengthOk">Al menos 8 caracteres</li>
+					<li [class.ok]="passwordHasUpper">Una letra mayúscula</li>
+					<li [class.ok]="passwordHasLower">Una letra minúscula</li>
+					<li [class.ok]="passwordHasNumber">Al menos un número</li>
+					<li [class.ok]="passwordHasSpecial">Al menos un carácter especial</li>
+				</ul>
+			</div>
+
 			<label class="field" *ngIf="!isLogin">
-				<span class="label-text">Confirm password</span>
+				<span class="label-text">Confirmar contraseña</span>
 				<div class="input-row">
-					<input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="confirmPassword" name="confirmPassword" required minlength="6" placeholder="••••••••" />
+					<input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="confirmPassword" name="confirmPassword" required minlength="8" placeholder="••••••••" aria-required="true" />
 				</div>
 			</label>
 
 			<div class="actions">
 				<button class="primary" type="submit" [disabled]="loading">
-					<span *ngIf="!loading">{{ isLogin ? 'Sign in' : 'Create account' }}</span>
+					<span *ngIf="!loading">{{ isLogin ? 'Iniciar sesión' : 'Crear cuenta' }}</span>
 					<span *ngIf="loading" class="loader"></span>
 				</button>
-				<button type="button" class="ghost" (click)="toggle()">{{ isLogin ? 'Create an account' : 'Have an account? Sign in' }}</button>
+				<button type="button" class="ghost" (click)="toggle()">{{ isLogin ? 'Crear cuenta' : '¿Ya tienes cuenta? Inicia sesión' }}</button>
+				<button *ngIf="isLogin" type="button" class="link small" (click)="resetPassword()" aria-label="Recuperar contraseña">¿Olvidaste tu contraseña?</button>
 			</div>
 		</form>
 
-		<p class="error" *ngIf="error">{{ error }}</p>
-		<p class="info" *ngIf="!error && !loading && success">{{ success }}</p>
+		<p class="error" *ngIf="error" role="status" aria-live="assertive">{{ error }}</p>
+		<p class="info" *ngIf="!error && !loading && success" role="status" aria-live="polite">{{ success }}</p>
 	</div>
 </div>
 
