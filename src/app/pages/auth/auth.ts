@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FirebaseService } from '../../services/firebase.service';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   standalone: true,
@@ -21,7 +20,7 @@ export class Auth {
   loading = false;
   showPassword = false;
 
-  constructor(private firebase: FirebaseService) {}
+  constructor(private authService: AuthService) {}
 
   toggle() {
     this.isLogin = !this.isLogin;
@@ -39,7 +38,7 @@ export class Auth {
     this.loading = true;
     try {
       if (this.isLogin) {
-        await signInWithEmailAndPassword(this.firebase.auth, this.email, this.password);
+        await this.authService.signIn(this.email, this.password);
         this.success = 'Logged in successfully.';
       } else {
         if (this.password !== this.confirmPassword) {
@@ -47,7 +46,7 @@ export class Auth {
           this.loading = false;
           return;
         }
-        await createUserWithEmailAndPassword(this.firebase.auth, this.email, this.password);
+        await this.authService.signUp(this.email, this.password);
         this.success = 'Account created successfully. You are logged in.';
       }
       this.email = '';
