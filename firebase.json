@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": " dist/PS_DnD",
+    "public": "dist/PS_DnD",
     "ignore": [
       "firebase.json",
       "**/.*",
