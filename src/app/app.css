@@ -1,0 +1,27 @@
+(/* PWA install modal */)
+.pwa-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0,0,0,0.45);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+}
+.pwa-modal {
+	background: #fff;
+	color: #222;
+	max-width: 420px;
+	width: calc(100% - 40px);
+	padding: 20px;
+	border-radius: 8px;
+	box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+	text-align: center;
+}
+.pwa-modal h3 { margin: 0 0 8px; }
+.pwa-modal p { margin: 0 0 16px; }
+.pwa-actions { display:flex; gap:10px; justify-content:center; }
+.pwa-actions button { padding:8px 14px; border-radius:6px; border: none; cursor: pointer; }
+.pwa-actions .primary { background:#1976d2; color:#fff; }
+.pwa-actions .secondary { background:transparent; color:#1976d2; border:1px solid #1976d2; }
+
