@@ -1,22 +1,29 @@
-(/* PWA install modal */)
+/* PWA install modal */
 .pwa-backdrop {
 	position: fixed;
-	inset: 0;
-	background: rgba(0,0,0,0.45);
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100dvh;
+	background: rgba(0,0,0,0.55);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	z-index: 1000;
+	z-index: 99999;
+	padding: 20px;
+	box-sizing: border-box;
 }
 .pwa-modal {
 	background: #fff;
 	color: #222;
 	max-width: 420px;
-	width: calc(100% - 40px);
+	width: 100%;
 	padding: 20px;
 	border-radius: 8px;
 	box-shadow: 0 8px 30px rgba(0,0,0,0.25);
 	text-align: center;
+	max-height: calc(100dvh - 60px);
+	overflow: auto;
 }
 .pwa-modal h3 { margin: 0 0 8px; }
 .pwa-modal p { margin: 0 0 16px; }
@@ -24,4 +31,10 @@
 .pwa-actions button { padding:8px 14px; border-radius:6px; border: none; cursor: pointer; }
 .pwa-actions .primary { background:#1976d2; color:#fff; }
 .pwa-actions .secondary { background:transparent; color:#1976d2; border:1px solid #1976d2; }
+
+/* prevent body scroll when modal open */
+body.pwa-modal-open {
+	overflow: hidden !important;
+	height: 100dvh;
+}
 
