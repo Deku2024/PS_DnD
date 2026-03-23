@@ -3,9 +3,11 @@
 <div class="pwa-backdrop" *ngIf="showInstallModal()">
 	<div class="pwa-modal">
 		<h3>Instalar PS_DnD</h3>
-		<p>Puedes añadir esta app a tu dispositivo para accederla más rápido.</p>
+		<p *ngIf="hasDeferred()">Puedes añadir esta app a tu dispositivo para accederla más rápido.</p>
+		<p *ngIf="!hasDeferred()">Si tu navegador no muestra el diálogo de instalación, abre el menú del navegador y selecciona «Add to Home screen» o «Install app».</p>
 		<div class="pwa-actions">
-			<button class="primary" (click)="installPWA()">Instalar</button>
+			<button class="primary" *ngIf="hasDeferred()" (click)="installPWA()">Instalar</button>
+			<button class="primary" *ngIf="!hasDeferred()" (click)="dismissInstall()">Entendido</button>
 			<button class="secondary" (click)="dismissInstall()">Cerrar</button>
 		</div>
 	</div>
