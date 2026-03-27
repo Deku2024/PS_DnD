@@ -10,8 +10,8 @@ export const routes: Routes = [
 	},
 	{
 		path: 'home',
-		loadComponent: () => import('./pages/home/home').then(m => m.Home),
-		canActivate: [AuthGuard]
+		loadComponent: () => import('./pages/player-sheet/player-sheet').then(m => m.PlayerSheet),
+		canActivate: [GuestGuard]
 	},
 	{ path: '', redirectTo: 'home', pathMatch: 'full' },
 	{ path: '**', redirectTo: 'home' }
