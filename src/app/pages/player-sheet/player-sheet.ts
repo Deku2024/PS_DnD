@@ -10,15 +10,15 @@ import { FormsModule } from '@angular/forms';
 })
 export class PlayerSheet {
   name: string = '';
-  age: number = 0;
+  age: number | null = null;
   race = '';
-  experience: number = 0;
+  experience: number | null = null;
   alignment = '';
   classes = '';
-  life: number = 0;
-  maxLife: number = 0;
-  tempLife: number = 0;
-  armourClass: number = 0;
+  life: number | null = null;
+  maxLife: number | null = null;
+  tempLife: number | null = null;
+  armourClass: number | null = null;
   salvationThrows = '';
   inventory = '';
   classHabilities: string = '';
