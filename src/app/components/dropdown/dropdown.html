@@ -1,7 +1,10 @@
 <div class="dropdown-container">
-  <label *ngIf="label" [for]="label" class="dropdown-label">
-    {{ label }}
-  </label>
+  @if (label) {
+    <label [for]="label" class="dropdown-label">
+      {{ label }}
+    </label>
+  }
+
   <select
     [id]="label"
     [value]="selectedValue"
@@ -10,8 +13,11 @@
     class="dropdown-select"
   >
     <option value="" disabled selected>{{ placeholder }}</option>
-    <option *ngFor="let option of options" [value]="option.value">
-      {{ option.label }}
-    </option>
+
+    @for (option of options; track option.value) {
+      <option [value]="option.value">
+          {{ option.label }}
+      </option>
+    }
   </select>
 </div>

@@ -1,56 +1,91 @@
 <main>
-    <form>
-        <label class="field">
-            <div id="name-input">
-                <input type="text" name="name" [(ngModel)]="name" placeholder="Volgrum">
-            </div>
-        </label>
-
-        <label class="field">
-            <div id="age-input">
-                <input type="number" name="age" [(ngModel)]="age" placeholder="100">
-            </div>
-        </label>
+    <form [formGroup]="playerSheetForm" (ngSubmit)="onSubmit()" class="player-sheet-form">
+        <div class="field">
+            <label for="name">Nombre:</label>
+            <input type="text" id="name" formControlName="name" placeholder="Ej: Aragorn">
+        </div>
         
+        <div class="field">
+          <label for="age">Edad:</label>
+          <input type="number" id="age" formControlName="age" min="18" max="80">
+        </div>
 
-        <label class="field">
-            <div id="experience-input">
-                <input type="number" name="exp" [(ngModel)]="experience" placeholder="30">
+        <app-dropdown
+            formControlName="race"
+            label="Raza"
+            [options]="raceOptions"
+            [placeholder]="'Selecciona una raza - Ej: Elfo'"
+        ></app-dropdown>
+
+        <app-dropdown
+            formControlName="class"
+            label="Clase"
+            [options]="classOptions"
+            [placeholder]="'Selecciona una clase - Ej: Bárbaro'"
+        ></app-dropdown>
+
+        <div class="field">
+          <label for="experience">Experiencia:</label>
+          <input type="number" id="experience" formControlName="experience" min="1" max="20">
+        </div>
+
+        <app-dropdown
+            formControlName="alignment"
+            label="Alineamiento"
+            [options]="alignmentOptions"
+            [placeholder]="'Selecciona una alineamiento - Ej: Legal Bueno'"
+        ></app-dropdown>
+        
+        <div class="field">
+          <label for="life">Vida:</label>
+          <input type="number" id="life" formControlName="life" min="0">
+        </div> 
+
+        <div class="field">
+          <label for="max-life">Vida máxima:</label>
+          <input type="number" id="max-life" formControlName="maxLife" min="0">
+        </div>
+
+        <div class="field">
+          <label for="temp-life">Vida temporal:</label>
+          <input type="number" id="temp-life" formControlName="tempLife" min="0">
+        </div>
+
+
+        <div class="field">
+          <label for="armour-class">Clase de armadura (CA):</label>
+          <input type="number" id="armour-class" formControlName="armourClass" min="1">
+        </div>
+
+
+    <div class="form-section">
+      <h2>Características</h2>
+      <div formGroupName="attributes" class="attributes-grid">
+        @for (attr of getAttributesList(); track attr.name) {
+            <div class="attribute-card">
+                <label>{{ attr.label }}</label>
+                <input 
+                    type="number" 
+                    [formControlName]="attr.name"
+                    min="1" 
+                    max="20"
+                    readonly
+                >
+                <button class="tirada">Hacer tirada</button>
             </div>
-        </label>
+        }
+      </div>
+    </div>
 
-        <label class="field">
-            <div id="life-input">
-                <input type="number" name="life" [(ngModel)]="life" placeholder="42">
-            </div>
-        </label>
+    <div class="form-section">
+        <h2>Inventario</h2>
+        <div class="inventario"></div>
+    </div>
 
-        <label class="field">
-            <div id="maxlife-input">
-                <input type="number" name="maxlife" [(ngModel)]="maxLife" placeholder="100">
-            </div>
-        </label>
-
-        <label class="field">
-            <div id="templife-input">
-                <input type="number" name="templife" [(ngModel)]="tempLife" placeholder="90">
-            </div>
-        </label>
-
-        <label class="field">
-            <div id="armourClass-input">
-                <input type="number" name="armourClass" [(ngModel)]="armourClass" placeholder="42">
-            </div>
-        </label>
-
-        <label class="field">
-            <div id="classHabilites-input">
-                <input type="text" name="classHabilities" [(ngModel)]="classHabilities">
-            </div>
-        </label>
-
-
-
+    <div class="form-section">
+        <h2>Habilidades</h2>
+        <div class="habilidades"></div>
+    </div>
     </form>
 </main>
 
