@@ -1,0 +1,17 @@
+<div class="dropdown-container">
+  <label *ngIf="label" [for]="label" class="dropdown-label">
+    {{ label }}
+  </label>
+  <select
+    [id]="label"
+    [value]="selectedValue"
+    (change)="onSelectChange($event)"
+    [disabled]="disabled"
+    class="dropdown-select"
+  >
+    <option value="" disabled selected>{{ placeholder }}</option>
+    <option *ngFor="let option of options" [value]="option.value">
+      {{ option.label }}
+    </option>
+  </select>
+</div>

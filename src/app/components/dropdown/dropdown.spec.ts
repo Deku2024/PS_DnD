@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AligmentDropdown } from './aligment-dropdown';
+import { Dropdown } from './dropdown';
 
-describe('AligmentDropdown', () => {
-  let component: AligmentDropdown;
-  let fixture: ComponentFixture<AligmentDropdown>;
+describe('Dropdown', () => {
+  let component: Dropdown;
+  let fixture: ComponentFixture<Dropdown>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AligmentDropdown]
+      imports: [Dropdown]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AligmentDropdown);
+    fixture = TestBed.createComponent(Dropdown);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
