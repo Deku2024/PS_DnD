@@ -1,56 +1,67 @@
 <main>
+    <img id="player-image" src="/player-icon-example.png" alt="elf girl">
     <form [formGroup]="playerSheetForm" (ngSubmit)="onSubmit()" class="player-sheet-form">
-        <div class="field">
-            <label for="name">Nombre:</label>
-            <input type="text" id="name" formControlName="name" placeholder="Ej: Aragorn">
-        </div>
+        <div id="basic-info" class="form-section">
+            <div class="field">
+                <label for="name">Nombre:</label>
+                <input type="text" id="name" formControlName="name" placeholder="Ej: Aragorn">
+            </div>
         
-        <div class="field">
-          <label for="age">Edad:</label>
-          <input type="number" id="age" formControlName="age" min="18" max="80">
+            <div class="field">
+                <label for="age">Edad:</label>
+                <input type="number" id="age" formControlName="age" min="18" max="80">
+            </div>
+
+            <div class="field">
+                <label for="experience">Experiencia:</label>
+                 <input type="number" id="experience" formControlName="experience" min="1" max="20">
+            </div>
         </div>
 
-        <app-dropdown
-            formControlName="race"
-            label="Raza"
-            [options]="raceOptions"
-            [placeholder]="'Selecciona una raza - Ej: Elfo'"
-        ></app-dropdown>
-
-        <app-dropdown
-            formControlName="class"
-            label="Clase"
-            [options]="classOptions"
-            [placeholder]="'Selecciona una clase - Ej: Bárbaro'"
-        ></app-dropdown>
-
-        <div class="field">
-          <label for="experience">Experiencia:</label>
-          <input type="number" id="experience" formControlName="experience" min="1" max="20">
+        <div id="dropdowns">
+            <app-dropdown
+                formControlName="race"
+                label="Raza"
+                [options]="raceOptions"
+                [placeholder]="'Selecciona una raza - Ej: Elfo'"
+            ></app-dropdown>
+    
+            <app-dropdown
+                formControlName="class"
+                label="Clase"
+                [options]="classOptions"
+                [placeholder]="'Selecciona una clase - Ej: Bárbaro'"
+            ></app-dropdown>
+    
+            <app-dropdown
+                formControlName="alignment"
+                label="Alineamiento"
+                [options]="alignmentOptions"
+                [placeholder]="'Selecciona una alineamiento - Ej: Legal Bueno'"
+            ></app-dropdown>
         </div>
 
-        <app-dropdown
-            formControlName="alignment"
-            label="Alineamiento"
-            [options]="alignmentOptions"
-            [placeholder]="'Selecciona una alineamiento - Ej: Legal Bueno'"
-        ></app-dropdown>
+
         
-        <div class="field">
-          <label for="life">Vida:</label>
-          <input type="number" id="life" formControlName="life" min="0">
-        </div> 
-
-        <div class="field">
-          <label for="max-life">Vida máxima:</label>
-          <input type="number" id="max-life" formControlName="maxLife" min="0">
+        <div class="form-section">
+            <h2>Estadísticas</h2>
+            <div id="life-info">
+                <div class="field">
+                    <label for="life">Vida:</label>
+                    <input type="number" id="life" formControlName="life" min="0">
+                </div> 
+    
+                <div class="field">
+                    <label for="max-life">Vida máxima:</label>
+                    <input type="number" id="max-life" formControlName="maxLife" min="0">
+                </div>
+    
+                <div class="field">
+                    <label for="temp-life">Vida temporal:</label>
+                    <input type="number" id="temp-life" formControlName="tempLife" min="0">
+                </div>
+            </div>
         </div>
-
-        <div class="field">
-          <label for="temp-life">Vida temporal:</label>
-          <input type="number" id="temp-life" formControlName="tempLife" min="0">
-        </div>
-
 
         <div class="field">
           <label for="armour-class">Clase de armadura (CA):</label>
@@ -58,34 +69,34 @@
         </div>
 
 
-    <div class="form-section">
-      <h2>Características</h2>
-      <div formGroupName="attributes" class="attributes-grid">
-        @for (attr of getAttributesList(); track attr.name) {
-            <div class="attribute-card">
-                <label>{{ attr.label }}</label>
-                <input 
-                    type="number" 
-                    [formControlName]="attr.name"
-                    min="1" 
-                    max="20"
-                    readonly
-                >
-                <button class="tirada">Hacer tirada</button>
+        <div class="form-section">
+            <h2>Características</h2>
+            <div formGroupName="attributes" class="attributes-grid">
+                @for (attr of getAttributesList(); track attr.name) {
+                    <div class="attribute-card">
+                        <label>{{ attr.label }}</label>
+                        <input 
+                            type="number" 
+                            [formControlName]="attr.name"
+                            min="1" 
+                            max="20"
+                            readonly
+                        >
+                        <button class="tirada">Hacer tirada</button>
+                    </div>
+                }
             </div>
-        }
-      </div>
-    </div>
+        </div>
 
-    <div class="form-section">
-        <h2>Inventario</h2>
-        <div class="inventario"></div>
-    </div>
+        <div class="form-section">
+            <h2>Inventario</h2>
+            <div class="inventario"></div>
+        </div>
 
-    <div class="form-section">
-        <h2>Habilidades</h2>
-        <div class="habilidades"></div>
-    </div>
+        <div class="form-section">
+            <h2>Habilidades</h2>
+            <div class="habilidades"></div>
+        </div>
     </form>
 </main>
 
