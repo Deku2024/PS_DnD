@@ -57,7 +57,8 @@
 }
 
 .field {
-  margin-bottom: 16px;
+  display: block;
+  margin-bottom: 0.5rem;
 }
 
 .label-text {
@@ -176,7 +177,8 @@ input:focus {
 }
 
 .pw-hint {
-  margin-top: 8px;
+  margin-top: 12px;
+  margin-bottom: 0.5rem;
 }
 
 .pw-requirements {
