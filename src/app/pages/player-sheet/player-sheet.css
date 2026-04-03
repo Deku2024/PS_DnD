@@ -150,7 +150,26 @@ main {
     box-sizing: border-box;
     padding: 8px 6px;
     font-size: 0.9rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
+}
+
+
+/*mensajes error*/
+.error {
+    font-family: 'Georgia', serif;
+    font-size: 1.5ch;
+    margin-bottom: 0.5rem;
+    border: 2px solid #c4a47a;
+    border-radius: 6px;
+    text-align: center;
+    background-color: #f7dcbe;
+    margin-top: 4px;
+    padding: 0.5rem 0;
+}
+
+#life-info .error {
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
 }
 
 /*características*/

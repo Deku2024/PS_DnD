@@ -90,17 +90,21 @@
                         <span class="error">La vida mínima es 0</span>
                     }
 
+                    @if (playerSheetForm.errors?.['lifeExceedsMax']) {
+                        <span class="error">La vida no puede ser mayor que la vida máxima</span>
+                    }
+
                 </div> 
     
                 <div class="field">
                     <label for="max-life">Vida máxima:</label>
                     <input type="number" id="max-life" formControlName="maxLife" min="0">
 
-                    @if (playerSheetForm.get('maxlife')?.errors?.['required']) {
+                    @if (playerSheetForm.get('maxLife')?.errors?.['required']) {
                         <span class="error">La vida máxima es requerida</span>
                     }
 
-                    @if (playerSheetForm.get('maxlife')?.errors?.['min']) {
+                    @if (playerSheetForm.get('maxLife')?.errors?.['min']) {
                         <span class="error">La vida máxima mínima es 0</span>
                     }
 
@@ -109,10 +113,6 @@
                 <div class="field">
                     <label for="temp-life">Vida temporal:</label>
                     <input type="number" id="temp-life" formControlName="tempLife" min="0">
-
-                    @if (playerSheetForm.get('tempLife')?.errors?.['required']) {
-                        <span class="error">La vida temporal es requerida</span>
-                    }
 
                     @if (playerSheetForm.get('tempLife')?.errors?.['min']) {
                         <span class="error">La vida temporal mínima es 0</span>

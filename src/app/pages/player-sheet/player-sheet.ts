@@ -48,7 +48,7 @@ export class PlayerSheet implements OnInit {
 
   constructor(private fb: FormBuilder) {
     this.playerSheetForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3)]],
+      name: ['Aragorn', [Validators.required, Validators.minLength(3)]],
       age: [18, [Validators.required, Validators.min(18), Validators.max(80)]],
       experience: [5, [Validators.required, Validators.min(0), Validators.max(20)]],
 
@@ -58,9 +58,9 @@ export class PlayerSheet implements OnInit {
 
       armourClass: [9, [Validators.required, Validators.min(1)]],
 
-      race: ['', Validators.required],
-      class: ['', Validators.required],
-      alignment: ['', Validators.required],
+      race: ['Elfo', Validators.required],
+      class: ['Bárbaro', Validators.required],
+      alignment: ['Legal Bueno', Validators.required],
 
       attributes: this.fb.group({
         strength: [10, [Validators.required, Validators.min(1), Validators.max(20)]],
