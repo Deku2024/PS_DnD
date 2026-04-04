@@ -1,1 +1,17 @@
-<p>note works!</p>
+<div class="note">
+    <div class="note-header">
+        <input
+        type="text"
+        [(ngModel)]="note.title"
+        placeholder="Título de la nota"
+        class="note-title">
+
+        <button class="btn-delete">✕</button>
+    </div>
+    
+    <textarea
+        [(ngModel)]="note.content"
+        placeholder="Escribe tu nota aquí..."
+        class="note-content"
+    ></textarea>
+</div>

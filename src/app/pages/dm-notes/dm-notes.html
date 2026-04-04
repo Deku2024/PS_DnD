@@ -1,9 +1,13 @@
 <main>
     <div id="create-note">
-        <button>+</button>
+        <button (click)="createNote()">+</button>
     </div>
     
     <div id="notes-area">
-        <app-note></app-note>
+        @for (note of notes; track note.id) {
+            <app-note
+                [note]="note"
+            ></app-note>
+        }
     </div>
 </main>
