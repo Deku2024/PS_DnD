@@ -6,6 +6,7 @@ import functions = firebase.functions;
 @Component({
   selector: 'single-custom-throw-button',
   templateUrl: './single.custom.throw.button.component.html',
+  styleUrls: ['./single.custom.throw.button.component.css'],
   standalone: true
 })
 export class SingleCustomThrowButtonComponent {
