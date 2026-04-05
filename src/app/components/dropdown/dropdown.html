@@ -1,0 +1,23 @@
+<div class="dropdown-container">
+  @if (label) {
+    <label [for]="label" class="dropdown-label">
+      {{ label }}
+    </label>
+  }
+
+  <select
+    [id]="label"
+    [value]="selectedValue"
+    (change)="onSelectChange($event)"
+    [disabled]="disabled"
+    class="dropdown-select"
+  >
+    <option value="" disabled selected>{{ placeholder }}</option>
+
+    @for (option of options; track option.value) {
+      <option [value]="option.value">
+          {{ option.label }}
+      </option>
+    }
+  </select>
+</div>

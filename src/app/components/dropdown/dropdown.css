@@ -1,0 +1,158 @@
+/* Estilos para el dropdown con temática medieval */
+.dropdown-container {
+    margin-bottom: 18px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.dropdown-label {
+    color: #3a2518;
+    font-weight: bold;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    font-family: 'MedievalSharp', 'Cinema', monospace;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dropdown-label::before {
+    content: "⚔️";
+    font-size: 0.8rem;
+}
+
+
+.dropdown-select {
+    background: #fff8f0;
+    border: 2px solid #c4a47a;
+    border-radius: 8px;
+    padding: 12px 10px;
+    font-size: 1rem;
+    font-family: 'Georgia', serif;
+    color: #3a2518;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%238b6914" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 36px;
+}
+
+.dropdown-select:hover:not(:disabled) {
+    border-color: #8b6914;
+    background-color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.dropdown-select:focus {
+    outline: none;
+    border-color: #8b6914;
+    box-shadow: 0 0 0 3px rgba(139, 105, 20, 0.2);
+    background-color: #ffffff;
+}
+
+.dropdown-select:disabled {
+    background-color: #e8dcc8;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.dropdown-select option {
+    background-color: #fff8f0;
+    color: #3a2518;
+    padding: 10px;
+    font-family: 'Georgia', serif;
+}
+
+.dropdown-select option:checked {
+    background: linear-gradient(135deg, #d4a056 0%, #8b6914 100%);
+    color: #fff8f0;
+}
+
+
+.dropdown-select:focus {
+    position: relative;
+}
+
+.dropdown-select:focus::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #d4a056, #f5e6c8, #d4a056);
+    border-radius: 10px;
+    z-index: -1;
+}
+
+/* Estilo para móviles pequeños */
+@media (max-width: 480px) {
+    .dropdown-select {
+        padding: 10px 8px;
+        font-size: 14px;
+        padding-right: 32px;
+        background-size: 14px;
+    }
+    
+    .dropdown-label {
+        font-size: 0.8rem;
+    }
+    
+    .dropdown-label::before {
+        font-size: 0.75rem;
+    }
+}
+
+
+.dropdown-select:active {
+    background-color: #f0e4d0;
+}
+
+/* Mejora de accesibilidad para dispositivos táctiles */
+@media (hover: none) and (pointer: coarse) {
+    .dropdown-select {
+        padding: 14px 10px;
+        font-size: 16px;
+    }
+    
+    .dropdown-select:active {
+        transform: scale(0.98);
+    }
+}
+
+.dropdown-container::after {
+    content: '';
+    position: relative;
+    display: block;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #d4a056, transparent);
+    transition: width 0.3s ease;
+    margin-top: -2px;
+}
+
+.dropdown-container:focus-within::after {
+    width: 100%;
+}
+
+.dropdown-select[multiple] {
+    background-image: none;
+    padding: 8px;
+}
+
+.dropdown-select[multiple] option {
+    padding: 8px;
+    border-bottom: 1px solid #e8dcc8;
+}
+
+.dropdown-select[multiple] option:last-child {
+    border-bottom: none;
+}
