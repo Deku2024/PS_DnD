@@ -4,5 +4,14 @@
   <div class="home-actions">
     <button class="btn-signout" (click)="signOut()" [disabled]="loading">{{ loading ? 'Signing out...' : 'Sign out' }}</button>
   </div>
+
+
+
+  <d20-roller [bonus]="-5" [dc]="15" ]></d20-roller>
+
+  <single-custom-throw-button [dataThrow]="'4d4 + 5'" />
+  <general-throw-component />
+  <result-frame />
+
 </div>
 <p>home works!</p>

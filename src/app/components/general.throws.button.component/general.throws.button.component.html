@@ -1,0 +1,26 @@
+<button (click)="interactWithPanel()">Tiradas</button>
+
+@if (isMenuOpen()) {
+  <div id="overlay_for_general_throw" (click)="closeMenu()"></div>
+
+  <div id="menu_for_throws">
+
+    <div class="menu-header">
+      <h3>Tiradas Rápidas</h3>
+      <button class="close-btn" (click)="closeMenu()">✖</button>
+    </div>
+
+<!-- opcional, por si se quiere añadir una tirada de 50% 50% -->
+    <single-custom-throw-button [dataThrow]="'d2'" [dc]="dc()" (callback)="closeMenu()"/>
+    <single-custom-throw-button [dataThrow]="'d4'" [dc]="dc()" (callback)="closeMenu()"/>
+    <single-custom-throw-button [dataThrow]="'d6'" [dc]="dc()" (callback)="closeMenu()"/>
+    <single-custom-throw-button [dataThrow]="'d8'" [dc]="dc()" (callback)="closeMenu()"/>
+    <single-custom-throw-button [dataThrow]="'d10'" [dc]="dc()" (callback)="closeMenu()"/>
+    <single-custom-throw-button [dataThrow]="'d12'" [dc]="dc()" (callback)="closeMenu()"/>
+    <single-custom-throw-button [dataThrow]="'d20'" [dc]="dc()" (callback)="closeMenu()"/>
+    <single-custom-throw-button [dataThrow]="'d100'" [dc]="dc()" (callback)="closeMenu()"/>
+    <input #customThrow placeholder="Tiradas custom (ej: 4d4 + 4)">
+    <button (click)="closeMenu(); throwCustom(customThrow.value);">Tirar tirada custom</button>
+  </div>
+
+}
