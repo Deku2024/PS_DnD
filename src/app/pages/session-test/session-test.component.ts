@@ -1,6 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router'; // <-- 1. Importamos el Router
 import { SessionService, Session } from '../../services/sessions.service';
 import { FirebaseService } from '../../services/firebase.service';
 
@@ -20,10 +21,13 @@ export class SessionTestComponent implements OnDestroy {
 
   unsubscribe?: () => void;
 
-  // UID de prueba hardcodeado (sin auth real)
+  // UID de prueba (Ojo: Para el futuro, esto debería venir del AuthService)
   fakeUserId = 'user_' + Math.random().toString(36).slice(2, 7);
 
-  constructor(private sessionService: SessionService) {}
+  constructor(
+    private sessionService: SessionService,
+    private router: Router // <-- 2. Inyectamos el Router
+  ) {}
 
   async onCreate() {
     if (!this.sessionName.trim()) return;
@@ -31,7 +35,9 @@ export class SessionTestComponent implements OnDestroy {
       const id = await this.sessionService.createSession(this.sessionName, this.fakeUserId);
       this.sessionId = id;
       this.message = `Sesión creada con ID: ${id}`;
-      this.listenTo(id);
+
+      // 3. ¡Teletransporte al panel del DM!
+      this.router.navigate(['/dm-notes', id]);
     } catch (e: any) {
       this.message = 'Error: ' + e.message;
     }
@@ -42,7 +48,9 @@ export class SessionTestComponent implements OnDestroy {
     try {
       await this.sessionService.joinSession(this.joinId, this.fakeUserId);
       this.message = `Te uniste a la sesión ${this.joinId}`;
-      this.listenTo(this.joinId);
+
+      // 4. ¡Teletransporte a la ficha del jugador!
+      this.router.navigate(['/player-sheet', this.joinId]);
     } catch (e: any) {
       this.message = 'Error: ' + e.message;
     }

@@ -17,12 +17,12 @@ export const routes: Routes = [
   {
     path: 'player-sheet/:sessionId',
     loadComponent: () => import('./pages/player-sheet/player-sheet').then(m => m.PlayerSheet),
-    canActivate: [GuestGuard]
+    canActivate: [AuthGuard]
   },
   {
     path: 'dm-notes/:sessionId',
     loadComponent: () => import('./pages/dm-notes/dm-notes').then(m => m.DmNotes),
-    canActivate: [GuestGuard]
+    canActivate: [AuthGuard]
   },
   {
     path: 'test',
