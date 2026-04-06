@@ -50,7 +50,12 @@ export class App implements OnInit, OnDestroy {
   }
 
   protected isDesktop(): boolean {
-    try { return !/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); } catch { return true; }
+    try {
+      const ua = typeof navigator !== 'undefined' && navigator.userAgent ? navigator.userAgent : '';
+      const isMobileUA = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
+      const isTouch = typeof window !== 'undefined' && ('ontouchstart' in window || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches));
+      return !(isMobileUA || isTouch);
+    } catch { return true; }
   }
 
   protected async installPWA(): Promise<void> {
