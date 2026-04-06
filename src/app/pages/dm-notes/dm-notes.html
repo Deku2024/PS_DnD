@@ -1,4 +1,9 @@
 <main>
+    @if (maxNotesExceeded) {
+        <div class="error">
+            <span>Ha alcanzado el número máximo de notas</span>
+        </div>
+    }
     <div id="create-note">
         <button (click)="createNote()" class="add-btn">
             <span>+</span>
@@ -9,6 +14,7 @@
         @for (note of notes; track note.id) {
             <app-note
                 [note]="note"
+                (delete)="deleteNote($event)"
             ></app-note>
         }
     </div>

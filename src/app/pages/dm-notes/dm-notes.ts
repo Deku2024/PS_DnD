@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Note } from '../../components/note/note';
+import { disabled } from '@angular/forms/signals';
 
 interface NoteItem {
   id: number;
@@ -15,6 +16,7 @@ interface NoteItem {
 })
 export class DmNotes {
   maxNotes: number = 40;
+  maxNotesExceeded: boolean = false;
   notes: NoteItem[] = [];
   private nextId = 1;
 
@@ -28,10 +30,18 @@ export class DmNotes {
     this.notes = [...this.notes, newNote];
 
     if (this.notes.length > this.maxNotes) {
-        alert("Número de notas excedido.");
+        this.maxNotesExceeded = true;
+        const button = document.querySelector('.add-btn');
+        button?.setAttribute('disabled', 'disabled');
+    } else {
+      this.maxNotesExceeded = false;
     }
 
     setTimeout(() => this.scrollToNewNote(), 100);
+  }
+
+  deleteNote(noteId: number) {
+    this.notes = this.notes.filter(note => note.id !== noteId);
   }
 
   private scrollToNewNote() {

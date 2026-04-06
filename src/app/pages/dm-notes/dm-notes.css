@@ -94,6 +94,55 @@ main::before {
 
 }
 
+.error {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    top: 5%;
+    left: 50%;
+
+    font-family: 'Georgia', serif;
+    font-size: 1.5ch;
+    margin-bottom: 0.5rem;
+    border: 2px solid #c4a47a;
+    border-radius: 6px;
+    text-align: center;
+    background-color: #f7dcbe;
+    margin-top: 4px;
+    padding: 0.5rem 0;
+
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.error.hide {
+  animation: slideOut 0.3s ease-in forwards;
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+}
+
+
+
+
 
 html {
     scroll-behavior: smooth;
