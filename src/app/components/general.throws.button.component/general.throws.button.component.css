@@ -49,13 +49,12 @@ button:not(#close-btn):active {
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   gap: 12px;
   padding: 20px;
   animation: slideIn 0.2s ease-in-out forwards;
 }
 
-/* Header del menú - ocupando toda la fila */
 .menu-header {
   grid-column: 1 / -1;
   display: flex;
@@ -111,7 +110,6 @@ button:not(#close-btn):active {
 }
 
 #menu_for_throws button:last-child {
-  grid-column: 1 / -1;
   padding: 10px;
   font-size: 14px;
   font-weight: 500;
@@ -229,4 +227,28 @@ button:not(#close-btn):active {
     padding: 8px;
     font-size: 13px;
   }
+}
+
+@keyframes shakeError {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.error-message {
+  display: block;
+  color: white;
+  width: 100%;
+  background-color: #935028;
+  border: 1px solid #935028;
+  border-radius: 8px;
+  animation: shakeError 0.3s ease-in-out;
+  margin-top: 8px;
+}
+
+#inputAndError {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }

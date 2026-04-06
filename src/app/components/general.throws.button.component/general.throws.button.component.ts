@@ -16,6 +16,7 @@ import {DiceRollerService} from '../../services/roll-dice.service';
 export class GeneralThrowsButtonComponent {
   public isMenuOpen = signal(false);
   public dc = input<number>(-1);
+  public errorMessage = signal<string>('');
 
   public diceRoller = inject(DiceRollerService);
 
@@ -28,6 +29,9 @@ export class GeneralThrowsButtonComponent {
   }
 
   public closeMenu():void {
+    if (this.errorMessage() !== "") {
+      return;
+    }
     this.isMenuOpen.set(false);
   }
 
@@ -36,6 +40,24 @@ export class GeneralThrowsButtonComponent {
   }
 
   public throwCustom(dataThrow: string): void {
-    this.diceRoller.rollDiceOf(dataThrow)
+
+    if (!dataThrow || dataThrow.trim() === '') {
+      this.errorMessage.set('Por favor, introduce una tirada válida (ej: 2d6+3)');
+      return;
+    }
+
+    const isValidFormat = /^\d*d\d+(?:\s*[+-]\s*\d+)?$/i.test(dataThrow.trim());
+    if (!isValidFormat) {
+      this.errorMessage.set('Formato inválido. Usa el formato: 2d6+3, d20, 4d4-2, etc.');
+      return;
+    }
+
+    this.errorMessage.set('');
+    this.diceRoller.rollDiceOf(dataThrow, this.dc());
+    this.closeMenu();
+  }
+
+  public clearError(): void {
+    this.errorMessage.set('');
   }
 }
