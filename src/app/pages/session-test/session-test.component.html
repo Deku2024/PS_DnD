@@ -1,0 +1,34 @@
+<div class="container">
+  <h2>🎲 VTT - Prueba de Sesiones</h2>
+  <p class="uid">Tu UID de prueba: <strong>{{ fakeUserId }}</strong></p>
+
+  <!-- Crear sesión -->
+  <div class="card">
+    <h3>Crear sesión</h3>
+    <input [(ngModel)]="sessionName" placeholder="Nombre de la sesión" />
+    <button (click)="onCreate()">Crear</button>
+  </div>
+
+  <!-- Unirse a sesión -->
+  <div class="card">
+    <h3>Unirse a sesión</h3>
+    <input [(ngModel)]="joinId" placeholder="ID de la sesión" />
+    <button (click)="onJoin()">Unirse</button>
+  </div>
+
+  <!-- Mensaje -->
+  <p class="message" *ngIf="message">{{ message }}</p>
+
+  <!-- Sesión activa -->
+  <div class="card session-info" *ngIf="currentSession">
+    <h3>📋 Sesión activa</h3>
+    <p><strong>Nombre:</strong> {{ currentSession.name }}</p>
+    <p><strong>ID:</strong> {{ currentSession.id }}</p>
+    <p><strong>Estado:</strong> <span class="badge">{{ currentSession.status }}</span></p>
+    <p><strong>Master:</strong> {{ currentSession.masterId }}</p>
+    <p><strong>Jugadores ({{ currentSession.players.length }}):</strong></p>
+    <ul>
+      <li *ngFor="let p of currentSession.players">{{ p }}</li>
+    </ul>
+  </div>
+</div>
