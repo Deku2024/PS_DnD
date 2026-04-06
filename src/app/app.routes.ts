@@ -14,7 +14,7 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/home/home').then(m => m.Home),
     canActivate: [AuthGuard]
   },
-  { path: 'test', component: SessionTestComponent }, // ← mover ANTES del wildcard
+  { path: 'test', component: SessionTestComponent, canActivate: [AuthGuard] },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' },
 ];
