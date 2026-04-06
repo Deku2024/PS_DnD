@@ -63,7 +63,6 @@ export class DiceRollerService {
 
     this.isCritic(throwsResult);
     this.lastResultSubject.next(throwsResult);
-    console.log(throwsResult)
   }
 
   private isCritic(throwsResult: ThrowsResult): void {
@@ -128,7 +127,6 @@ export class DiceRollerService {
       throwsResult.throws.push(oneRollResult);
     }
 
-    console.log(total)
     throwsResult.result =  total + throwsResult.bonus;
 
     if (throwsResult.result >= dc) {
