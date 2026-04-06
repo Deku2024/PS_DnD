@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
 import { GuestGuard } from './guards/guest.guard';
+import { Auth } from './pages/auth/auth';
 
 export const routes: Routes = [
 	{
@@ -11,7 +12,7 @@ export const routes: Routes = [
 	{
 		path: 'home',
 		loadComponent: () => import('./pages/player-sheet/player-sheet').then(m => m.PlayerSheet),
-		canActivate: [GuestGuard]
+		canActivate: [AuthGuard]
 	},
 	{ path: '', redirectTo: 'home', pathMatch: 'full' },
 	{ path: '**', redirectTo: 'home' }
