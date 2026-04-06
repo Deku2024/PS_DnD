@@ -2,7 +2,6 @@ import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SessionService, Session } from '../../services/sessions.service';
-import { FirebaseService } from '../../services/firebase.service';
 
 @Component({
   selector: 'app-session-test',
@@ -13,46 +12,59 @@ import { FirebaseService } from '../../services/firebase.service';
 })
 export class SessionTestComponent implements OnDestroy {
   sessionName = '';
+  sessionPassword = '';
   sessionId = '';
   joinId = '';
+  joinPassword = '';
   currentSession: Session | null = null;
   message = '';
+  isError = false;
 
-  unsubscribe?: () => void;
+  private unsubscribe?: () => void;
 
-  // UID de prueba hardcodeado (sin auth real)
   fakeUserId = 'user_' + Math.random().toString(36).slice(2, 7);
 
   constructor(private sessionService: SessionService) {}
 
   async onCreate() {
-    if (!this.sessionName.trim()) return;
+    if (!this.sessionName.trim() || !this.sessionPassword.trim()) {
+      this.showMessage('Introduce nombre y contraseña.', true);
+      return;
+    }
     try {
-      const id = await this.sessionService.createSession(this.sessionName, this.fakeUserId);
+      const id = await this.sessionService.createSession(this.sessionName, this.fakeUserId, this.sessionPassword);
       this.sessionId = id;
-      this.message = `Sesión creada con ID: ${id}`;
+      this.showMessage(`Sesión creada con ID: ${id}`, false);
       this.listenTo(id);
     } catch (e: any) {
-      this.message = 'Error: ' + e.message;
+      this.showMessage('Error: ' + e.message, true);
     }
   }
 
   async onJoin() {
-    if (!this.joinId.trim()) return;
+    if (!this.joinId.trim() || !this.joinPassword.trim()) {
+      this.showMessage('Introduce el ID y la contraseña de la sesión.', true);
+      return;
+    }
     try {
-      await this.sessionService.joinSession(this.joinId, this.fakeUserId);
-      this.message = `Te uniste a la sesión ${this.joinId}`;
+      await this.sessionService.joinSession(this.joinId, this.fakeUserId, this.joinPassword);
+      this.showMessage(`Te uniste a la sesión ${this.joinId}`, false);
       this.listenTo(this.joinId);
     } catch (e: any) {
-      this.message = 'Error: ' + e.message;
+      this.showMessage('Error: ' + e.message, true);
     }
   }
 
-  listenTo(id: string) {
+  private listenTo(id: string) {
     this.unsubscribe?.();
     this.unsubscribe = this.sessionService.listenSession(id, (session) => {
       this.currentSession = session;
     });
+  }
+
+  private showMessage(msg: string, error: boolean) {
+    this.message = msg;
+    this.isError = error;
   }
 
   ngOnDestroy() {

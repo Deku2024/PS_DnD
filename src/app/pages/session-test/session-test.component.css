@@ -50,6 +50,11 @@ button:hover {
   color: #0369a1;
 }
 
+.message.error {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
 .badge {
   background: #22c55e;
   color: white;
