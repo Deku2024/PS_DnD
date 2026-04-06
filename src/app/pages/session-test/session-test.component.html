@@ -1,13 +1,19 @@
 <div class="container">
   <h2>🎲 VTT - Prueba de Sesiones</h2>
-  <p class="uid">Tu UID de prueba: <strong>{{ fakeUserId }}</strong></p>
+
+  <p class="uid" *ngIf="currentUser">
+    Usuario: <strong>{{ currentUser.email }}</strong>
+  </p>
+  <p class="uid error" *ngIf="!currentUser">
+    ⚠️ No hay usuario autenticado.
+  </p>
 
   <!-- Crear sesión -->
   <div class="card">
     <h3>Crear sesión</h3>
     <input [(ngModel)]="sessionName" placeholder="Nombre de la sesión" />
     <input [(ngModel)]="sessionPassword" type="password" placeholder="Contraseña de la sesión" />
-    <button (click)="onCreate()">Crear</button>
+    <button (click)="onCreate()" [disabled]="!currentUser">Crear</button>
   </div>
 
   <!-- Unirse a sesión -->
@@ -15,7 +21,7 @@
     <h3>Unirse a sesión</h3>
     <input [(ngModel)]="joinId" placeholder="ID de la sesión" />
     <input [(ngModel)]="joinPassword" type="password" placeholder="Contraseña" />
-    <button (click)="onJoin()">Unirse</button>
+    <button (click)="onJoin()" [disabled]="!currentUser">Unirse</button>
   </div>
 
   <!-- Mensaje -->
