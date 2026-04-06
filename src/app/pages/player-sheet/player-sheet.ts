@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { Dropdown } from "../../components/dropdown/dropdown";
+import { CharacterService } from '../../services/character.service';
 
 @Component({
   selector: 'app-player-sheet',
@@ -43,10 +44,10 @@ export class PlayerSheet implements OnInit {
     { value: 'CN', label: 'Caótico neutral' },
     { value: 'LC', label: 'Legal caótico' },
     { value: 'NC', label: 'Neutral caótico' },
-    { value: 'LG', label: 'Caótico caótico' },
+    { value: 'CC', label: 'Caótico caótico' },
   ];
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private characterService: CharacterService) {
     this.playerSheetForm = this.fb.group({
       name: ['Aragorn', [Validators.required, Validators.minLength(3)]],
       age: [18, [Validators.required, Validators.min(18), Validators.max(80)]],
@@ -78,7 +79,7 @@ export class PlayerSheet implements OnInit {
       return (group: AbstractControl): { [key: string]: any } | null => {
       const life = group.get('life')?.value;
       const maxLife = group.get('maxLife')?.value;
-      
+
       if (life !== null && maxLife !== null && life > maxLife) {
         return { 'lifeExceedsMax': true };
       }
