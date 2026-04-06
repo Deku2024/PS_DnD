@@ -1,4 +1,12 @@
+@if (!isAuthPage()) {
+  <app-header></app-header>
+}
+
 <router-outlet></router-outlet>
+
+@if (!isAuthPage()) {
+  <app-footer></app-footer>
+}
 
 <div class="pwa-backdrop" *ngIf="showInstallModal()">
 	<div class="pwa-modal">

@@ -1,22 +1,34 @@
 import { Component, signal, OnInit, OnDestroy } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { filter } from 'rxjs/operators';
+import { Header } from './components/header/header';
+import { Footer } from './components/footer/footer';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CommonModule],
+  imports: [RouterOutlet, CommonModule, Header, Footer],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App implements OnInit, OnDestroy {
   protected readonly title = signal('PS_DnD');
+  protected isAuthPage = signal(false);
 
   protected showInstallModal = signal(false);
   private deferredPrompt: any = null;
   private beforeInstallHandler: ((e: Event) => void) | null = null;
   private mobileFallbackTimer: any = null;
 
+  constructor(private router: Router) {}
+
   ngOnInit(): void {
+    this.isAuthPage.set(this.router.url.startsWith('/auth'));
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd)
+    ).subscribe((e: NavigationEnd) => {
+      this.isAuthPage.set(e.urlAfterRedirects.startsWith('/auth'));
+    });
     if (typeof window !== 'undefined') {
       this.beforeInstallHandler = (e: Event) => {
         try { e.preventDefault(); } catch {}
