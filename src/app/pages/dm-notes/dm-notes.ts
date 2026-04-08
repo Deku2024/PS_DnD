@@ -27,7 +27,7 @@ export class DmNotes {
     content: ''
   };
 
-  constructor(private dmNotesService: DmnotesService, private sessionService: SessionService) {}
+  constructor(private dmNotesService: DmnotesService, /*private sessionService: SessionService*/) {}
 
   ngOnInit() {
     this.unsubscribe = this.dmNotesService.listenToNotes(
@@ -39,14 +39,14 @@ export class DmNotes {
       }
     )
 
-    const id = this.sessionService.getCurrentSessionId();
+    /*const id = this.sessionService.getCurrentSessionId();
 
     if (!id) {
       console.error('No hay sesión activa');
       return;
     }
 
-    this.sessionId = id;
+    this.sessionId = id;*/
   }
 
   async addNote() {
