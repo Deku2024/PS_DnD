@@ -27,7 +27,7 @@ export class DmNotes {
     content: ''
   };
 
-  constructor(private dmNotesService: DmnotesService) {}
+  constructor(private dmNotesService: DmnotesService, private sessionService: SessionService) {}
 
   ngOnInit() {
     this.unsubscribe = this.dmNotesService.listenToNotes(
@@ -38,6 +38,15 @@ export class DmNotes {
         this.maxNotesExceeded = this.notes.length > this.maxNotes;
       }
     )
+
+    const id = this.sessionService.getCurrentSessionId();
+
+    if (!id) {
+      console.error('No hay sesión activa');
+      return;
+    }
+
+    this.sessionId = id;
   }
 
   async addNote() {
@@ -52,6 +61,12 @@ export class DmNotes {
   async deleteNote(noteId: string) {
     if (!noteId) return;
     await this.dmNotesService.deleteNote(this.sessionId, noteId);
+  }
+
+  async updateNote(noteId: string) {
+    if (!noteId) return;
+    await this.dmNotesService.updateNote(this.sessionId, noteId, this.newNote);
+    this.newNote = { title: '', content: ''};
   }
 
 

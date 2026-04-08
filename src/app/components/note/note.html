@@ -3,6 +3,7 @@
         <input
         type="text"
         [(ngModel)]="note.title"
+        (blur)="onUpdate()"
         placeholder="Título de la nota"
         class="note-title">
 
