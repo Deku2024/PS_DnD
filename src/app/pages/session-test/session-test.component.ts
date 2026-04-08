@@ -33,10 +33,7 @@ export class SessionTestComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    // Leer usuario inmediatamente sin esperar al observable
     this.currentUser = this.authService.getCurrentUser();
-
-    // Suscribirse para detectar cambios de sesión
     this.authSub = this.authService.onAuthState().subscribe(user => {
       this.currentUser = user;
     });
@@ -55,6 +52,7 @@ export class SessionTestComponent implements OnInit, OnDestroy {
       const id = await this.sessionService.createSession(
         this.sessionName,
         this.currentUser.uid,
+        this.currentUser.email || this.currentUser.uid,
         this.sessionPassword
       );
       this.showMessage(`Sesión creada con ID: ${id}`, false);
@@ -69,7 +67,7 @@ export class SessionTestComponent implements OnInit, OnDestroy {
       this.showMessage('No hay usuario autenticado.', true);
       return;
     }
-    if (!this.joinId.trim() || !this.joinPassword.trim()) {
+    if (!this.joinId.trim()) {
       this.showMessage('Introduce el ID y la contraseña de la sesión.', true);
       return;
     }
@@ -77,6 +75,7 @@ export class SessionTestComponent implements OnInit, OnDestroy {
       await this.sessionService.joinSession(
         this.joinId,
         this.currentUser.uid,
+        this.currentUser.email || this.currentUser.uid,
         this.joinPassword
       );
       this.showMessage(`Te uniste a la sesión ${this.joinId}`, false);

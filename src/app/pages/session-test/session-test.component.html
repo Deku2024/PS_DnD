@@ -33,10 +33,12 @@
     <p><strong>Nombre:</strong> {{ currentSession.name }}</p>
     <p><strong>ID:</strong> {{ currentSession.id }}</p>
     <p><strong>Estado:</strong> <span class="badge">{{ currentSession.status }}</span></p>
-    <p><strong>Master:</strong> {{ currentSession.masterId }}</p>
+    <p><strong>Master:</strong> {{ currentSession.playerEmails[currentSession.masterId] || currentSession.masterId }}</p>
     <p><strong>Jugadores ({{ currentSession.players.length }}):</strong></p>
     <ul>
-      <li *ngFor="let p of currentSession.players">{{ p }}</li>
+      <li *ngFor="let uid of currentSession.players">
+        {{ currentSession.playerEmails[uid] || uid }}
+      </li>
     </ul>
   </div>
 </div>

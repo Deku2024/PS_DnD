@@ -17,6 +17,7 @@ export interface Session {
   name: string;
   masterId: string;
   players: string[];
+  playerEmails: { [uid: string]: string };
   status: 'waiting' | 'active' | 'closed';
   password?: string;
   createdAt?: any;
@@ -28,13 +29,13 @@ export class SessionService {
 
   constructor(private firebase: FirebaseService) {}
 
-  /** Crea una nueva sesión con contraseña */
-  async createSession(name: string, masterId: string, password: string): Promise<string> {
+  async createSession(name: string, masterId: string, masterEmail: string, password: string): Promise<string> {
     const ref = collection(this.firebase.db, this.sessionsCol);
     const docRef = await addDoc(ref, {
       name,
       masterId,
       players: [masterId],
+      playerEmails: { [masterId]: masterEmail },
       status: 'waiting',
       password,
       createdAt: serverTimestamp()
@@ -42,7 +43,6 @@ export class SessionService {
     return docRef.id;
   }
 
-  /** Obtiene una sesión por ID (sin exponer la contraseña) */
   async getSession(sessionId: string): Promise<Session | null> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     const snap = await getDoc(ref);
@@ -51,8 +51,7 @@ export class SessionService {
     return { id: snap.id, ...sessionWithoutPassword } as Session;
   }
 
-  /** Un jugador se une verificando la contraseña */
-  async joinSession(sessionId: string, userId: string, password: string): Promise<void> {
+  async joinSession(sessionId: string, userId: string, userEmail: string, password: string): Promise<void> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     const snap = await getDoc(ref);
 
@@ -65,11 +64,11 @@ export class SessionService {
     if (session.password !== password) throw new Error('Contraseña incorrecta.');
 
     await updateDoc(ref, {
-      players: arrayUnion(userId)
+      players: arrayUnion(userId),
+      [`playerEmails.${userId}`]: userEmail
     });
   }
 
-  /** Escucha cambios en tiempo real de una sesión */
   listenSession(sessionId: string, callback: (session: Session | null) => void): Unsubscribe {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     return onSnapshot(ref, (snap) => {
@@ -82,7 +81,6 @@ export class SessionService {
     });
   }
 
-  /** Cambia el estado de la sesión (solo el master) */
   async updateStatus(sessionId: string, status: Session['status']): Promise<void> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     await updateDoc(ref, { status });
