@@ -1,0 +1,174 @@
+.overlay {
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.3);
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+.overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.resultFrame {
+  width: 50%;
+  height: 50%;
+  background-color: #935028;
+  display: flex;
+  flex-direction: column;
+
+  transform: scale(0.9);
+  transition: transform 0.3s ease-in-out;
+
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.overlay.show .resultFrame {
+  transform: scale(1);
+}
+
+.resultArea {
+  flex: 7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #703818;
+  padding: 20px;
+}
+
+.mainResult {
+  font-size: 400%;
+  font-weight: bold;
+  margin: 0;
+  text-align: center;
+  font-family: 'Arial', sans-serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mainResult.success {
+  color: #15a654;
+}
+
+.mainResult.fail {
+  color: #c32f1f;
+}
+
+.mainResult.criticalSuccess {
+  color: #15a654;
+  font-size: 350%;
+  animation: pulse 0.5s ease-in-out;
+}
+
+.mainResult.criticalFail {
+  color: #c32f1f;
+  font-size: 350%;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+.detailsArea {
+  flex: 3;
+  background-color: #703818;
+  border-top: 2px solid #703818;
+  padding: 15px 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  font-family: 'Arial', sans-serif;
+}
+
+.detailItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 10px;
+  background-color: #935028;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.detailLabel {
+  font-size: 85%;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.detailValue {
+  font-size: 100%;
+  font-weight: 500;
+  color: white;
+}
+
+.detailValue.positive {
+  color: #15a654;
+  font-weight: bold;
+}
+
+.detailValue.negative {
+  color: #c32f1f;
+  font-weight: bold;
+}
+
+.throwsList {
+  font-family: 'Courier New', monospace;
+  font-size: 90%;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .resultFrame {
+    width: 90%;
+    height: 60%;
+  }
+
+  .mainResult {
+    font-size: 250%;
+  }
+
+  .mainResult.criticalSuccess,
+  .mainResult.criticalFail {
+    font-size: 220%;
+  }
+
+  .detailsArea {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .detailItem {
+    padding: 8px;
+  }
+}
+
+.detailItem .detailValue {
+  font-family: 'Arial', sans-serif;
+}
+
+.detailValue.diceValue {
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  color: #3498db;
+}

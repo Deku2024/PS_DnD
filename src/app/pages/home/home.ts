@@ -1,7 +1,15 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
+import {D20RollerButtonComponent} from '../../components/d20.roller.button.component/d20.roller.button.component';
+import {ResultThrowFrameComponent} from '../../components/result.throw.frame.component/result.throw.frame.component';
+import {
+  SingleCustomThrowButtonComponent
+} from '../../components/single.custom.throw.button.component/single.custom.throw.button.component';
+import {
+  GeneralThrowsButtonComponent
+} from '../../components/general.throws.button.component/general.throws.button.component';
 
 @Component({
   standalone: true,
@@ -12,7 +20,7 @@ import { Router } from '@angular/router';
 })
 export class Home {
   loading = false;
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private auth: AuthService, private router: Router) { }
 
   async signOut() {
     this.loading = true;
@@ -26,4 +34,5 @@ export class Home {
       this.loading = false;
     }
   }
+
 }
