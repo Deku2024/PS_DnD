@@ -10,9 +10,10 @@ import { FormsModule } from '@angular/forms';
 })
 export class Note {
   @Input() note!: any;
-  @Output() delete = new EventEmitter<number>();
+  @Output() delete = new EventEmitter<string>();
   
   onDelete() {
+    if (!this.note.id) return;
     this.delete.emit(this.note.id);
   }
 

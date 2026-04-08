@@ -1,11 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, ɵisSubscribable } from '@angular/core';
 import { Note } from '../../components/note/note';
-import { disabled } from '@angular/forms/signals';
+import { DmnotesService } from '../../services/dmnotes.service';
 
 interface NoteItem {
-  id: number;
+  id?: string;
   title: string,
   content: string;
+  createdAt?: any;
+  updatedAt?: any;
 }
 
 @Component({
@@ -18,36 +20,44 @@ export class DmNotes {
   maxNotes: number = 40;
   maxNotesExceeded: boolean = false;
   notes: NoteItem[] = [];
-  private nextId = 1;
+  sessionId: string = '';
+  unsubscribe: (() => void) | undefined;
+  newNote: NoteItem = {
+    title: '',
+    content: ''
+  };
 
-  createNote() {
-    const newNote: NoteItem = {
-      id: this.nextId++,
-      title: '',
-      content: ''
-    };
+  constructor(private dmNotesService: DmnotesService) {}
 
-    this.notes = [...this.notes, newNote];
+  ngOnInit() {
+    this.unsubscribe = this.dmNotesService.listenToNotes(
+      this.sessionId,
+      (notes) => {
+        this.notes = notes;
 
-    if (this.notes.length > this.maxNotes) {
-        this.maxNotesExceeded = true;
-        const button = document.querySelector('.add-btn');
-        button?.setAttribute('disabled', 'disabled');
-    } else {
-      this.maxNotesExceeded = false;
+        this.maxNotesExceeded = this.notes.length > this.maxNotes;
+      }
+    )
+  }
+
+  async addNote() {
+    if (!this.newNote.title || !this.newNote.content) {
+      return;
     }
 
-    setTimeout(() => this.scrollToNewNote(), 100);
+    await this.dmNotesService.createNote(this.sessionId, this.newNote);
+    this.newNote = { title: '', content: ''};
   }
 
-  deleteNote(noteId: number) {
-    this.notes = this.notes.filter(note => note.id !== noteId);
+  async deleteNote(noteId: string) {
+    if (!noteId) return;
+    await this.dmNotesService.deleteNote(this.sessionId, noteId);
   }
 
-  private scrollToNewNote() {
-    const container = document.querySelector('.notes-area');
-    if (container) {
-      container.scrollTop = container.scrollHeight;
+
+  ngOnDestroy() {
+    if (this.unsubscribe) {
+      this.unsubscribe();
     }
   }
 

@@ -16,12 +16,12 @@ export const routes: Routes = [
 	{
 		path: 'player-sheet',
 		loadComponent: () => import('./pages/player-sheet/player-sheet').then(m => m.PlayerSheet),
-		canActivate: [GuestGuard]
+		/*canActivate: [AuthGuard]*/
 	},
 	{
 		path: 'dm-notes',
 		loadComponent: () => import('./pages/dm-notes/dm-notes').then(m => m.DmNotes),
-		canActivate: [GuestGuard]
+		/*canActivate: [GuestGuard]*/
 	},
 	{ path: '', redirectTo: 'home', pathMatch: 'full' },
 	{ path: '**', redirectTo: 'home' }

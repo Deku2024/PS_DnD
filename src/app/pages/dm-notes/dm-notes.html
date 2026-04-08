@@ -5,7 +5,7 @@
         </div>
     }
     <div id="create-note">
-        <button (click)="createNote()" class="add-btn">
+        <button (click)="addNote()" class="add-btn" [disabled]="maxNotesExceeded">
             <span>+</span>
         </button>
     </div>
