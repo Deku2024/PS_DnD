@@ -1,0 +1,254 @@
+:host {
+  display: inline-block;
+  position: relative;
+}
+
+button:not(#close-btn) {
+  background-color: #935028;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Arial', sans-serif;
+}
+
+button:not(#close-btn):hover {
+  background-color: #703818;
+}
+
+button:not(#close-btn):active {
+  transform: scale(0.98);
+}
+
+#overlay_for_general_throw {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  z-index: 998;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+#menu_for_throws {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  z-index: 999;
+  background: #332112;
+  width: 50%;
+  max-width: 550px;
+  min-width: 320px;
+  height: auto;
+  max-height: 80%;
+  overflow-y: auto;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 12px;
+  padding: 20px;
+  animation: slideIn 0.2s ease-in-out forwards;
+}
+
+.menu-header {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.menu-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: white;
+  font-weight: 500;
+}
+
+#menu_for_throws single-custom-throw-button {
+  display: block;
+}
+
+#close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #935028;
+  border: 1px solid #935028;
+}
+
+#close-btn:hover {
+  background-color: #703818;
+}
+
+#menu_for_throws input {
+  grid-column: 1 / -1;
+  padding: 10px 12px;
+  border: 1px solid #935028;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  font-family: 'Arial', sans-serif;
+  background-color: #935028;
+}
+
+#menu_for_throws input:focus {
+  outline: none;
+  background-color: #703818;
+}
+
+#menu_for_throws input::placeholder {
+  color: white;
+  font-size: 13px;
+}
+
+#menu_for_throws button:last-child {
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+#menu_for_throws button:last-child:hover {
+  background-color: #703818;
+}
+
+#menu_for_throws button:last-child:active {
+  transform: scale(0.98);
+}
+
+#menu_for_throws::-webkit-scrollbar {
+  width: 6px;
+}
+
+#menu_for_throws::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+#menu_for_throws::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 3px;
+}
+
+#menu_for_throws::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  #menu_for_throws {
+    width: 90%;
+    padding: 16px;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+
+  .menu-header h3 {
+    font-size: 16px;
+  }
+
+  #close-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+  }
+
+  #menu_for_throws ::ng-deep single-custom-throw-button button {
+    padding: 8px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  #menu_for_throws {
+    width: 95%;
+    padding: 12px;
+    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  }
+
+  .menu-header {
+    padding-bottom: 12px;
+    margin-bottom: 4px;
+  }
+
+  .menu-header h3 {
+    font-size: 15px;
+  }
+
+  #close-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 16px;
+  }
+
+  #menu_for_throws single-custom-throw-button button {
+    padding: 6px;
+    font-size: 10Px;
+  }
+
+  #menu_for_throws input {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  #menu_for_throws button:last-child {
+    padding: 8px;
+    font-size: 13px;
+  }
+}
+
+@keyframes shakeError {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.error-message {
+  display: block;
+  color: white;
+  width: 100%;
+  background-color: #935028;
+  border: 1px solid #935028;
+  border-radius: 8px;
+  animation: shakeError 0.3s ease-in-out;
+  margin-top: 8px;
+}
+
+#inputAndError {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
