@@ -2,10 +2,15 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { Dropdown } from "../../components/dropdown/dropdown";
+import {D20RollerButtonComponent} from '../../components/d20.roller.button.component/d20.roller.button.component';
+import {ResultThrowFrameComponent} from '../../components/result.throw.frame.component/result.throw.frame.component';
+import {
+  GeneralThrowsButtonComponent
+} from '../../components/general.throws.button.component/general.throws.button.component';
 
 @Component({
   selector: 'app-player-sheet',
-  imports: [CommonModule, ReactiveFormsModule, Dropdown],
+  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, ResultThrowFrameComponent, GeneralThrowsButtonComponent],
   templateUrl: './player-sheet.html',
   styleUrl: './player-sheet.css',
 })
@@ -78,7 +83,7 @@ export class PlayerSheet implements OnInit {
       return (group: AbstractControl): { [key: string]: any } | null => {
       const life = group.get('life')?.value;
       const maxLife = group.get('maxLife')?.value;
-      
+
       if (life !== null && maxLife !== null && life > maxLife) {
         return { 'lifeExceedsMax': true };
       }
@@ -115,4 +120,5 @@ export class PlayerSheet implements OnInit {
   ];
 }
 
+  protected readonly parseInt = parseInt;
 }

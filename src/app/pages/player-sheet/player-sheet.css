@@ -218,23 +218,23 @@ main {
     cursor: default;
 }
 
-.attribute-card button {
-    background: #5c3d2e;
-    color: #f5e6c8;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    font-family: 'MedievalSharp', monospace;
-    transition: all 0.2s ease;
-    width: 100%;
-}
+/*.attribute-card d20-roller {*/
+/*    background: #5c3d2e;*/
+/*    color: #f5e6c8;*/
+/*    border: none;*/
+/*    border-radius: 6px;*/
+/*    padding: 6px 12px;*/
+/*    font-size: 0.8rem;*/
+/*    cursor: pointer;*/
+/*    font-family: 'MedievalSharp', monospace;*/
+/*    transition: all 0.2s ease;*/
+/*    width: 100%;*/
+/*}*/
 
-.attribute-card button:hover {
-    background: #8b6914;
-    transform: scale(1.02);
-}
+/*.attribute-card button:hover {*/
+/*    background: #8b6914;*/
+/*    transform: scale(1.02);*/
+/*}*/
 
 /* Áreas de inventario y habilidades */
 .inventario, .habilidades, #dropdowns {
@@ -252,11 +252,11 @@ main {
     body {
         padding-bottom: 150px;
     }
-    
+
     .player-sheet-form {
         padding: 16px 12px;
     }
-    
+
     .attributes-grid {
         gap: 8px;
     }
@@ -270,16 +270,16 @@ main {
         font-size: 0.7rem;
         padding: 5px 8px;
     }
-    
+
     .field input {
         padding: 10px 8px;
         font-size: 14px;
     }
-    
+
     .form-section h2 {
         font-size: 1rem;
     }
-    
+
     .attribute-card input {
         font-size: 1rem;
     }
@@ -287,15 +287,15 @@ main {
     #life-info {
         gap: 8px;
     }
-    
+
     #life-info .field label {
-        font-size: 0.6rem; 
+        font-size: 0.6rem;
     }
 
      #basic-info .field label {
         font-size: 0.7rem;
      }
-    
+
     #life-info .field input {
         padding: 6px 4px;
         font-size: 0.85rem;
@@ -307,8 +307,6 @@ main {
         padding-bottom: 150px;
     }
 }
-
-
 
 html {
     scroll-behavior: smooth;
@@ -331,4 +329,8 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #8b6914;
+}
+
+general-throw-component {
+  width: 100%;
 }
