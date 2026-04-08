@@ -1,0 +1,18 @@
+<div class="note">
+    <div class="note-header">
+        <input
+        type="text"
+        [(ngModel)]="note.title"
+        (blur)="onUpdate()"
+        placeholder="Título de la nota"
+        class="note-title">
+
+        <button class="btn-delete" (click)="onDelete()">✕</button>
+    </div>
+    
+    <textarea
+        [(ngModel)]="note.content"
+        placeholder="Escribe tu nota aquí..."
+        class="note-content"
+    ></textarea>
+</div>
