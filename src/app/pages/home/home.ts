@@ -14,7 +14,7 @@ import {
 @Component({
   standalone: true,
   selector: 'app-home',
-  imports: [CommonModule, D20RollerButtonComponent, ResultThrowFrameComponent, SingleCustomThrowButtonComponent, GeneralThrowsButtonComponent],
+  imports: [CommonModule],
   templateUrl: './home.html',
   styleUrls: ['./home.css']
 })
