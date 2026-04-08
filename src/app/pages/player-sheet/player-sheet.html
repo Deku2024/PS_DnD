@@ -202,10 +202,10 @@
             @for (ability of abilitiesFormArray.controls; track $index) {
               <div [formGroupName]="$index" class="ability-item">
                 <div class="ability-main">
-                  <input type="text" formControlName="name" class="name-input" placeholder="Ability name...">
+                  <input type="text" formControlName="name" class="name-input" placeholder="Nombre...">
                   <button type="button" class="btn-delete" (click)="removeAbility($index)">Eliminar habilidad</button>
                 </div>
-                <textarea formControlName="description" class="ability-desc" placeholder="Description of the effect..."></textarea>
+                <textarea formControlName="description" class="ability-desc" placeholder="Descripción..."></textarea>
               </div>
             }
           </div>
