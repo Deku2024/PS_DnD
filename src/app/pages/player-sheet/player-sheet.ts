@@ -69,7 +69,8 @@ export class PlayerSheet implements OnInit {
         charisma: [10, [Validators.required, Validators.min(1), Validators.max(20)]]
       }),
       gold: [0, [Validators.min(0)]],
-      inventory: this.fb.array([])
+      inventory: this.fb.array([]),
+      abilities: this.fb.array([])
 
     }, { validators: this.validateLifeNotExceedMax() });
   }
@@ -89,6 +90,21 @@ export class PlayerSheet implements OnInit {
 
   removeItem(index: number): void {
     this.inventoryFormArray.removeAt(index);
+  }
+
+  get abilitiesFormArray() : FormArray {
+    return this.playerSheetForm.get('abilities') as FormArray;
+  }
+
+  addAbility(): void {
+    const abilityForm = this.fb.group({
+      name: ['', Validators.required],
+      description: ['', Validators.required]
+    });
+    this.abilitiesFormArray.push(abilityForm);
+  }
+  removeAbility(index: number): void {
+    this.abilitiesFormArray.removeAt(index);
   }
   validateLifeNotExceedMax(): ValidatorFn {
       return (group: AbstractControl): { [key: string]: any } | null => {
