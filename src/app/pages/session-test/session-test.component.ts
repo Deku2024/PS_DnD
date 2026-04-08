@@ -55,6 +55,7 @@ export class SessionTestComponent implements OnInit, OnDestroy {
         this.currentUser.email || this.currentUser.uid,
         this.sessionPassword
       );
+      this.sessionService.setCurrentSessionId(id);
       this.showMessage(`Sesión creada con ID: ${id}`, false);
       this.listenTo(id);
     } catch (e: any) {
@@ -78,6 +79,7 @@ export class SessionTestComponent implements OnInit, OnDestroy {
         this.currentUser.email || this.currentUser.uid,
         this.joinPassword
       );
+      this.sessionService.setCurrentSessionId(this.joinId);
       this.showMessage(`Te uniste a la sesión ${this.joinId}`, false);
       this.listenTo(this.joinId);
     } catch (e: any) {

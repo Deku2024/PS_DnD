@@ -26,8 +26,17 @@ export interface Session {
 @Injectable({ providedIn: 'root' })
 export class SessionService {
   private readonly sessionsCol = 'sessions';
+  private currentSessionId: string | null = null;
 
   constructor(private firebase: FirebaseService) {}
+
+  setCurrentSessionId(id: string | null): void {
+    this.currentSessionId = id;
+  }
+
+  getCurrentSessionId(): string | null {
+    return this.currentSessionId;
+  }
 
   async createSession(name: string, masterId: string, masterEmail: string, password: string): Promise<string> {
     const ref = collection(this.firebase.db, this.sessionsCol);
