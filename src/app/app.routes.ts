@@ -25,6 +25,12 @@ export const routes: Routes = [
 		loadComponent: () => import('./pages/dm-notes/dm-notes').then(m => m.DmNotes),
 		// canActivate: [GuestGuard]
 	},
+
+  {
+    path: 'sessions',
+    loadComponent: () => import('./pages/session-test/session-test.component').then(m => m.SessionTestComponent),
+    canActivate: [AuthGuard],
+  },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' },
 ];
