@@ -1,4 +1,4 @@
-<button (click)="interactWithPanel()">Hacer tiradas generales</button>
+<button type="button" (click)="interactWithPanel()">Hacer tiradas generales</button>
 
 @if (isMenuOpen()) {
   <div id="overlay_for_general_throw" (click)="closeMenu()"></div>
@@ -7,7 +7,7 @@
 
     <div class="menu-header">
       <h3>Tiradas Rápidas</h3>
-      <button id="close-btn" (click)="closeMenu()">✖</button>
+      <button type="button" id="close-btn" (click)="closeMenu()">✖</button>
     </div>
 
     <!-- opcional, por si se quiere añadir una tirada de 50% 50% -->
@@ -22,7 +22,7 @@
     <input #customThrow placeholder="Tiradas custom (ej: 4d4 + 4)" (input)="clearError()">
 
     <div id="inputAndError">
-      <button id="throw-custom-button" (click)="throwCustom(customThrow.value); closeMenu();">Tirar tirada custom</button>
+      <button type="button" id="throw-custom-button" (click)="throwCustom(customThrow.value); closeMenu();">Tirar tirada custom</button>
 
       @if (errorMessage() !== "") {
         <div class="error-message">

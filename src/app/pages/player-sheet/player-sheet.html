@@ -141,10 +141,12 @@
             <div formGroupName="attributes" class="attributes-grid">
                 @for (attr of getAttributesList(); track attr.name) {
                     <div class="attribute-card">
-                        <label>{{ attr.label }}</label>
+                        <label [for]="'attr-' + attr.name">{{ attr.label }}</label>
                         <input
                             type="number"
+                            [id]="'attr-' + attr.name"
                             [formControlName]="attr.name"
+                            [title]="attr.label"
                             min="1"
                             max="20"
                             readonly
@@ -212,6 +214,13 @@
               </div>
             }
           </div>
+        </div>
+
+        <div class="save-section">
+          <p class="save-error" *ngIf="saveError">{{ saveError }}</p>
+          <button type="submit" class="btn-save" [disabled]="saving">
+            {{ saving ? 'Guardando...' : '💾 Guardar personaje' }}
+          </button>
         </div>
     </form>
 

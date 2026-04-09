@@ -1,12 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl, FormArray } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Dropdown } from "../../components/dropdown/dropdown";
 import {D20RollerButtonComponent} from '../../components/d20.roller.button.component/d20.roller.button.component';
 import {ResultThrowFrameComponent} from '../../components/result.throw.frame.component/result.throw.frame.component';
 import {
   GeneralThrowsButtonComponent
 } from '../../components/general.throws.button.component/general.throws.button.component';
+import { CharacterService } from '../../services/character.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-player-sheet',
@@ -16,6 +19,9 @@ import {
 })
 export class PlayerSheet implements OnInit {
   classHabilities: string = '';
+  sessionId: string | null = null;
+  saving = false;
+  saveError = '';
 
   playerSheetForm: FormGroup;
 
@@ -49,7 +55,13 @@ export class PlayerSheet implements OnInit {
     { value: 'LG', label: 'Caótico caótico' },
   ];
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private router: Router,
+    private characterService: CharacterService,
+    private authService: AuthService
+  ) {
     this.playerSheetForm = this.fb.group({
       name: ['Aragorn', [Validators.required, Validators.minLength(3)]],
       age: [18, [Validators.required, Validators.min(18), Validators.max(80)]],
@@ -124,16 +136,58 @@ export class PlayerSheet implements OnInit {
   }
 
   ngOnInit(): void {
-    //  TO-DO: cargar datos guardados de la ficha si existen
-    // TO-DO: escuchar cambios para autoguardar
+    this.sessionId = this.route.snapshot.queryParamMap.get('sessionId');
+
+    if (this.sessionId) {
+      const user = this.authService.getCurrentUser();
+      if (user) {
+        this.characterService.getCharacter(user.uid, this.sessionId).then(character => {
+          if (character) {
+            // Patch the form with existing character data
+            const { userId, sessionId, updatedAt, inventory, abilities, ...basic } = character;
+            this.playerSheetForm.patchValue(basic);
+            (inventory ?? []).forEach((item: any) => {
+              this.inventoryFormArray.push(this.fb.group({
+                name: [item.name, Validators.required],
+                quantity: [item.quantity, [Validators.required, Validators.min(1)]],
+                description: [item.description]
+              }));
+            });
+            (abilities ?? []).forEach((ability: any) => {
+              this.abilitiesFormArray.push(this.fb.group({
+                name: [ability.name, Validators.required],
+                description: [ability.description, Validators.required]
+              }));
+            });
+          }
+        });
+      }
+    }
   }
 
-  onSubmit(): void {
-    if (this.playerSheetForm.valid) {
-      console.log('Formulario enviado:', this.playerSheetForm.value);
-      // TO-DO: lógica de guardado de datos
-    } else {
+  async onSubmit(): Promise<void> {
+    if (!this.playerSheetForm.valid) {
       console.log('Formulario inválido');
+      return;
+    }
+
+    const user = this.authService.getCurrentUser();
+    if (!user || !this.sessionId) {
+      // No session context: just log (future: save globally)
+      console.log('Formulario enviado (sin sesión):', this.playerSheetForm.value);
+      return;
+    }
+
+    this.saving = true;
+    this.saveError = '';
+    try {
+      await this.characterService.saveCharacter(user.uid, this.sessionId, this.playerSheetForm.value);
+      this.router.navigate(['/session', this.sessionId]);
+    } catch (e: any) {
+      this.saveError = 'Error al guardar el personaje. Inténtalo de nuevo.';
+      console.error(e);
+    } finally {
+      this.saving = false;
     }
   }
 

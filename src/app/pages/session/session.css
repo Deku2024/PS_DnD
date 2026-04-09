@@ -139,6 +139,205 @@ h2 {
   border-bottom: 1px solid rgba(198, 167, 71, 0.1);
 }
 
+.player-email {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-character {
+  margin-left: auto;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid rgba(198, 167, 71, 0.35);
+  border-radius: 4px;
+  color: #c6a747;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 2px 6px;
+  line-height: 1.4;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn-character:hover {
+  background: rgba(198, 167, 71, 0.12);
+  border-color: #c6a747;
+}
+
+/* ─── Modal ─── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 1rem;
+}
+
+.modal-card {
+  background: #1e1208;
+  border: 1px solid #c6a747;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem 0.75rem;
+  border-bottom: 1px solid rgba(198, 167, 71, 0.2);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  color: #c6a747;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: #8a6e2f;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transition: color 0.15s;
+  width: auto;
+  margin-top: 0;
+}
+
+.modal-close:hover {
+  color: #c6a747;
+  background: rgba(198, 167, 71, 0.08);
+}
+
+.modal-body {
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.char-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(198, 167, 71, 0.08);
+  font-size: 0.88rem;
+}
+
+.char-row span {
+  color: #6a5428;
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.char-row strong {
+  color: #c6a747;
+}
+
+.modal-divider {
+  border: none;
+  border-top: 1px solid rgba(198, 167, 71, 0.15);
+  margin: 0.85rem 0 0.65rem;
+}
+
+.modal-section-title {
+  margin: 0 0 0.65rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #8a6e2f;
+}
+
+.attrs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.attr-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(198, 167, 71, 0.05);
+  border: 1px solid rgba(198, 167, 71, 0.15);
+  border-radius: 4px;
+  padding: 0.4rem 0.25rem;
+}
+
+.attr-item span {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: #6a5428;
+  text-transform: uppercase;
+}
+
+.attr-item strong {
+  font-size: 1.1rem;
+  color: #c6a747;
+}
+
+.modal-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.85rem;
+  color: #a88a3a;
+}
+
+.modal-list li {
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(198, 167, 71, 0.08);
+}
+
+.modal-list li strong {
+  color: #c6a747;
+}
+
+.no-char {
+  text-align: center;
+  color: #5a4a20;
+  font-size: 0.85rem;
+  padding: 0.5rem 0;
+}
+
+.modal-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-edit-char {
+  background: transparent;
+  border: 1px solid #c6a747;
+  color: #c6a747;
+  padding: 0.55rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  width: auto;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-edit-char:hover {
+  background: rgba(198, 167, 71, 0.15);
+  color: #e8d5a0;
+}
+
 .players-list li:last-child {
   border-bottom: none;
 }
