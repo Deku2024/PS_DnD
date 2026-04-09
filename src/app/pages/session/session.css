@@ -419,6 +419,34 @@ h2 {
   color: #e8d5a0;
 }
 
+.btn-toggle {
+  border: none;
+  padding: 0.65rem 1.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: bold;
+  transition: filter 0.2s, transform 0.1s;
+}
+
+.btn-toggle:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+.btn-resume {
+  background: #22c55e;
+  color: #0f2d1a;
+}
+
+.btn-pause {
+  background: #f59e0b;
+  color: #2d1e00;
+}
+
 @media (max-width: 480px) {
   .session-page {
     padding: 1.25rem 1rem;

@@ -124,6 +124,12 @@ export class SessionPage implements OnInit, OnDestroy {
     this.router.navigate(['/player-sheet'], { queryParams: { sessionId: this.session.id } });
   }
 
+  async toggleSessionStatus(): Promise<void> {
+    if (!this.session?.id) return;
+    const nextStatus = (this.session.status === 'paused' || this.session.status === 'waiting') ? 'active' : 'paused';
+    await this.sessionService.updateStatus(this.session.id, nextStatus);
+  }
+
   goToNotes(): void {
     if (!this.session?.id) return;
     this.sessionService.setCurrentSessionId(this.session.id);

@@ -1,20 +1,4 @@
 <main>
-  <div class="dm-control-panel">
-    <div class="panel-info">
-      <h2>Mesa del Dungeon Master</h2>
-      <span class="status-badge" [ngClass]="sessionStatus">
-                Estado: {{ sessionStatus | uppercase }}
-            </span>
-    </div>
-
-    <button
-      class="btn-toggle"
-      [ngClass]="sessionStatus === 'paused' || sessionStatus === 'waiting' ? 'btn-resume' : 'btn-pause'"
-      (click)="toggleSessionStatus()">
-      {{ sessionStatus === 'paused' || sessionStatus === 'waiting' ? '▶️ REANUDAR PARTIDA' : '⏸️ PAUSAR PARTIDA' }}
-    </button>
-  </div>
-
   @if (maxNotesExceeded) {
     <div class="error">
       <span>Ha alcanzado el número máximo de notas</span>

@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Note } from '../../components/note/note';
 import { DmnotesService } from '../../services/dmnotes.service';
-import { SessionService } from '../../services/sessions.service';
 import { ResultThrowFrameComponent } from '../../components/result.throw.frame.component/result.throw.frame.component';
 import { GeneralThrowsButtonComponent } from '../../components/general.throws.button.component/general.throws.button.component';
 
@@ -27,10 +26,8 @@ export class DmNotes implements OnInit, OnDestroy {
   maxNotesExceeded: boolean = false;
   notes: NoteItem[] = [];
   sessionId: string = '';
-  sessionStatus: string = 'waiting';
 
   unsubscribe: (() => void) | undefined;
-  sessionUnsubscribe: (() => void) | undefined;
 
   newNote: NoteItem = {
     title: '',
@@ -39,7 +36,6 @@ export class DmNotes implements OnInit, OnDestroy {
 
   constructor(
     private dmNotesService: DmnotesService,
-    private sessionService: SessionService,
     private route: ActivatedRoute
   ) {}
 
@@ -58,21 +54,6 @@ export class DmNotes implements OnInit, OnDestroy {
         this.maxNotesExceeded = this.notes.length > this.maxNotes;
       }
     );
-
-    this.sessionUnsubscribe = this.sessionService.listenSession(
-      this.sessionId,
-      (session) => {
-        if (session) {
-          this.sessionStatus = session.status;
-        }
-      }
-    );
-  }
-
-  async toggleSessionStatus() {
-    if (!this.sessionId) return;
-    const nextStatus = (this.sessionStatus === 'paused' || this.sessionStatus === 'waiting') ? 'active' : 'paused';
-    await this.sessionService.updateStatus(this.sessionId, nextStatus);
   }
 
   async addNote() {
@@ -94,6 +75,5 @@ export class DmNotes implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     if (this.unsubscribe) this.unsubscribe();
-    if (this.sessionUnsubscribe) this.sessionUnsubscribe();
   }
 }
