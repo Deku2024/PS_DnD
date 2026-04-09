@@ -120,9 +120,11 @@ export class PlayerSheet implements OnInit {
     });
     this.abilitiesFormArray.push(abilityForm);
   }
+
   removeAbility(index: number): void {
     this.abilitiesFormArray.removeAt(index);
   }
+  
   validateLifeNotExceedMax(): ValidatorFn {
       return (group: AbstractControl): { [key: string]: any } | null => {
       const life = group.get('life')?.value;

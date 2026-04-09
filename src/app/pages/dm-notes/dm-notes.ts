@@ -5,6 +5,7 @@ import {ResultThrowFrameComponent} from '../../components/result.throw.frame.com
 import {
   GeneralThrowsButtonComponent
 } from '../../components/general.throws.button.component/general.throws.button.component';
+import { SessionService } from '../../services/sessions.service';
 
 interface NoteItem {
   id?: string;
@@ -31,7 +32,7 @@ export class DmNotes {
     content: ''
   };
 
-  constructor(private dmNotesService: DmnotesService, /*private sessionService: SessionService*/) {}
+  constructor(private dmNotesService: DmnotesService, private sessionService: SessionService) {}
 
   ngOnInit() {
     this.unsubscribe = this.dmNotesService.listenToNotes(
@@ -43,14 +44,14 @@ export class DmNotes {
       }
     )
 
-    /*const id = this.sessionService.getCurrentSessionId();
+    const id = this.sessionService.getCurrentSessionId();
 
     if (!id) {
       console.error('No hay sesión activa');
       return;
     }
 
-    this.sessionId = id;*/
+    this.sessionId = id;
   }
 
   async addNote() {
