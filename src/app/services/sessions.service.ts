@@ -18,7 +18,7 @@ export interface Session {
   masterId: string;
   players: string[];
   playerEmails: { [uid: string]: string };
-  status: 'waiting' | 'active' | 'closed';
+  status: 'waiting' | 'active' | 'paused' | 'closed';
   password?: string;
   createdAt?: any;
 }

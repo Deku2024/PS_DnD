@@ -1,11 +1,11 @@
-import { Component, OnInit, OnDestroy, ɵisSubscribable } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { Note } from '../../components/note/note';
 import { DmnotesService } from '../../services/dmnotes.service';
-import {ResultThrowFrameComponent} from '../../components/result.throw.frame.component/result.throw.frame.component';
-import {
-  GeneralThrowsButtonComponent
-} from '../../components/general.throws.button.component/general.throws.button.component';
 import { SessionService } from '../../services/sessions.service';
+import { ResultThrowFrameComponent } from '../../components/result.throw.frame.component/result.throw.frame.component';
+import { GeneralThrowsButtonComponent } from '../../components/general.throws.button.component/general.throws.button.component';
 
 interface NoteItem {
   id?: string;
@@ -17,48 +17,66 @@ interface NoteItem {
 
 @Component({
   selector: 'app-dm-notes',
-  imports: [Note, ResultThrowFrameComponent, GeneralThrowsButtonComponent],
+  standalone: true,
+  imports: [CommonModule, Note, ResultThrowFrameComponent, GeneralThrowsButtonComponent],
   templateUrl: './dm-notes.html',
   styleUrl: './dm-notes.css',
 })
-export class DmNotes {
+export class DmNotes implements OnInit, OnDestroy {
   maxNotes: number = 40;
   maxNotesExceeded: boolean = false;
   notes: NoteItem[] = [];
   sessionId: string = '';
+  sessionStatus: string = 'waiting';
+
   unsubscribe: (() => void) | undefined;
+  sessionUnsubscribe: (() => void) | undefined;
+
   newNote: NoteItem = {
     title: '',
     content: ''
   };
 
-  constructor(private dmNotesService: DmnotesService, private sessionService: SessionService) {}
+  constructor(
+    private dmNotesService: DmnotesService,
+    private sessionService: SessionService,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
+    this.sessionId = this.route.snapshot.paramMap.get('sessionId') || '';
+
+    if (!this.sessionId) {
+      console.error('No hay sesión activa en la URL');
+      return;
+    }
+
     this.unsubscribe = this.dmNotesService.listenToNotes(
       this.sessionId,
       (notes) => {
         this.notes = notes;
-
         this.maxNotesExceeded = this.notes.length > this.maxNotes;
       }
-    )
+    );
 
-    const id = this.sessionService.getCurrentSessionId();
+    this.sessionUnsubscribe = this.sessionService.listenSession(
+      this.sessionId,
+      (session) => {
+        if (session) {
+          this.sessionStatus = session.status;
+        }
+      }
+    );
+  }
 
-    if (!id) {
-      console.error('No hay sesión activa');
-      return;
-    }
-
-    this.sessionId = id;
+  async toggleSessionStatus() {
+    if (!this.sessionId) return;
+    const nextStatus = (this.sessionStatus === 'paused' || this.sessionStatus === 'waiting') ? 'active' : 'paused';
+    await this.sessionService.updateStatus(this.sessionId, nextStatus);
   }
 
   async addNote() {
-    if (!this.newNote.title || !this.newNote.content) {
-      return;
-    }
-
+    if (!this.newNote.title || !this.newNote.content) return;
     await this.dmNotesService.createNote(this.sessionId, this.newNote);
     this.newNote = { title: '', content: ''};
   }
@@ -74,11 +92,8 @@ export class DmNotes {
     this.newNote = { title: '', content: ''};
   }
 
-
   ngOnDestroy() {
-    if (this.unsubscribe) {
-      this.unsubscribe();
-    }
+    if (this.unsubscribe) this.unsubscribe();
+    if (this.sessionUnsubscribe) this.sessionUnsubscribe();
   }
-
 }
