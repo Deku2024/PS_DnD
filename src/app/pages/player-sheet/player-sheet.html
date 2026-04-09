@@ -14,7 +14,7 @@
                     <span class="error">El nombre debe tener al menos 3 caracteres</span>
                 }
             </div>
-        
+
             <div class="field">
                 <label for="age">Edad:</label>
                 <input type="number" id="age" formControlName="age" min="18" max="80">
@@ -41,7 +41,7 @@
                 }
 
                 @if (playerSheetForm.get('experience')?.errors?.['min']) {
-                    <span class="error">La experiencia mínima es 0</span>   
+                    <span class="error">La experiencia mínima es 0</span>
                 }
 
                 @if (playerSheetForm.get('experience')?.errors?.['max']) {
@@ -57,14 +57,14 @@
                 [options]="raceOptions"
                 [placeholder]="'Selecciona una raza - Ej: Elfo'"
             ></app-dropdown>
-    
+
             <app-dropdown
                 formControlName="class"
                 label="Clase"
                 [options]="classOptions"
                 [placeholder]="'Selecciona una clase - Ej: Bárbaro'"
             ></app-dropdown>
-    
+
             <app-dropdown
                 formControlName="alignment"
                 label="Alineamiento"
@@ -74,7 +74,7 @@
         </div>
 
 
-        
+
         <div class="form-section">
             <h2>Estadísticas</h2>
             <div id="life-info">
@@ -94,8 +94,8 @@
                         <span class="error">La vida no puede ser mayor que la vida máxima</span>
                     }
 
-                </div> 
-    
+                </div>
+
                 <div class="field">
                     <label for="max-life">Vida máxima:</label>
                     <input type="number" id="max-life" formControlName="maxLife" min="0">
@@ -109,9 +109,9 @@
                     }
 
                 </div>
-    
+
                 <div class="field">
-                    <label for="temp-life">Vida temporal:</label>
+                    <label for="temp-life">Vida temp:</label>
                     <input type="number" id="temp-life" formControlName="tempLife" min="0">
 
                     @if (playerSheetForm.get('tempLife')?.errors?.['min']) {
@@ -130,7 +130,7 @@
                 <span class="error">La clase de armadura (CA) es requerida</span>
           }
 
-          @if (playerSheetForm.get('armourClass')?.errors?.['min']) {   
+          @if (playerSheetForm.get('armourClass')?.errors?.['min']) {
                 <span class="error">La clase de armadura (CA) mínima es 1</span>
           }
         </div>
@@ -142,28 +142,79 @@
                 @for (attr of getAttributesList(); track attr.name) {
                     <div class="attribute-card">
                         <label>{{ attr.label }}</label>
-                        <input 
-                            type="number" 
+                        <input
+                            type="number"
                             [formControlName]="attr.name"
-                            min="1" 
+                            min="1"
                             max="20"
                             readonly
+                            #charValueInput
                         >
-                        <button class="tirada">Hacer tirada</button>
+                        <d20-roller [rollingForCharacteristic]="true" [charValue]="parseInt(charValueInput.value)"></d20-roller>
+<!--                        <button class="tirada">Hacer tirada</button>-->
                     </div>
                 }
             </div>
+            <general-throw-component />
         </div>
 
         <div class="form-section">
+          <div class="section-header">
             <h2>Inventario</h2>
-            <div class="inventario"></div>
+            <button type="button" class="btn-add" (click)="addItem()">
+              Añadir objeto
+            </button>
+          </div>
+
+          <div formArrayName="inventory" class="inventario">
+            @if (inventoryFormArray.controls.length === 0) {
+              <p class="empty-msg">El inventario está vacío.</p>
+            }
+
+            @for (item of inventoryFormArray.controls; track $index) {
+              <div [formGroupName]="$index" class="inventory-item">
+                <input type="number" formControlName="quantity" class="qty-input" placeholder="Cant.">
+                <input type="text" formControlName="name" class="name-input" placeholder="Objeto...">
+                <input type="text" formControlName="description" class="desc-input" placeholder="Descripción...">
+                <button type="button" class="btn-delete" (click)="removeItem($index)">
+                  Borrar objeto
+                </button>
+              </div>
+            }
+          </div>
+
+          <div class="gold-container">
+            <label for="gold"> Oro:</label>
+            <input type="number" id="gold" formControlName="gold">
+          </div>
         </div>
 
         <div class="form-section">
+          <div class="section-header">
             <h2>Habilidades</h2>
-            <div class="habilidades"></div>
+            <button type="button" class="btn-add" (click)="addAbility()">
+              Añadir habilidad
+            </button>
+          </div>
+
+          <div formArrayName="abilities" class="abilities-container">
+            @if (abilitiesFormArray.controls.length === 0) {
+              <p class="empty-msg">No class abilities registered yet.</p>
+            }
+
+            @for (ability of abilitiesFormArray.controls; track $index) {
+              <div [formGroupName]="$index" class="ability-item">
+                <div class="ability-main">
+                  <input type="text" formControlName="name" class="name-input" placeholder="Nombre...">
+                  <button type="button" class="btn-delete" (click)="removeAbility($index)">Eliminar habilidad</button>
+                </div>
+                <textarea formControlName="description" class="ability-desc" placeholder="Descripción..."></textarea>
+              </div>
+            }
+          </div>
         </div>
     </form>
+
+  <result-frame />
 </main>
 

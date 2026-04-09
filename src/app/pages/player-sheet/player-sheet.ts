@@ -1,18 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { ReactiveFormsModule, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl, FormArray } from '@angular/forms';
 import { Dropdown } from "../../components/dropdown/dropdown";
+import {D20RollerButtonComponent} from '../../components/d20.roller.button.component/d20.roller.button.component';
+import {ResultThrowFrameComponent} from '../../components/result.throw.frame.component/result.throw.frame.component';
+import {
+  GeneralThrowsButtonComponent
+} from '../../components/general.throws.button.component/general.throws.button.component';
 
 @Component({
   selector: 'app-player-sheet',
-  imports: [CommonModule, ReactiveFormsModule, Dropdown],
+  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, ResultThrowFrameComponent, GeneralThrowsButtonComponent],
   templateUrl: './player-sheet.html',
   styleUrl: './player-sheet.css',
 })
 export class PlayerSheet implements OnInit {
-  inventory = '';
   classHabilities: string = '';
-
 
   playerSheetForm: FormGroup;
 
@@ -69,16 +72,50 @@ export class PlayerSheet implements OnInit {
         intelligence: [10, [Validators.required, Validators.min(1), Validators.max(20)]],
         wisdom: [10, [Validators.required, Validators.min(1), Validators.max(20)]],
         charisma: [10, [Validators.required, Validators.min(1), Validators.max(20)]]
-      })
+      }),
+      gold: [0, [Validators.min(0)]],
+      inventory: this.fb.array([]),
+      abilities: this.fb.array([])
 
     }, { validators: this.validateLifeNotExceedMax() });
   }
 
+  get inventoryFormArray() : FormArray {
+    return this.playerSheetForm.get('inventory') as FormArray;
+  }
+
+  addItem(): void {
+    const itemForm = this.fb.group({
+      name: ['', Validators.required],
+      quantity: [1, [Validators.required, Validators.min(1)]],
+      description: ['']
+    });
+    this.inventoryFormArray.push(itemForm);
+  }
+
+  removeItem(index: number): void {
+    this.inventoryFormArray.removeAt(index);
+  }
+
+  get abilitiesFormArray() : FormArray {
+    return this.playerSheetForm.get('abilities') as FormArray;
+  }
+
+  addAbility(): void {
+    const abilityForm = this.fb.group({
+      name: ['', Validators.required],
+      description: ['', Validators.required]
+    });
+    this.abilitiesFormArray.push(abilityForm);
+  }
+  removeAbility(index: number): void {
+    this.abilitiesFormArray.removeAt(index);
+  }
   validateLifeNotExceedMax(): ValidatorFn {
       return (group: AbstractControl): { [key: string]: any } | null => {
       const life = group.get('life')?.value;
       const maxLife = group.get('maxLife')?.value;
-      
+
       if (life !== null && maxLife !== null && life > maxLife) {
         return { 'lifeExceedsMax': true };
       }
@@ -115,4 +152,5 @@ export class PlayerSheet implements OnInit {
   ];
 }
 
+  protected readonly parseInt = parseInt;
 }

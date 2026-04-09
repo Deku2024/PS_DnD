@@ -22,7 +22,7 @@ export const routes: Routes = [
   {
 		path: 'dm-notes',
 		loadComponent: () => import('./pages/dm-notes/dm-notes').then(m => m.DmNotes),
-		/*canActivate: [GuestGuard]*/
+		// canActivate: [GuestGuard]
 	},
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' },

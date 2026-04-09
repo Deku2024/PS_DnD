@@ -1,23 +1,29 @@
 :host {
-  display: inline-block;
+  display: block;
   position: relative;
 }
 
 button:not(#close-btn) {
-  background-color: #935028;
-  color: white;
+  background: #5c3d2e;
+  color: #f5e6c8;
   border: none;
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: 500;
-  border-radius: 8px;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 1.2rem;
   cursor: pointer;
+  font-family: 'MedievalSharp', monospace;
   transition: all 0.2s ease;
-  font-family: 'Arial', sans-serif;
+  margin-top: 8px;
+  display: block !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: 30%;
+  text-align: center;
 }
 
 button:not(#close-btn):hover {
-  background-color: #703818;
+  background: #8b6914;
+  transform: scale(1.02);
 }
 
 button:not(#close-btn):active {
@@ -39,7 +45,7 @@ button:not(#close-btn):active {
   left: 50%;
   transform: translate(-50%, -50%) scale(0.95);
   z-index: 999;
-  background: #332112;
+  background: linear-gradient(135deg, #fff8f0 0%, #f0e4d0 100%);
   width: 50%;
   max-width: 550px;
   min-width: 320px;
@@ -62,14 +68,14 @@ button:not(#close-btn):active {
   align-items: center;
   padding-bottom: 16px;
   margin-bottom: 8px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #5c3d2e;
 }
 
 .menu-header h3 {
   margin: 0;
   font-size: 18px;
-  color: white;
   font-weight: 500;
+  font-family: 'MedievalSharp', monospace;
 }
 
 #menu_for_throws single-custom-throw-button {
@@ -77,50 +83,59 @@ button:not(#close-btn):active {
 }
 
 #close-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #935028;
-  border: 1px solid #935028;
+  background: #5c3d2e;
+  color: #f5e6c8;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  font-family: 'MedievalSharp', monospace;
+  transition: all 0.2s ease;
+  text-align: center;
+  width: 10%;
 }
 
 #close-btn:hover {
-  background-color: #703818;
+  background: #8b6914;
+  transform: scale(1.02);
 }
 
 #menu_for_throws input {
   grid-column: 1 / -1;
   padding: 10px 12px;
-  border: 1px solid #935028;
+  border: 1px solid #5c3d2e;
   border-radius: 8px;
   font-size: 14px;
   transition: all 0.2s ease;
   font-family: 'Arial', sans-serif;
-  background-color: #935028;
+  background-color: #5c3d2e;
+  color: #f5e6c8;
 }
 
 #menu_for_throws input:focus {
   outline: none;
-  background-color: #703818;
+  background-color: #8b6914;
 }
 
 #menu_for_throws input::placeholder {
-  color: white;
+  color: #f5e6c8;
   font-size: 13px;
 }
 
-#menu_for_throws button:last-child {
+#throw-custom-button {
   padding: 10px;
-  font-size: 14px;
+  font-size: 1.2rem;
   font-weight: 500;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-top: 4px;
+  width: 100% !important;
 }
 
 #menu_for_throws button:last-child:hover {
-  background-color: #703818;
+  background: #8b6914;
+  transform: scale(1.02);
 }
 
 #menu_for_throws button:last-child:active {
@@ -191,6 +206,11 @@ button:not(#close-btn):active {
 }
 
 @media (max-width: 480px) {
+
+  button:not(#close-btn) {
+    font-size: 0.8rem;
+  }
+
   #menu_for_throws {
     width: 95%;
     padding: 12px;
@@ -211,6 +231,7 @@ button:not(#close-btn):active {
     width: 26px;
     height: 26px;
     font-size: 16px;
+    padding: 0;
   }
 
   #menu_for_throws single-custom-throw-button button {
@@ -225,7 +246,7 @@ button:not(#close-btn):active {
 
   #menu_for_throws button:last-child {
     padding: 8px;
-    font-size: 13px;
+    font-size: 0.8rem;
   }
 }
 
@@ -239,11 +260,12 @@ button:not(#close-btn):active {
   display: block;
   color: white;
   width: 100%;
-  background-color: #935028;
-  border: 1px solid #935028;
+  background-color: #5c3d2e;
+  border: 1px solid #5c3d2e;
   border-radius: 8px;
   animation: shakeError 0.3s ease-in-out;
   margin-top: 8px;
+  padding: 8px;
 }
 
 #inputAndError {

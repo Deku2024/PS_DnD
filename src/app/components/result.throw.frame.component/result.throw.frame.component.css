@@ -42,7 +42,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #703818;
+  background: linear-gradient(135deg, #fff8f0 0%, #f0e4d0 100%);
   padding: 20px;
 }
 
@@ -88,8 +88,8 @@
 
 .detailsArea {
   flex: 3;
-  background-color: #703818;
-  border-top: 2px solid #703818;
+  background: linear-gradient(135deg, #fff8f0 0%, #f0e4d0 100%);
+  border-top: 2px solid #5c3d2e;
   padding: 15px 20px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -102,7 +102,7 @@
   justify-content: space-between;
   align-items: baseline;
   padding: 5px 10px;
-  background-color: #935028;
+  background-color: #5c3d2e;
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -110,7 +110,7 @@
 .detailLabel {
   font-size: 85%;
   font-weight: 600;
-  color: white;
+  color: #f5e6c8;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -118,7 +118,7 @@
 .detailValue {
   font-size: 100%;
   font-weight: 500;
-  color: white;
+  color: #f5e6c8;
 }
 
 .detailValue.positive {
@@ -134,7 +134,7 @@
 .throwsList {
   font-family: 'Courier New', monospace;
   font-size: 90%;
-  color: white;
+  color: #f5e6c8;
 }
 
 @media (max-width: 768px) {

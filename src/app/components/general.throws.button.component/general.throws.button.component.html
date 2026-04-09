@@ -1,4 +1,4 @@
-<button (click)="interactWithPanel()">Tiradas</button>
+<button (click)="interactWithPanel()">Hacer tiradas generales</button>
 
 @if (isMenuOpen()) {
   <div id="overlay_for_general_throw" (click)="closeMenu()"></div>
@@ -22,7 +22,7 @@
     <input #customThrow placeholder="Tiradas custom (ej: 4d4 + 4)" (input)="clearError()">
 
     <div id="inputAndError">
-      <button (click)="throwCustom(customThrow.value); closeMenu();">Tirar tirada custom</button>
+      <button id="throw-custom-button" (click)="throwCustom(customThrow.value); closeMenu();">Tirar tirada custom</button>
 
       @if (errorMessage() !== "") {
         <div class="error-message">

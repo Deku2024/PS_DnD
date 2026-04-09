@@ -1,6 +1,10 @@
 import { Component, OnInit, OnDestroy, ɵisSubscribable } from '@angular/core';
 import { Note } from '../../components/note/note';
 import { DmnotesService } from '../../services/dmnotes.service';
+import {ResultThrowFrameComponent} from '../../components/result.throw.frame.component/result.throw.frame.component';
+import {
+  GeneralThrowsButtonComponent
+} from '../../components/general.throws.button.component/general.throws.button.component';
 
 interface NoteItem {
   id?: string;
@@ -12,7 +16,7 @@ interface NoteItem {
 
 @Component({
   selector: 'app-dm-notes',
-  imports: [Note],
+  imports: [Note, ResultThrowFrameComponent, GeneralThrowsButtonComponent],
   templateUrl: './dm-notes.html',
   styleUrl: './dm-notes.css',
 })

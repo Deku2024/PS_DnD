@@ -4,6 +4,7 @@ import {DiceRollerService, ThrowsResult} from '../../services/roll-dice.service'
 @Component({
   selector: 'd20-roller',
   templateUrl: './d20.roller.button.component.html',
+  styleUrls: ['./d20.roller.button.component.css'],
   standalone: true
 })
 export class D20RollerButtonComponent {
