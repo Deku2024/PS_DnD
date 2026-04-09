@@ -54,6 +54,7 @@
     <!-- Acciones -->
     <div class="actions">
       <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
+      <button *ngIf="isMaster" class="btn-notes" (click)="goToNotes()">📝 Notas DM</button>
     </div>
   </div>
 
