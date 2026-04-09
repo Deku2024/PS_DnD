@@ -124,6 +124,12 @@ export class SessionPage implements OnInit, OnDestroy {
     this.router.navigate(['/player-sheet'], { queryParams: { sessionId: this.session.id } });
   }
 
+  goToNotes(): void {
+    if (!this.session?.id) return;
+    this.sessionService.setCurrentSessionId(this.session.id);
+    this.router.navigate(['/dm-notes']);
+  }
+
   async leaveSession(): Promise<void> {
     this.unsubscribe?.();
     this.sessionService.setCurrentSessionId(null);
