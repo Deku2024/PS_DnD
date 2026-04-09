@@ -1,0 +1,54 @@
+<div class="session-page">
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="loading">
+    <span class="spinner">⏳</span>
+    <p>Cargando la sesión...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-state" *ngIf="!loading && errorMsg">
+    <p class="error-msg">{{ errorMsg }}</p>
+    <button class="btn-back" (click)="leaveSession()">← Volver al inicio</button>
+  </div>
+
+  <!-- Sesión activa -->
+  <div class="session-content" *ngIf="!loading && session">
+    <div class="session-header">
+      <div class="session-title-row">
+        <h2>⚔ {{ session.name }}</h2>
+        <span class="badge" [class.badge-waiting]="session.status === 'waiting'" [class.badge-active]="session.status === 'active'" [class.badge-closed]="session.status === 'closed'">
+          {{ session.status }}
+        </span>
+      </div>
+      <p class="session-id">ID de sesión: <code>{{ session.id }}</code></p>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Master -->
+    <div class="card">
+      <h3>Dungeon Master</h3>
+      <p class="player master-player">
+        👑 {{ session.playerEmails[session.masterId] || session.masterId }}
+      </p>
+    </div>
+
+    <!-- Jugadores -->
+    <div class="card">
+      <h3>Aventureros ({{ session.players.length }})</h3>
+      <ul class="players-list">
+        <li *ngFor="let uid of session.players" [class.is-master]="uid === session.masterId">
+          <span class="player-icon">{{ uid === session.masterId ? '👑' : '🗡' }}</span>
+          {{ session.playerEmails[uid] || uid }}
+          <span class="you-badge" *ngIf="currentUser && uid === currentUser.uid">(tú)</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Acciones -->
+    <div class="actions">
+      <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
+    </div>
+  </div>
+</div>

@@ -30,18 +30,4 @@
   <!-- Mensaje -->
   <p class="message" *ngIf="message" [class.error]="isError">{{ message }}</p>
 
-  <!-- Sesión activa -->
-  <div class="card session-info" *ngIf="currentSession">
-    <h3>📜 Sesión activa</h3>
-    <p><strong>Nombre:</strong> {{ currentSession.name }}</p>
-    <p><strong>ID:</strong> {{ currentSession.id }}</p>
-    <p><strong>Estado:</strong> <span class="badge">{{ currentSession.status }}</span></p>
-    <p><strong>Master:</strong> {{ currentSession.playerEmails[currentSession.masterId] || currentSession.masterId }}</p>
-    <p><strong>Aventureros ({{ currentSession.players.length }}):</strong></p>
-    <ul>
-      <li *ngFor="let uid of currentSession.players">
-        {{ currentSession.playerEmails[uid] || uid }}
-      </li>
-    </ul>
-  </div>
 </div>

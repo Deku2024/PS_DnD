@@ -12,12 +12,17 @@ export const routes: Routes = [
   },
   {
     path: 'home',
-    loadComponent: () => import('./pages/home/home').then((m) => m.Home),
+    loadComponent: () => import('./pages/session-test/session-test.component').then((m) => m.SessionTestComponent),
     canActivate: [AuthGuard],
   },
   {
     path: 'player-sheet',
     loadComponent: () => import('./pages/player-sheet/player-sheet').then((m) => m.PlayerSheet),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'session/:id',
+    loadComponent: () => import('./pages/session/session').then((m) => m.SessionPage),
     canActivate: [AuthGuard],
   },
   {

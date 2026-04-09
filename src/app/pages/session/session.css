@@ -1,0 +1,211 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #1a1008;
+  background-image:
+    radial-gradient(ellipse at top, #2a1a08 0%, #1a1008 60%),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c6a747' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.session-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+  color: #c6a747;
+  min-height: 100vh;
+}
+
+/* Loading / error */
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding-top: 4rem;
+  color: #8a6e2f;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+}
+
+.spinner {
+  font-size: 2rem;
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.error-msg {
+  color: #e74c3c;
+  text-align: center;
+}
+
+/* Content */
+.session-header {
+  margin-bottom: 1.5rem;
+}
+
+.session-title-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+h2 {
+  font-size: 1.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #c6a747;
+  margin: 0;
+  text-shadow: 0 0 18px rgba(198, 167, 71, 0.4);
+}
+
+.session-id {
+  font-size: 0.78rem;
+  color: #5a4a20;
+  margin-top: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.session-id code {
+  color: #8a6e2f;
+  background: rgba(198, 167, 71, 0.07);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.85em;
+  user-select: all;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #c6a747;
+  opacity: 0.2;
+  margin: 1.25rem 0;
+}
+
+/* Cards */
+.card {
+  background: rgba(198, 167, 71, 0.05);
+  border: 1px solid rgba(198, 167, 71, 0.25);
+  border-radius: 4px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+  position: relative;
+}
+
+.card::before,
+.card::after {
+  content: '✦';
+  position: absolute;
+  color: #c6a747;
+  font-size: 0.6rem;
+  opacity: 0.6;
+}
+
+.card::before { top: 6px; left: 10px; }
+.card::after  { top: 6px; right: 10px; }
+
+.card h3 {
+  margin: 0 0 0.85rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #c6a747;
+  text-align: center;
+  opacity: 0.85;
+}
+
+/* Players list */
+.players-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.players-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  font-size: 0.9rem;
+  color: #a88a3a;
+  border-bottom: 1px solid rgba(198, 167, 71, 0.1);
+}
+
+.players-list li:last-child {
+  border-bottom: none;
+}
+
+.players-list li.is-master {
+  color: #c6a747;
+}
+
+.you-badge {
+  font-size: 0.72rem;
+  color: #5a4a20;
+  letter-spacing: 0.05em;
+}
+
+.master-player {
+  font-size: 0.95rem;
+  color: #c6a747;
+  text-align: center;
+  margin: 0;
+}
+
+/* Status badge */
+.badge {
+  padding: 0.2rem 0.7rem;
+  border-radius: 3px;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+}
+
+.badge-waiting { color: #f59e0b; }
+.badge-active  { color: #22c55e; }
+.badge-closed  { color: #ef4444; }
+
+/* Actions */
+.actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.btn-back {
+  background: transparent;
+  color: #c6a747;
+  border: 1px solid #c6a747;
+  padding: 0.65rem 1.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-back:hover {
+  background: rgba(198, 167, 71, 0.15);
+  color: #e8d5a0;
+}
+
+@media (max-width: 480px) {
+  .session-page {
+    padding: 1.25rem 1rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+  }
+}
