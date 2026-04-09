@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
 import { GuestGuard } from './guards/guest.guard';
-import { SessionTestComponent } from './pages/session-test/session-test.component'; // ← añadir
+import { SessionTestComponent } from './pages/session-test/session-test.component';
 import { Auth } from './pages/auth/auth';
 
 export const routes: Routes = [
@@ -25,6 +25,12 @@ export const routes: Routes = [
 		loadComponent: () => import('./pages/dm-notes/dm-notes').then(m => m.DmNotes),
 		// canActivate: [GuestGuard]
 	},
+
+  {
+    path: 'session',
+    loadComponent: () => import('./pages/session-test/session-test.component').then(m => m.SessionTestComponent),
+    canActivate: [AuthGuard],
+  },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' },
 ];
