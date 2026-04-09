@@ -4,12 +4,13 @@
             <span>Ha alcanzado el número máximo de notas</span>
         </div>
     }
+    <general-throw-component />
     <div id="create-note">
         <button (click)="addNote()" class="add-btn" [disabled]="maxNotesExceeded">
             <span>+</span>
         </button>
     </div>
-    
+
     <div id="notes-area">
         @for (note of notes; track note.id) {
             <app-note
@@ -19,4 +20,6 @@
             ></app-note>
         }
     </div>
+
+  <result-frame />
 </main>

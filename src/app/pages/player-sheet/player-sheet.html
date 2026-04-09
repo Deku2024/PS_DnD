@@ -111,7 +111,7 @@
                 </div>
 
                 <div class="field">
-                    <label for="temp-life">Vida temporal:</label>
+                    <label for="temp-life">Vida temp:</label>
                     <input type="number" id="temp-life" formControlName="tempLife" min="0">
 
                     @if (playerSheetForm.get('tempLife')?.errors?.['min']) {
@@ -159,13 +159,59 @@
         </div>
 
         <div class="form-section">
+          <div class="section-header">
             <h2>Inventario</h2>
-            <div class="inventario"></div>
+            <button type="button" class="btn-add" (click)="addItem()">
+              Añadir objeto
+            </button>
+          </div>
+
+          <div formArrayName="inventory" class="inventario">
+            @if (inventoryFormArray.controls.length === 0) {
+              <p class="empty-msg">El inventario está vacío.</p>
+            }
+
+            @for (item of inventoryFormArray.controls; track $index) {
+              <div [formGroupName]="$index" class="inventory-item">
+                <input type="number" formControlName="quantity" class="qty-input" placeholder="Cant.">
+                <input type="text" formControlName="name" class="name-input" placeholder="Objeto...">
+                <input type="text" formControlName="description" class="desc-input" placeholder="Descripción...">
+                <button type="button" class="btn-delete" (click)="removeItem($index)">
+                  Borrar objeto
+                </button>
+              </div>
+            }
+          </div>
+
+          <div class="gold-container">
+            <label for="gold"> Oro:</label>
+            <input type="number" id="gold" formControlName="gold">
+          </div>
         </div>
 
         <div class="form-section">
+          <div class="section-header">
             <h2>Habilidades</h2>
-            <div class="habilidades"></div>
+            <button type="button" class="btn-add" (click)="addAbility()">
+              Añadir habilidad
+            </button>
+          </div>
+
+          <div formArrayName="abilities" class="abilities-container">
+            @if (abilitiesFormArray.controls.length === 0) {
+              <p class="empty-msg">No class abilities registered yet.</p>
+            }
+
+            @for (ability of abilitiesFormArray.controls; track $index) {
+              <div [formGroupName]="$index" class="ability-item">
+                <div class="ability-main">
+                  <input type="text" formControlName="name" class="name-input" placeholder="Nombre...">
+                  <button type="button" class="btn-delete" (click)="removeAbility($index)">Eliminar habilidad</button>
+                </div>
+                <textarea formControlName="description" class="ability-desc" placeholder="Descripción..."></textarea>
+              </div>
+            }
+          </div>
         </div>
     </form>
 
