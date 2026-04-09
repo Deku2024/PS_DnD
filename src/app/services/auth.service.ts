@@ -15,6 +15,10 @@ export class AuthService {
     return createUserWithEmailAndPassword(this.firebase.auth, email, password);
   }
 
+  getCurrentUser(): User | null {
+    return this.firebase.auth.currentUser;
+  }
+
   sendEmailVerification() {
     const user = this.firebase.auth.currentUser;
     if (!user) return Promise.reject(new Error('No user logged in'));

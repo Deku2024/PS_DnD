@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
 import { GuestGuard } from './guards/guest.guard';
+import { SessionTestComponent } from './pages/session-test/session-test.component'; // ← añadir
 import { Auth } from './pages/auth/auth';
 
 export const routes: Routes = [

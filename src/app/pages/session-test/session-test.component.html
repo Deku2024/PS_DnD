@@ -1,0 +1,47 @@
+<div class="container">
+  <h2>⚔ Sesiones de Juego</h2>
+  <p class="subtitle">Dungeons &amp; Dragons</p>
+
+  <p class="uid" *ngIf="currentUser">
+    Aventurero: <strong>{{ currentUser.email }}</strong>
+  </p>
+  <p class="uid error" *ngIf="!currentUser">
+    ⚠️ No hay usuario autenticado.
+  </p>
+
+  <hr class="divider" />
+
+  <!-- Crear sesión -->
+  <div class="card">
+    <h3>Crear sesión</h3>
+    <input [(ngModel)]="sessionName" placeholder="Nombre de la sesión" />
+    <input [(ngModel)]="sessionPassword" type="password" placeholder="Contraseña de la sesión" />
+    <button (click)="onCreate()" [disabled]="!currentUser">Crear sesión</button>
+  </div>
+
+  <!-- Unirse a sesión -->
+  <div class="card">
+    <h3>Unirse a sesión</h3>
+    <input [(ngModel)]="joinId" placeholder="ID de la sesión" />
+    <input [(ngModel)]="joinPassword" type="password" placeholder="Contraseña" />
+    <button (click)="onJoin()" [disabled]="!currentUser">Unirse</button>
+  </div>
+
+  <!-- Mensaje -->
+  <p class="message" *ngIf="message" [class.error]="isError">{{ message }}</p>
+
+  <!-- Sesión activa -->
+  <div class="card session-info" *ngIf="currentSession">
+    <h3>📜 Sesión activa</h3>
+    <p><strong>Nombre:</strong> {{ currentSession.name }}</p>
+    <p><strong>ID:</strong> {{ currentSession.id }}</p>
+    <p><strong>Estado:</strong> <span class="badge">{{ currentSession.status }}</span></p>
+    <p><strong>Master:</strong> {{ currentSession.playerEmails[currentSession.masterId] || currentSession.masterId }}</p>
+    <p><strong>Aventureros ({{ currentSession.players.length }}):</strong></p>
+    <ul>
+      <li *ngFor="let uid of currentSession.players">
+        {{ currentSession.playerEmails[uid] || uid }}
+      </li>
+    </ul>
+  </div>
+</div>
