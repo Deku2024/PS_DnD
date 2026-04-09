@@ -1,0 +1,276 @@
+:host {
+  display: block;
+  position: relative;
+}
+
+button:not(#close-btn) {
+  background: #5c3d2e;
+  color: #f5e6c8;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  font-family: 'MedievalSharp', monospace;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+  display: block !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: 30%;
+  text-align: center;
+}
+
+button:not(#close-btn):hover {
+  background: #8b6914;
+  transform: scale(1.02);
+}
+
+button:not(#close-btn):active {
+  transform: scale(0.98);
+}
+
+#overlay_for_general_throw {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  z-index: 998;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+#menu_for_throws {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  z-index: 999;
+  background: linear-gradient(135deg, #fff8f0 0%, #f0e4d0 100%);
+  width: 50%;
+  max-width: 550px;
+  min-width: 320px;
+  height: auto;
+  max-height: 80%;
+  overflow-y: auto;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 12px;
+  padding: 20px;
+  animation: slideIn 0.2s ease-in-out forwards;
+}
+
+.menu-header {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #5c3d2e;
+}
+
+.menu-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  font-family: 'MedievalSharp', monospace;
+}
+
+#menu_for_throws single-custom-throw-button {
+  display: block;
+}
+
+#close-btn {
+  background: #5c3d2e;
+  color: #f5e6c8;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  font-family: 'MedievalSharp', monospace;
+  transition: all 0.2s ease;
+  text-align: center;
+  width: 10%;
+}
+
+#close-btn:hover {
+  background: #8b6914;
+  transform: scale(1.02);
+}
+
+#menu_for_throws input {
+  grid-column: 1 / -1;
+  padding: 10px 12px;
+  border: 1px solid #5c3d2e;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  font-family: 'Arial', sans-serif;
+  background-color: #5c3d2e;
+  color: #f5e6c8;
+}
+
+#menu_for_throws input:focus {
+  outline: none;
+  background-color: #8b6914;
+}
+
+#menu_for_throws input::placeholder {
+  color: #f5e6c8;
+  font-size: 13px;
+}
+
+#throw-custom-button {
+  padding: 10px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100% !important;
+}
+
+#menu_for_throws button:last-child:hover {
+  background: #8b6914;
+  transform: scale(1.02);
+}
+
+#menu_for_throws button:last-child:active {
+  transform: scale(0.98);
+}
+
+#menu_for_throws::-webkit-scrollbar {
+  width: 6px;
+}
+
+#menu_for_throws::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+#menu_for_throws::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 3px;
+}
+
+#menu_for_throws::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  #menu_for_throws {
+    width: 90%;
+    padding: 16px;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+
+  .menu-header h3 {
+    font-size: 16px;
+  }
+
+  #close-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+  }
+
+  #menu_for_throws ::ng-deep single-custom-throw-button button {
+    padding: 8px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+
+  button:not(#close-btn) {
+    font-size: 0.8rem;
+  }
+
+  #menu_for_throws {
+    width: 95%;
+    padding: 12px;
+    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  }
+
+  .menu-header {
+    padding-bottom: 12px;
+    margin-bottom: 4px;
+  }
+
+  .menu-header h3 {
+    font-size: 15px;
+  }
+
+  #close-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 16px;
+    padding: 0;
+  }
+
+  #menu_for_throws single-custom-throw-button button {
+    padding: 6px;
+    font-size: 10Px;
+  }
+
+  #menu_for_throws input {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  #menu_for_throws button:last-child {
+    padding: 8px;
+    font-size: 0.8rem;
+  }
+}
+
+@keyframes shakeError {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.error-message {
+  display: block;
+  color: white;
+  width: 100%;
+  background-color: #5c3d2e;
+  border: 1px solid #5c3d2e;
+  border-radius: 8px;
+  animation: shakeError 0.3s ease-in-out;
+  margin-top: 8px;
+  padding: 8px;
+}
+
+#inputAndError {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}

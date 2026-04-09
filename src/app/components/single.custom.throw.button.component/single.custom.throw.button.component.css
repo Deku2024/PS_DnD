@@ -1,0 +1,17 @@
+button {
+  background: #5c3d2e;
+  color: #f5e6c8;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: 'MedievalSharp', monospace;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+button:hover {
+  background: #8b6914;
+  transform: scale(1.02);
+}

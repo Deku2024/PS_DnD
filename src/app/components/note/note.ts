@@ -1,0 +1,26 @@
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
+@Component({
+  selector: 'app-note',
+  imports: [FormsModule],
+  standalone: true,
+  templateUrl: './note.html',
+  styleUrl: './note.css',
+})
+export class Note {
+  @Input() note!: any;
+  @Output() delete = new EventEmitter<string>();
+  @Output() update = new EventEmitter<string>();
+  
+  onDelete() {
+    if (!this.note.id) return;
+    this.delete.emit(this.note.id);
+  }
+
+  onUpdate() {
+    if (!this.note.id) return;
+    this.update.emit(this.note.id);
+  }
+
+}

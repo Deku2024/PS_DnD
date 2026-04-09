@@ -1,0 +1,472 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    font-family: 'Cinema', 'MedievalSharp', 'Georgia', serif;
+    padding: 16px;
+    height: auto;
+    min-height: 100vh;
+}
+
+body {
+    padding-bottom: 120px;
+}
+
+main {
+    max-width: 100%;
+    margin: 0 auto;
+    background: #f5e6c8;
+    padding-top: 1rem;
+}
+
+/* Imagen del personaje */
+#player-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid #d4a056;
+    box-shadow: 0 0 0 2px #2c1810, 0 0 0 5px #8b6914;
+    display: block;
+    margin: 0 auto 20px;
+    object-fit: cover;
+    background: #3a2518;
+    background-image: radial-gradient(circle at 25% 40%, rgba(212, 160, 86, 0.2) 2%, transparent 2%);
+    background-size: 20px 20px;
+}
+
+/* Formulario principal */
+.player-sheet-form {
+    background: #f5e6c8;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.05"><path d="M10,10 L90,10 L90,90 L10,90 Z" fill="none" stroke="%238b6914" stroke-width="1"/><path d="M20,20 L80,20 M20,30 L80,30" stroke="%238b6914" stroke-width="0.5"/><circle cx="50" cy="60" r="10" fill="none" stroke="%238b6914" stroke-width="0.5"/></svg>');
+    border-radius: 24px 24px 16px 16px;
+    border: 1px solid #d4a056;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    padding: 20px 16px;
+}
+
+/* Campos de formulario */
+.field {
+    margin-bottom: 18px;
+    display: flex;
+    flex-direction: column;
+}
+
+.field label {
+    color: #3a2518;
+    font-weight: bold;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    font-family: 'MedievalSharp', monospace;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.field label::before {
+    content: "⚔️";
+    font-size: 0.8rem;
+}
+
+.field input {
+    background: #fff8f0;
+    border: 2px solid #c4a47a;
+    border-radius: 8px;
+    padding: 12px 10px;
+    font-size: 1rem;
+    font-family: 'Georgia', serif;
+    transition: all 0.3s ease;
+}
+
+.field input:focus {
+    outline: none;
+    border-color: #8b6914;
+    box-shadow: 0 0 0 3px rgba(139, 105, 20, 0.2);
+    background: #ffffff;
+}
+
+/* Secciones */
+.form-section {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 2px solid #c4a47a;
+    position: relative;
+}
+
+.form-section h2 {
+    color: #5c3d2e;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    text-align: center;
+    font-family: 'MedievalSharp', monospace;
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    background: #f5e6c8;
+    padding: 0 10px;
+}
+
+.form-section h2::before,
+.form-section h2::after {
+    content: "✦";
+    color: #d4a056;
+    margin: 0 8px;
+    font-size: 0.9rem;
+}
+
+/*Estadísticas*/
+
+#life-info, #basic-info {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    gap: 12px;
+    overflow: hidden;
+}
+
+#life-info .field {
+    min-width: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#life-info .field label, #basic-info .field label {
+    display: block;
+    font-size: 0.8rem;
+    white-space: normal;
+
+}
+
+#life-info .field input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 8px 6px;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+
+/*mensajes error*/
+.error {
+    font-family: 'Georgia', serif;
+    font-size: 1.5ch;
+    margin-bottom: 0.5rem;
+    border: 2px solid #c4a47a;
+    border-radius: 6px;
+    text-align: center;
+    background-color: #f7dcbe;
+    margin-top: 4px;
+    padding: 0.5rem 0;
+}
+
+#life-info .error {
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+}
+
+/*características*/
+
+.attributes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.attribute-card {
+    background: linear-gradient(135deg, #fff8f0 0%, #f0e4d0 100%);
+    border: 1px solid #c4a47a;
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.attribute-card:hover {
+    transform: translateY(-2px);
+}
+
+.attribute-card label {
+    display: block;
+    font-weight: bold;
+    color: #5c3d2e;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.attribute-card input {
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    background: #3a2518;
+    color: #d4a056;
+    border: 2px solid #8b6914;
+    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 8px;
+    cursor: default;
+}
+
+.attribute-card button {
+    background: #5c3d2e;
+    color: #f5e6c8;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-family: 'MedievalSharp', monospace;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.attribute-card button:hover {
+    background: #8b6914;
+    transform: scale(1.02);
+}
+
+/* Áreas de inventario y habilidades */
+.inventario, .habilidades, #dropdowns {
+    background: #fff8f0;
+    border: 2px dashed #c4a47a;
+    border-radius: 12px;
+    padding: 16px;
+    min-height: 100px;
+    background-image: radial-gradient(circle at 10px 10px, #e8dcc8 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.btn-add {
+  background-color: #5c3d2e;
+  color: #f5e6c8;
+  border: 1px solid #d4a056;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-family: 'MedievalSharp', monospace;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-add:hover {
+  background-color: #8b6914;
+  transform: scale(1.05);
+}
+.inventory-item {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+  padding: 8px;
+  background: rgba(255, 254, 240, 0.5);
+  border-radius: 8px;
+  border-bottom: 1px dashed #c4a47a;
+}
+
+.qty-input {
+  width: 65px;
+  text-align: center;
+}
+
+.name-input {
+  flex: 2;
+}
+
+.desc-input {
+  flex: 3;
+}
+
+.btn-delete {
+  background: #3a2518;
+  color: #d4a056;
+  border: 1px solid #8b6914;
+  border-radius: 4px;
+  padding: 5px 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.btn-delete:hover {
+  background: #721c24;
+  color: #ffffff;
+}
+
+.empty-msg {
+  text-align: center;
+  font-style: italic;
+  color: #5c3d2e;
+  padding: 20px;
+  opacity: 0.8;
+}
+
+.gold-container {
+  margin-top: 25px;
+  padding: 15px;
+  background: rgba(139, 105, 20, 0.1);
+  border: 1px solid #d4a056;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+.gold-container label {
+  font-family: 'MedievalSharp', monospace;
+  font-weight: bold;
+  color: #3a2518;
+}
+
+.gold-container input {
+  width: 100px;
+  text-align: center;
+  font-weight: bold;
+  color: #8b6914;
+  font-size: 1.1rem;
+  border: 2px solid #c4a47a;
+  background: #fff8f0;
+}
+
+.abilities-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.ability-item {
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid #c4a47a;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.ability-main {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.ability-item .name-input {
+  font-weight: bold;
+  color: #5c3d2e;
+  flex: 1;
+}
+
+.ability-desc {
+  width: 100%;
+  min-height: 80px;
+  background: #fff8f0;
+  border: 1px solid #c4a47a;
+  border-radius: 4px;
+  padding: 10px;
+  font-family: 'Georgia', serif;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+.ability-desc:focus {
+  outline: none;
+  border-color: #8b6914;
+  background: #ffffff;
+}
+/* Ajustes específicos para móviles pequeños */
+@media (max-width: 480px) {
+    body {
+        padding-bottom: 150px;
+    }
+
+    .player-sheet-form {
+        padding: 16px 12px;
+    }
+
+    .attributes-grid {
+        gap: 8px;
+    }
+
+    .attribute-card input {
+        font-size: 1rem;
+        padding: 6px;
+    }
+
+    .attribute-card button {
+        font-size: 0.7rem;
+        padding: 5px 8px;
+    }
+
+    .field input {
+        padding: 10px 8px;
+        font-size: 14px;
+    }
+
+    .form-section h2 {
+        font-size: 1rem;
+    }
+
+    .attribute-card input {
+        font-size: 1rem;
+    }
+
+    #life-info {
+        gap: 8px;
+    }
+
+    #life-info .field label {
+        font-size: 0.6rem;
+    }
+
+     #basic-info .field label {
+        font-size: 0.7rem;
+     }
+
+    #life-info .field input {
+        padding: 6px 4px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding-bottom: 150px;
+    }
+}
+
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #3a2518;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #d4a056;
+    border-radius: 10px;
+    border: 1px solid #5c3d2e;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #8b6914;
+}

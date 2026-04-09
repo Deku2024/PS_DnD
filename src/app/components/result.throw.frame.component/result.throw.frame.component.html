@@ -1,0 +1,60 @@
+<div class="overlay" [class.show]="showResult()" (click)="interruptDisplay()">
+  <div class="resultFrame">
+    <div class="resultArea">
+      @if (result()?.isNat1) {
+        <p class="mainResult criticalFail">¡Fracaso Crítico!</p>
+      } @else if (result()?.isNat20) {
+        <p class="mainResult criticalSuccess">¡Éxito Crítico!</p>
+      } @else {
+        <p class="mainResult"
+           [class.success]="result()?.success === true"
+           [class.fail]="result()?.success === false">
+          {{ result()?.result }}
+        </p>
+      }
+    </div>
+
+    <div class="detailsArea">
+      <div class="detailItem">
+        <span class="detailLabel">Dados:</span>
+        <span class="detailValue">
+          {{ result()?.amount }}d{{ result()?.side }}
+        </span>
+      </div>
+
+      <div class="detailItem">
+        <span class="detailLabel">Bono:</span>
+        <span class="detailValue" [class.positive]="(result()?.bonus ?? 0) > 0" [class.negative]="(result()?.bonus ?? 0) < 0">
+          {{ (result()?.bonus ?? 0) > 0 ? '+' : '' }}{{ result()?.bonus }}
+        </span>
+      </div>
+
+      <div class="detailItem">
+        <span class="detailLabel">Tipo:</span>
+        <span class="detailValue">
+          @if (result()?.type === TypeOfThrow.Normal) {
+            Normal
+          } @else if (result()?.type === TypeOfThrow.Advantage) {
+            Ventaja
+          } @else {
+            Desventaja
+          }
+        </span>
+      </div>
+
+      @if (result()?.dc && result()?.dc !== -1) {
+        <div class="detailItem">
+          <span class="detailLabel">DC:</span>
+          <span class="detailValue">{{ result()?.dc }}</span>
+        </div>
+      }
+
+      <div class="detailItem" style="grid-column: span 2;">
+        <span class="detailLabel">Tiradas individuales:</span>
+        <span class="detailValue throwsList">
+          [{{ result()?.throws?.join(', ') }}]
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
