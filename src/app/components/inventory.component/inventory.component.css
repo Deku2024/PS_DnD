@@ -1,0 +1,127 @@
+.inventory-item {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+  padding: 8px;
+  background: rgba(255, 254, 240, 0.5);
+  border-radius: 8px;
+  border-bottom: 1px dashed #c4a47a;
+}
+
+.qty-input {
+  width: 65px;
+  text-align: center;
+  background: #fff8f0;
+  border: 2px solid #c4a47a;
+  border-radius: 6px;
+  padding: 8px;
+  font-family: 'Georgia', serif;
+}
+
+.name-input {
+  flex: 2;
+  background: #fff8f0;
+  border: 2px solid #c4a47a;
+  border-radius: 6px;
+  padding: 8px;
+  font-family: 'Georgia', serif;
+}
+
+.desc-input {
+  flex: 3;
+  background: #fff8f0;
+  border: 2px solid #c4a47a;
+  border-radius: 6px;
+  padding: 8px;
+  font-family: 'Georgia', serif;
+}
+
+.btn-delete {
+  background: #3a2518;
+  color: #d4a056;
+  border: 1px solid #8b6914;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: 'MedievalSharp', monospace;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-delete:hover {
+  background: #721c24;
+  color: #ffffff;
+  transform: scale(1.02);
+}
+
+input:focus {
+  outline: none;
+  border-color: #8b6914;
+  box-shadow: 0 0 0 3px rgba(139, 105, 20, 0.2);
+  background: #ffffff;
+}
+
+/* 📱 Tablets (768px y menos) */
+@media (max-width: 768px) {
+  .inventory-item {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .qty-input {
+    width: calc(25% - 6px);
+    min-width: 60px;
+  }
+
+  .name-input {
+    flex: 1;
+    min-width: calc(40% - 6px);
+  }
+
+  .desc-input {
+    flex: 1;
+    min-width: calc(100% - 80px);
+    order: 3;
+  }
+
+  .btn-delete {
+    order: 2;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+}
+
+/* 📱 Móviles (480px y menos) */
+@media (max-width: 480px) {
+  .inventory-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .qty-input {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .name-input {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .desc-input {
+    width: 100%;
+    min-width: auto;
+    order: 2;
+  }
+
+  .btn-delete {
+    width: 100%;
+    order: 3;
+    margin-top: 4px;
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+}

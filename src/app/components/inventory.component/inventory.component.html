@@ -1,0 +1,8 @@
+<div class="inventory-item" [formGroup]="itemGroup()">
+  <input type="number" formControlName="quantity" class="qty-input" placeholder="Cant.">
+  <input type="text" formControlName="name" class="name-input" placeholder="Objeto...">
+  <input type="text" formControlName="description" class="desc-input" placeholder="Descripción...">
+  <button type="button" class="btn-delete" (click)="removeItem()">
+    Borrar objeto
+  </button>
+</div>

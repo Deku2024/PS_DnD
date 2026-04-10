@@ -1,0 +1,7 @@
+<div [formGroup]="itemGroup()" class="ability-item">
+  <div class="ability-main">
+    <input type="text" formControlName="name" class="name-input" placeholder="Nombre...">
+    <button type="button" class="btn-delete" (click)="removeAbility()">Eliminar habilidad</button>
+  </div>
+  <textarea formControlName="description" class="ability-desc" placeholder="Descripción..."></textarea>
+</div>

@@ -1,19 +1,29 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { ReactiveFormsModule, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl, FormArray } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Dropdown } from "../../components/dropdown/dropdown";
+import {CommonModule} from '@angular/common';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {
+  AbstractControl,
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
+import {ActivatedRoute, Router} from '@angular/router';
+import {Dropdown} from "../../components/dropdown/dropdown";
 import {D20RollerButtonComponent} from '../../components/d20.roller.button.component/d20.roller.button.component';
 import {ResultThrowFrameComponent} from '../../components/result.throw.frame.component/result.throw.frame.component';
 import {
   GeneralThrowsButtonComponent
 } from '../../components/general.throws.button.component/general.throws.button.component';
-import { CharacterService } from '../../services/character.service';
-import { AuthService } from '../../services/auth.service';
+import {CharacterService} from '../../services/character.service';
+import {AuthService} from '../../services/auth.service';
+import {InventoryItemComponent} from '../../components/inventory.component/inventory.component';
+import {AbilityComponent} from '../../components/ability.component/ability.component';
 
 @Component({
   selector: 'app-player-sheet',
-  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, ResultThrowFrameComponent, GeneralThrowsButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, ResultThrowFrameComponent, GeneralThrowsButtonComponent, InventoryItemComponent, AbilityComponent],
   templateUrl: './player-sheet.html',
   styleUrl: './player-sheet.css',
 })
@@ -55,12 +65,14 @@ export class PlayerSheet implements OnInit {
     { value: 'LG', label: 'Caótico caótico' },
   ];
 
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private characterService: CharacterService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {
     this.playerSheetForm = this.fb.group({
       name: ['Aragorn', [Validators.required, Validators.minLength(3)]],
@@ -96,13 +108,20 @@ export class PlayerSheet implements OnInit {
     return this.playerSheetForm.get('inventory') as FormArray;
   }
 
+  get inventoryItems(): FormGroup[] {
+    return this.inventoryFormArray.controls as FormGroup[];
+  }
+
   addItem(): void {
-    const itemForm = this.fb.group({
-      name: ['', Validators.required],
-      quantity: [1, [Validators.required, Validators.min(1)]],
-      description: ['']
-    });
-    this.inventoryFormArray.push(itemForm);
+    this.inventoryFormArray.push(
+      this.fb.group(
+        {
+          name: ['', Validators.required],
+          quantity: [1, [Validators.required, Validators.min(1)]],
+          description: ['']
+        }
+      )
+    );
   }
 
   removeItem(index: number): void {
@@ -113,20 +132,27 @@ export class PlayerSheet implements OnInit {
     return this.playerSheetForm.get('abilities') as FormArray;
   }
 
+  get abilities(): FormGroup[] {
+    return this.abilitiesFormArray.controls as FormGroup[];
+  }
+
   addAbility(): void {
-    const abilityForm = this.fb.group({
-      name: ['', Validators.required],
-      description: ['', Validators.required]
-    });
-    this.abilitiesFormArray.push(abilityForm);
+    this.abilitiesFormArray.push(
+      this.fb.group(
+        {
+          name: ['', Validators.required],
+          description: ['', Validators.required]
+        }
+        )
+    );
   }
 
   removeAbility(index: number): void {
     this.abilitiesFormArray.removeAt(index);
   }
-  
+
   validateLifeNotExceedMax(): ValidatorFn {
-      return (group: AbstractControl): { [key: string]: any } | null => {
+    return (group: AbstractControl): { [key: string]: any } | null => {
       const life = group.get('life')?.value;
       const maxLife = group.get('maxLife')?.value;
 
@@ -145,6 +171,7 @@ export class PlayerSheet implements OnInit {
       if (user) {
         this.characterService.getCharacter(user.uid, this.sessionId).then(character => {
           if (character) {
+            console.log(character);
             // Patch the form with existing character data
             const { userId, sessionId, updatedAt, inventory, abilities, ...basic } = character;
             this.playerSheetForm.patchValue(basic);
@@ -161,6 +188,8 @@ export class PlayerSheet implements OnInit {
                 description: [ability.description, Validators.required]
               }));
             });
+
+            this.cdr.detectChanges();
           }
         });
       }
@@ -198,15 +227,15 @@ export class PlayerSheet implements OnInit {
   }
 
   getAttributesList() {
-  return [
-    { name: 'strength', label: 'Fuerza (STR)' },
-    { name: 'dexterity', label: 'Destreza (DEX)' },
-    { name: 'constitution', label: 'Constitución (CON)' },
-    { name: 'intelligence', label: 'Inteligencia (INT)' },
-    { name: 'wisdom', label: 'Sabiduría (WIS)' },
-    { name: 'charisma', label: 'Carisma (CHA)' }
-  ];
-}
+    return [
+      { name: 'strength', label: 'Fuerza (STR)' },
+      { name: 'dexterity', label: 'Destreza (DEX)' },
+      { name: 'constitution', label: 'Constitución (CON)' },
+      { name: 'intelligence', label: 'Inteligencia (INT)' },
+      { name: 'wisdom', label: 'Sabiduría (WIS)' },
+      { name: 'charisma', label: 'Carisma (CHA)' }
+    ];
+  }
 
-  protected readonly parseInt = parseInt;
+  protected readonly parseInt = parseInt; // ?? pa q sirve esto - Iván
 }
