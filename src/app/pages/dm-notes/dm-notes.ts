@@ -5,6 +5,8 @@ import { Note } from '../../components/note/note';
 import { DmnotesService } from '../../services/dmnotes.service';
 import { ResultThrowFrameComponent } from '../../components/result.throw.frame.component/result.throw.frame.component';
 import { GeneralThrowsButtonComponent } from '../../components/general.throws.button.component/general.throws.button.component';
+import { SessionService } from '../../services/sessions.service';
+import { FormsModule } from '@angular/forms';
 
 interface NoteItem {
   id?: string;
@@ -17,7 +19,7 @@ interface NoteItem {
 @Component({
   selector: 'app-dm-notes',
   standalone: true,
-  imports: [CommonModule, Note, ResultThrowFrameComponent, GeneralThrowsButtonComponent],
+  imports: [CommonModule, Note, FormsModule, ResultThrowFrameComponent, GeneralThrowsButtonComponent],
   templateUrl: './dm-notes.html',
   styleUrl: './dm-notes.css',
 })
@@ -29,23 +31,23 @@ export class DmNotes implements OnInit, OnDestroy {
 
   unsubscribe: (() => void) | undefined;
 
-  newNote: NoteItem = {
-    title: '',
-    content: ''
-  };
-
   constructor(
     private dmNotesService: DmnotesService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private sessionsService: SessionService
   ) {}
 
   ngOnInit() {
-    this.sessionId = this.route.snapshot.paramMap.get('sessionId') || '';
+    const id = this.sessionsService.getCurrentSessionId();
 
-    if (!this.sessionId) {
-      console.error('No hay sesión activa en la URL');
+    if (!id) {
+      console.error('No hay id de la sesión.');
       return;
     }
+
+    this.sessionId = id;
+
+    console.log(this.sessionId)
 
     this.unsubscribe = this.dmNotesService.listenToNotes(
       this.sessionId,
@@ -57,20 +59,17 @@ export class DmNotes implements OnInit, OnDestroy {
   }
 
   async addNote() {
-    if (!this.newNote.title || !this.newNote.content) return;
-    await this.dmNotesService.createNote(this.sessionId, this.newNote);
-    this.newNote = { title: '', content: ''};
+    await this.dmNotesService.createNote(this.sessionId, {
+      title: '',
+      content: ''
+    });
+    console.log('nota creada exitosamente');
   }
 
   async deleteNote(noteId: string) {
-    if (!noteId) return;
     await this.dmNotesService.deleteNote(this.sessionId, noteId);
-  }
-
-  async updateNote(noteId: string) {
-    if (!noteId) return;
-    await this.dmNotesService.updateNote(this.sessionId, noteId, this.newNote);
-    this.newNote = { title: '', content: ''};
+    console.log('nota borrada exitosamente');
+    console.log(noteId);
   }
 
   ngOnDestroy() {

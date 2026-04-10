@@ -14,11 +14,11 @@
   </div>
 
   <div id="notes-area">
-    @for (note of notes; track note.id) {
+    @for (note of notes; track $index) {
       <app-note
         [note]="note"
+        [sessionId]="sessionId"
         (delete)="deleteNote($event)"
-        (update)="updateNote($event)"
       ></app-note>
     }
   </div>
