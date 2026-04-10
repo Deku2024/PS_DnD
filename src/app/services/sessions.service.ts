@@ -18,7 +18,7 @@ export interface Session {
   masterId: string;
   players: string[];
   playerEmails: { [uid: string]: string };
-  status: 'waiting' | 'active' | 'closed';
+  status: 'waiting' | 'active' | 'paused' | 'closed';
   password?: string;
   createdAt?: any;
 }
@@ -49,6 +49,7 @@ export class SessionService {
       password,
       createdAt: serverTimestamp()
     });
+    this.setCurrentSessionId(docRef.id);
     return docRef.id;
   }
 
@@ -56,6 +57,7 @@ export class SessionService {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     const snap = await getDoc(ref);
     if (!snap.exists()) return null;
+    this.setCurrentSessionId(snap.id);
     const { password, ...sessionWithoutPassword } = snap.data() as Session;
     return { id: snap.id, ...sessionWithoutPassword } as Session;
   }
@@ -85,6 +87,7 @@ export class SessionService {
         callback(null);
         return;
       }
+      this.setCurrentSessionId(snap.id);
       const { password, ...sessionWithoutPassword } = snap.data() as Session;
       callback({ id: snap.id, ...sessionWithoutPassword } as Session);
     });

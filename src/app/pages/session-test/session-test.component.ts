@@ -1,7 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SessionService, Session } from '../../services/sessions.service';
+import { Router } from '@angular/router';
+import { SessionService } from '../../services/sessions.service';
 import { AuthService } from '../../services/auth.service';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
@@ -18,18 +19,17 @@ export class SessionTestComponent implements OnInit, OnDestroy {
   sessionPassword = '';
   joinId = '';
   joinPassword = '';
-  currentSession: Session | null = null;
   message = '';
   isError = false;
 
   currentUser: User | null = null;
 
-  private unsubscribe?: () => void;
   private authSub?: Subscription;
 
   constructor(
     private sessionService: SessionService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -56,8 +56,7 @@ export class SessionTestComponent implements OnInit, OnDestroy {
         this.sessionPassword
       );
       this.sessionService.setCurrentSessionId(id);
-      this.showMessage(`Sesión creada con ID: ${id}`, false);
-      this.listenTo(id);
+      this.router.navigate(['/session', id]);
     } catch (e: any) {
       this.showMessage('Error: ' + e.message, true);
     }
@@ -80,18 +79,10 @@ export class SessionTestComponent implements OnInit, OnDestroy {
         this.joinPassword
       );
       this.sessionService.setCurrentSessionId(this.joinId);
-      this.showMessage(`Te uniste a la sesión ${this.joinId}`, false);
-      this.listenTo(this.joinId);
+      this.router.navigate(['/session', this.joinId]);
     } catch (e: any) {
       this.showMessage('Error: ' + e.message, true);
     }
-  }
-
-  private listenTo(id: string) {
-    this.unsubscribe?.();
-    this.unsubscribe = this.sessionService.listenSession(id, (session) => {
-      this.currentSession = session;
-    });
   }
 
   private showMessage(msg: string, error: boolean) {
@@ -100,7 +91,6 @@ export class SessionTestComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.unsubscribe?.();
     this.authSub?.unsubscribe();
   }
 }

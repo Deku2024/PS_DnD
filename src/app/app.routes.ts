@@ -12,7 +12,7 @@ export const routes: Routes = [
   },
   {
     path: 'home',
-    loadComponent: () => import('./pages/home/home').then((m) => m.Home),
+    loadComponent: () => import('./pages/session-test/session-test.component').then((m) => m.SessionTestComponent),
     canActivate: [AuthGuard],
   },
   {
@@ -21,9 +21,14 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'session/:id',
+    loadComponent: () => import('./pages/session/session').then((m) => m.SessionPage),
+    canActivate: [AuthGuard],
+  },
+  {
 		path: 'dm-notes',
 		loadComponent: () => import('./pages/dm-notes/dm-notes').then(m => m.DmNotes),
-		// canActivate: [GuestGuard]
+		canActivate: [AuthGuard],
 	},
 
   {

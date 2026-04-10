@@ -141,13 +141,14 @@
             <div formGroupName="attributes" class="attributes-grid">
                 @for (attr of getAttributesList(); track attr.name) {
                     <div class="attribute-card">
-                        <label>{{ attr.label }}</label>
+                        <label [for]="'attr-' + attr.name">{{ attr.label }}</label>
                         <input
                             type="number"
+                            [id]="'attr-' + attr.name"
                             [formControlName]="attr.name"
+                            [title]="attr.label"
                             min="1"
                             max="20"
-                            readonly
                             #charValueInput
                         >
                         <d20-roller [rollingForCharacteristic]="true" [charValue]="parseInt(charValueInput.value)"></d20-roller>
@@ -171,15 +172,12 @@
               <p class="empty-msg">El inventario está vacío.</p>
             }
 
-            @for (item of inventoryFormArray.controls; track $index) {
-              <div [formGroupName]="$index" class="inventory-item">
-                <input type="number" formControlName="quantity" class="qty-input" placeholder="Cant.">
-                <input type="text" formControlName="name" class="name-input" placeholder="Objeto...">
-                <input type="text" formControlName="description" class="desc-input" placeholder="Descripción...">
-                <button type="button" class="btn-delete" (click)="removeItem($index)">
-                  Borrar objeto
-                </button>
-              </div>
+            @for (item of inventoryItems; track $index) {
+              <inventory-item
+                [itemGroup]="item"
+                [index]="$index"
+                (remove)="removeItem($event)"
+              />
             }
           </div>
 
@@ -202,16 +200,17 @@
               <p class="empty-msg">No class abilities registered yet.</p>
             }
 
-            @for (ability of abilitiesFormArray.controls; track $index) {
-              <div [formGroupName]="$index" class="ability-item">
-                <div class="ability-main">
-                  <input type="text" formControlName="name" class="name-input" placeholder="Nombre...">
-                  <button type="button" class="btn-delete" (click)="removeAbility($index)">Eliminar habilidad</button>
-                </div>
-                <textarea formControlName="description" class="ability-desc" placeholder="Descripción..."></textarea>
-              </div>
+            @for (ability of abilities; track $index) {
+              <ability [itemGroup]="ability" [index]="$index" (remove)="removeAbility($event)" />
             }
           </div>
+        </div>
+
+        <div class="save-section">
+          <p class="save-error" *ngIf="saveError">{{ saveError }}</p>
+          <button type="submit" class="btn-save" [disabled]="saving">
+            {{ saving ? 'Guardando...' : '💾 Guardar personaje' }}
+          </button>
         </div>
     </form>
 
