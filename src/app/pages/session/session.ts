@@ -133,7 +133,7 @@ export class SessionPage implements OnInit, OnDestroy {
   goToNotes(): void {
     if (!this.session?.id) return;
     this.sessionService.setCurrentSessionId(this.session.id);
-    this.router.navigate(['/dm-notes']);
+    this.router.navigate(['/dm-notes'], { queryParams: { sessionId: this.session.id } });
   }
 
   async leaveSession(): Promise<void> {

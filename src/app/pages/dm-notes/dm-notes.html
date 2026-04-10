@@ -1,4 +1,8 @@
 <main>
+  <div id="top-bar">
+    <button class="back-btn" (click)="goToSession()">← Volver a la sesión</button>
+  </div>
+
   @if (maxNotesExceeded) {
     <div class="error">
       <span>Ha alcanzado el número máximo de notas</span>

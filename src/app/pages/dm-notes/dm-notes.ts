@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Note } from '../../components/note/note';
 import { DmnotesService } from '../../services/dmnotes.service';
 import { ResultThrowFrameComponent } from '../../components/result.throw.frame.component/result.throw.frame.component';
@@ -34,15 +34,22 @@ export class DmNotes implements OnInit, OnDestroy {
   constructor(
     private dmNotesService: DmnotesService,
     private route: ActivatedRoute,
-    private sessionsService: SessionService
+    private router: Router,
+    private sessionsService: SessionService,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    const id = this.sessionsService.getCurrentSessionId();
+    const paramId = this.route.snapshot.queryParamMap.get('sessionId');
+    const id = paramId || this.sessionsService.getCurrentSessionId();
 
     if (!id) {
       console.error('No hay id de la sesión.');
       return;
+    }
+
+    if (paramId) {
+      this.sessionsService.setCurrentSessionId(paramId);
     }
 
     this.sessionId = id;
@@ -54,6 +61,7 @@ export class DmNotes implements OnInit, OnDestroy {
       (notes) => {
         this.notes = notes;
         this.maxNotesExceeded = this.notes.length > this.maxNotes;
+        this.cd.detectChanges();
       }
     );
   }
@@ -70,6 +78,11 @@ export class DmNotes implements OnInit, OnDestroy {
     await this.dmNotesService.deleteNote(this.sessionId, noteId);
     console.log('nota borrada exitosamente');
     console.log(noteId);
+  }
+
+  goToSession() {
+    if (!this.sessionId) return;
+    this.router.navigate(['/session', this.sessionId]);
   }
 
   ngOnDestroy() {

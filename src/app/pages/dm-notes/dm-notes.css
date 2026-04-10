@@ -38,6 +38,28 @@ main::before {
   z-index: 0;
 }
 
+#top-bar {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 1.5rem;
+}
+
+.back-btn {
+    padding: 0.4rem 1rem;
+    background-color: #fff8f0;
+    border: 2px solid #c4a47a;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.back-btn:hover {
+    background-color: #f0d9b5;
+    transform: translateX(-2px);
+}
+
 #create-note {
     position: relative;
     z-index: 1;
