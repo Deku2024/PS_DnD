@@ -1,0 +1,138 @@
+.ability-item {
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid #c4a47a;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.ability-main {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.ability-main .name-input {
+  flex: 1;
+  font-weight: bold;
+  color: #5c3d2e;
+  background: #fff8f0;
+  border: 2px solid #c4a47a;
+  border-radius: 6px;
+  padding: 8px;
+  font-family: 'Georgia', serif;
+}
+
+.ability-desc {
+  width: 100%;
+  min-height: 80px;
+  background: #fff8f0;
+  border: 2px solid #c4a47a;
+  border-radius: 6px;
+  padding: 10px;
+  font-family: 'Georgia', serif;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+.ability-desc:focus {
+  outline: none;
+  border-color: #8b6914;
+  background: #ffffff;
+}
+
+.btn-delete {
+  background: #3a2518;
+  color: #d4a056;
+  border: 1px solid #8b6914;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: 'MedievalSharp', monospace;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-delete:hover {
+  background: #721c24;
+  color: #ffffff;
+  transform: scale(1.02);
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: #8b6914;
+  box-shadow: 0 0 0 3px rgba(139, 105, 20, 0.2);
+  background: #ffffff;
+}
+
+/* 📱 Tablets (768px y menos) */
+@media (max-width: 768px) {
+  .ability-main {
+    flex-wrap: wrap;
+  }
+
+  .ability-main .name-input {
+    flex: 1;
+    min-width: calc(70% - 10px);
+  }
+
+  .btn-delete {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  .ability-desc {
+    min-height: 70px;
+    font-size: 0.85rem;
+  }
+}
+
+/* 📱 Móviles (480px y menos) */
+@media (max-width: 480px) {
+  .ability-item {
+    padding: 10px;
+  }
+
+  .ability-main {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ability-main .name-input {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .btn-delete {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.9rem;
+    white-space: normal;
+  }
+
+  .ability-desc {
+    min-height: 60px;
+    font-size: 0.8rem;
+    padding: 8px;
+  }
+}
+
+/* 📱 Móviles muy pequeños (380px y menos) */
+@media (max-width: 380px) {
+  .ability-item {
+    padding: 8px;
+  }
+
+  .ability-desc {
+    min-height: 50px;
+    font-size: 0.75rem;
+  }
+
+  .btn-delete {
+    font-size: 0.8rem;
+    padding: 8px;
+  }
+}
