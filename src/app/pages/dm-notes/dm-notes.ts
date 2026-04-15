@@ -8,6 +8,7 @@ import { GeneralThrowsButtonComponent } from '../../components/general.throws.bu
 import { SessionService } from '../../services/sessions.service';
 import { FormsModule } from '@angular/forms';
 
+
 interface NoteItem {
   id?: string;
   title: string,
@@ -30,6 +31,7 @@ export class DmNotes implements OnInit, OnDestroy {
   sessionId: string = '';
 
   unsubscribe: (() => void) | undefined;
+
 
   constructor(
     private dmNotesService: DmnotesService,
@@ -64,6 +66,7 @@ export class DmNotes implements OnInit, OnDestroy {
         this.cd.detectChanges();
       }
     );
+
   }
 
   async addNote() {
@@ -87,5 +90,6 @@ export class DmNotes implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     if (this.unsubscribe) this.unsubscribe();
+
   }
 }

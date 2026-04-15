@@ -4,6 +4,7 @@ import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
 import { getAnalytics, Analytics } from 'firebase/analytics';
+import { getDatabase, Database } from 'firebase/database';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -12,6 +13,7 @@ export class FirebaseService {
   public auth: Auth;
   public db: Firestore;
   public storage: FirebaseStorage;
+  public rtdb: Database;
   public analytics?: Analytics;
 
   constructor() {
@@ -19,6 +21,7 @@ export class FirebaseService {
     this.auth = getAuth(this.app);
     this.db = getFirestore(this.app);
     this.storage = getStorage(this.app);
+    this.rtdb = getDatabase(this.app);
     if (this.isBrowser()) {
       try {
         this.analytics = getAnalytics(this.app);
