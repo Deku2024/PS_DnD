@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService, Session } from '../../services/sessions.service';
 import { AuthService } from '../../services/auth.service';
 import { CharacterService, CharacterData } from '../../services/character.service';
+import { PresenceService } from '../../services/presence.service';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
 
@@ -26,10 +27,12 @@ export class SessionPage implements OnInit, OnDestroy {
   modalCharacter: CharacterData | null = null;
   modalPlayerEmail = '';
   modalUid = '';
+  presenceMap: { [uid: string]: boolean } = {};
 
   private unsubscribe?: () => void;
   private authSub?: Subscription;
   private initializing = false;
+  private presenceUnsub?: () => void;
 
   constructor(
     private route: ActivatedRoute,
@@ -37,7 +40,8 @@ export class SessionPage implements OnInit, OnDestroy {
     private sessionService: SessionService,
     private authService: AuthService,
     private characterService: CharacterService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private presenceService: PresenceService
   ) {}
 
   ngOnInit(): void {
@@ -86,6 +90,12 @@ export class SessionPage implements OnInit, OnDestroy {
         this.session = session;
         await this.loadCharacters(session);
       }
+      this.cd.detectChanges();
+    });
+
+    // Start presence listener and announce current user as online
+    this.presenceUnsub = this.presenceService.listenPresence(id, (map) => {
+      this.presenceMap = map;
       this.cd.detectChanges();
     });
   }
@@ -138,6 +148,7 @@ export class SessionPage implements OnInit, OnDestroy {
 
   async leaveSession(): Promise<void> {
     this.unsubscribe?.();
+    this.presenceUnsub?.();
     this.sessionService.setCurrentSessionId(null);
     this.router.navigate(['/home']);
   }
@@ -145,5 +156,6 @@ export class SessionPage implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.unsubscribe?.();
     this.authSub?.unsubscribe();
+    this.presenceUnsub?.();
   }
 }

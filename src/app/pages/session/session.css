@@ -147,6 +147,25 @@ h2 {
   white-space: nowrap;
 }
 
+/* Presence indicator */
+.presence-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 0.5rem;
+  background: #6b7280;
+  box-shadow: 0 0 6px rgba(0,0,0,0.4);
+}
+.presence-dot.online {
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34,197,94,0.7);
+}
+.presence-dot.offline {
+  background: #6b7280;
+  opacity: 0.6;
+}
+
 .btn-character {
   margin-left: auto;
   flex-shrink: 0;
@@ -351,6 +370,7 @@ h2 {
   color: #5a4a20;
   letter-spacing: 0.05em;
 }
+
 
 .master-player {
   font-size: 0.95rem;
