@@ -79,7 +79,7 @@ export class SessionTestComponent implements OnInit, OnDestroy {
         this.joinPassword
       );
       this.sessionService.setCurrentSessionId(this.joinId);
-      this.router.navigate(['/session', this.joinId]);
+      this.router.navigate(['/choose-character'], { queryParams: { sessionId: this.joinId } });
     } catch (e: any) {
       this.showMessage('Error: ' + e.message, true);
     }

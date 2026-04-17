@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService, Session } from '../../services/sessions.service';
 import { AuthService } from '../../services/auth.service';
-import { CharacterService, CharacterData } from '../../services/character.service';
+import { CharacterService, CharacterData, CharacterWithId } from '../../services/character.service';
 import { PresenceService } from '../../services/presence.service';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
@@ -22,9 +22,9 @@ export class SessionPage implements OnInit, OnDestroy {
   errorMsg = '';
 
   // Character modal
-  characters: { [uid: string]: CharacterData | null } = {};
+  characters: { [uid: string]: CharacterWithId | null } = {};
   showModal = false;
-  modalCharacter: CharacterData | null = null;
+  modalCharacter: CharacterWithId | null = null;
   modalPlayerEmail = '';
   modalUid = '';
   presenceMap: { [uid: string]: boolean } = {};
@@ -73,9 +73,10 @@ export class SessionPage implements OnInit, OnDestroy {
     const isDm = snap?.masterId === user.uid;
 
     if (!isDm) {
-      const has = await this.characterService.hasCharacter(user.uid, id);
-      if (!has) {
-        this.router.navigate(['/player-sheet'], { queryParams: { sessionId: id } });
+      const selected = snap?.selectedCharacters?.[user.uid];
+      // Require explicit selection: if there is no selected character entry for this user, force choose-character
+      if (!selected) {
+        this.router.navigate(['/choose-character'], { queryParams: { sessionId: id } });
         return;
       }
     }
@@ -103,9 +104,31 @@ export class SessionPage implements OnInit, OnDestroy {
   private async loadCharacters(session: Session): Promise<void> {
     const players = session.players.filter(uid => uid !== session.masterId);
     for (const uid of players) {
-      if (!(uid in this.characters)) {
-        this.characters[uid] = await this.characterService.getCharacter(uid, session.id!);
-        this.cd.detectChanges();
+      const selectedCharId = session.selectedCharacters?.[uid];
+      const current = this.characters[uid] ?? null;
+
+      if (selectedCharId) {
+        // If selected character changed (or not loaded yet), fetch it
+        if (!current || (current && (current as CharacterWithId).id !== selectedCharId)) {
+          const ch = await this.characterService.getCharacterById(selectedCharId);
+          this.characters[uid] = ch ?? null;
+          // If modal is open for this uid, refresh modalCharacter as well
+          if (this.showModal && this.modalUid === uid) {
+            this.modalCharacter = this.characters[uid];
+          }
+          this.cd.detectChanges();
+        }
+      } else {
+        // No selectedCharacters entry yet: take the first character for user+session if any
+        const list = await this.characterService.listCharactersByUserAndSession(uid, session.id!);
+        const ch = list.length > 0 ? list[0] : null;
+        if (!current || (ch && (current as CharacterWithId).id !== ch.id)) {
+          this.characters[uid] = ch ?? null;
+          if (this.showModal && this.modalUid === uid) {
+            this.modalCharacter = this.characters[uid];
+          }
+          this.cd.detectChanges();
+        }
       }
     }
   }
@@ -129,9 +152,17 @@ export class SessionPage implements OnInit, OnDestroy {
   }
 
   editMyCharacter(): void {
-    if (!this.session?.id) return;
+    if (!this.session?.id || !this.currentUser) return;
     this.closeModal();
-    this.router.navigate(['/player-sheet'], { queryParams: { sessionId: this.session.id } });
+    const myUid = this.currentUser.uid;
+    const selected = this.session?.selectedCharacters?.[myUid];
+    this.router.navigate(['/player-sheet'], { queryParams: { sessionId: this.session.id, characterId: selected } });
+  }
+
+  changeMyCharacter(): void {
+    if (!this.session?.id || !this.currentUser) return;
+    this.closeModal();
+    this.router.navigate(['/choose-character'], { queryParams: { sessionId: this.session.id } });
   }
 
   async toggleSessionStatus(): Promise<void> {
