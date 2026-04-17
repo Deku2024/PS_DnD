@@ -21,6 +21,7 @@ export interface Session {
   masterId: string;
   players: string[];
   playerEmails: { [uid: string]: string };
+  selectedCharacters?: { [uid: string]: string | null };
   status: 'waiting' | 'active' | 'paused' | 'closed';
   password?: string;
   createdAt?: any;
@@ -77,6 +78,7 @@ export class SessionService {
       masterId,
       players: [masterId],
       playerEmails: { [masterId]: masterEmail },
+      selectedCharacters: {},
       status: 'waiting',
       password,
       createdAt: serverTimestamp()
@@ -128,5 +130,10 @@ export class SessionService {
   async updateStatus(sessionId: string, status: Session['status']): Promise<void> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     await updateDoc(ref, { status });
+  }
+
+  async setSelectedCharacter(sessionId: string, userId: string, characterId: string | null): Promise<void> {
+    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
+    await updateDoc(ref, { [`selectedCharacters.${userId}`]: characterId });
   }
 }
