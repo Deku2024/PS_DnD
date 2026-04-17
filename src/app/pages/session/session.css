@@ -80,6 +80,8 @@ h2 {
   border-radius: 3px;
   font-family: monospace;
   font-size: 0.85em;
+  -webkit-user-select: all;
+  -ms-user-select: all;
   user-select: all;
 }
 
@@ -355,6 +357,28 @@ h2 {
 .btn-edit-char:hover {
   background: rgba(198, 167, 71, 0.15);
   color: #e8d5a0;
+}
+
+.btn-change-char {
+  background: transparent;
+  border: 1px dashed rgba(198, 167, 71, 0.45);
+  color: #c6a747;
+  padding: 0.55rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  width: auto;
+  margin-left: 0.6rem;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn-change-char:hover {
+  background: rgba(198, 167, 71, 0.08);
+  color: #e8d5a0;
+  border-color: #c6a747;
 }
 
 .players-list li:last-child {
