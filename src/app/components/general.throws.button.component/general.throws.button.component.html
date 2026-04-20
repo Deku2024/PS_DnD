@@ -10,7 +10,21 @@
       <button type="button" id="close-btn" (click)="closeMenu()">✖</button>
     </div>
 
-    <!-- opcional, por si se quiere añadir una tirada de 50% 50% -->
+    <div class="throw-modifiers">
+      <label>
+        <input type="checkbox"
+               [checked]="throwType() === TypeOfThrow.Advantage"
+               (change)="toggleType(TypeOfThrow.Advantage)">
+        Ventaja
+      </label>
+      <label>
+        <input type="checkbox"
+               [checked]="throwType() === TypeOfThrow.Disadvantage"
+               (change)="toggleType(TypeOfThrow.Disadvantage)">
+        Desventaja
+      </label>
+    </div>
+
     <single-custom-throw-button [dataThrow]="'d2'" [dc]="dc()" (callback)="closeMenu()"/>
     <single-custom-throw-button [dataThrow]="'d4'" [dc]="dc()" (callback)="closeMenu()"/>
     <single-custom-throw-button [dataThrow]="'d6'" [dc]="dc()" (callback)="closeMenu()"/>
@@ -22,7 +36,7 @@
     <input #customThrow placeholder="Tiradas custom (ej: 4d4 + 4)" (input)="clearError()">
 
     <div id="inputAndError">
-      <button type="button" id="throw-custom-button" (click)="throwCustom(customThrow.value); closeMenu();">Tirar tirada custom</button>
+      <button type="button" id="throw-custom-button" (click)="throwCustom(customThrow.value)">Tirar tirada custom</button>
 
       @if (errorMessage() !== "") {
         <div class="error-message">
@@ -32,5 +46,4 @@
     </div>
 
   </div>
-
 }

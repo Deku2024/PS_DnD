@@ -1,6 +1,7 @@
 .overlay {
   position: fixed;
-  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  background-color: rgba(0, 0, 0, 0.5);
   inset: 0;
   display: flex;
   justify-content: center;
@@ -21,6 +22,9 @@
 .resultFrame {
   width: 50%;
   height: 50%;
+  position: relative;
+  z-index: 10000;
+
   background-color: #935028;
   display: flex;
   flex-direction: column;
@@ -29,7 +33,7 @@
   transition: transform 0.3s ease-in-out;
 
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   overflow: hidden;
 }
 
@@ -42,8 +46,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  background: #fff8f0;
   background: linear-gradient(135deg, #fff8f0 0%, #f0e4d0 100%);
   padding: 20px;
+  position: relative;
 }
 
 .mainResult {
