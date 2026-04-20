@@ -1,4 +1,8 @@
 <main>
+  <div id="top-bar">
+    <button class="back-btn" (click)="goToSession()">← Volver a la sesión</button>
+  </div>
+
   @if (maxNotesExceeded) {
     <div class="error">
       <span>Ha alcanzado el número máximo de notas</span>
@@ -8,17 +12,27 @@
   <general-throw-component />
 
   <div id="create-note">
+    <div class="sort-container">
+      <label for="sort-notes">Ordenar por:</label>
+      <select id="sort-notes" [(ngModel)]="sortCriteria" (change)="sortNotes()" class="sort-select">
+        <option value="newest">Más recientes</option>
+        <option value="oldest">Más antiguas</option>
+        <option value="alphaAsc">Alfabético (A-Z)</option>
+        <option value="alphaDesc">Alfabético (Z-A)</option>
+      </select>
+    </div>
+
     <button (click)="addNote()" class="add-btn" [disabled]="maxNotesExceeded">
       <span>+</span>
     </button>
   </div>
 
   <div id="notes-area">
-    @for (note of notes; track note.id) {
+    @for (note of notes; track $index) {
       <app-note
         [note]="note"
+        [sessionId]="sessionId"
         (delete)="deleteNote($event)"
-        (update)="updateNote($event)"
       ></app-note>
     }
   </div>

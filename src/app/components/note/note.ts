@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DmnotesService } from '../../services/dmnotes.service';
 
 @Component({
   selector: 'app-note',
@@ -10,17 +11,29 @@ import { FormsModule } from '@angular/forms';
 })
 export class Note {
   @Input() note!: any;
+  @Input() sessionId!: string;
   @Output() delete = new EventEmitter<string>();
-  @Output() update = new EventEmitter<string>();
+
+  constructor(private dmNotesService: DmnotesService) {}
   
-  onDelete() {
+  async update() {
     if (!this.note.id) return;
-    this.delete.emit(this.note.id);
+
+    if (this.note.id) {
+      await this.dmNotesService.updateNote(
+        this.sessionId,
+        this.note.id,
+        {
+          title: this.note.title,
+          content: this.note.content
+        }
+      );
+    }
   }
 
-  onUpdate() {
+  async onDelete() {
     if (!this.note.id) return;
-    this.update.emit(this.note.id);
+    this.delete.emit(this.note.id);
   }
 
 }

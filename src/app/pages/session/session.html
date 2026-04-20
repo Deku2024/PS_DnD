@@ -39,6 +39,7 @@
       <h3>Aventureros ({{ session.players.length }})</h3>
       <ul class="players-list">
         <li *ngFor="let uid of session.players" [class.is-master]="uid === session.masterId">
+          <span class="presence-dot" [class.online]="presenceMap[uid]" [class.offline]="!presenceMap[uid]"></span>
           <span class="player-icon">{{ uid === session.masterId ? '👑' : '🗡' }}</span>
           <span class="player-email">{{ session.playerEmails[uid] || uid }}</span>
           <span class="you-badge" *ngIf="currentUser && uid === currentUser.uid">(tú)</span>
@@ -49,6 +50,7 @@
             title="Ver ficha del personaje">📜</button>
         </li>
       </ul>
+
     </div>
 
     <!-- Acciones -->
@@ -104,6 +106,7 @@
 
         <div class="modal-actions" *ngIf="currentUser && modalUid === currentUser.uid">
           <button class="btn-edit-char" (click)="editMyCharacter()">✏ Editar mi personaje</button>
+          <button class="btn-change-char" (click)="changeMyCharacter()">🔁 Cambiar personaje</button>
         </div>
       </div>
 
