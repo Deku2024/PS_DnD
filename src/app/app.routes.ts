@@ -21,6 +21,11 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'monster-sheet',
+    loadComponent: () => import('./pages/monster-sheet/monster-sheet').then((m) => m.MonsterSheet),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'session/:id',
     loadComponent: () => import('./pages/session/session').then((m) => m.SessionPage),
     canActivate: [AuthGuard],

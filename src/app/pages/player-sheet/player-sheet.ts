@@ -237,5 +237,5 @@ export class PlayerSheet implements OnInit {
     ];
   }
 
-  protected readonly parseInt = parseInt; // ?? pa q sirve esto - Iván
+  protected readonly parseInt = parseInt;
 }
