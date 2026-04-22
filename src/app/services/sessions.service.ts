@@ -4,9 +4,12 @@ import {
   addDoc,
   doc,
   getDoc,
+  getDocs,
   updateDoc,
   arrayUnion,
   onSnapshot,
+  query,
+  where,
   serverTimestamp,
   Unsubscribe
 } from 'firebase/firestore';
@@ -135,5 +138,15 @@ export class SessionService {
   async setSelectedCharacter(sessionId: string, userId: string, characterId: string | null): Promise<void> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     await updateDoc(ref, { [`selectedCharacters.${userId}`]: characterId });
+  }
+
+  async getSessionsByPlayer(userId: string): Promise<Session[]> {
+    const ref = collection(this.firebase.db, this.sessionsCol);
+    const q = query(ref, where('players', 'array-contains', userId));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => {
+      const { password, ...data } = d.data() as Session;
+      return { id: d.id, ...data } as Session;
+    });
   }
 }
