@@ -180,31 +180,29 @@
               />
             }
           </div>
-
-          <div class="gold-container">
-            <label for="gold"> Oro:</label>
-            <input type="number" id="gold" formControlName="gold">
-          </div>
         </div>
-
-        <div class="form-section">
-          <div class="section-header">
-            <h2>Habilidades</h2>
-            <button type="button" class="btn-add" (click)="addAbility()">
-              Añadir habilidad
-            </button>
-          </div>
-
-          <div formArrayName="abilities" class="abilities-container">
-            @if (abilitiesFormArray.controls.length === 0) {
-              <p class="empty-msg">No class abilities registered yet.</p>
-            }
-
-            @for (ability of abilities; track $index) {
-              <ability [itemGroup]="ability" [index]="$index" (remove)="removeAbility($event)" />
-            }
-          </div>
+      <div class="form-section">
+        <div class="section-header">
+          <h2>Monedas</h2>
         </div>
+        <money-section [moneyGroup]="$any(playerSheetForm.get('money'))" />
+      </div>
+      <div class="form-section">
+        <div class="section-header">
+          <h2>Habilidades</h2>
+          <button type="button" class="btn-add" (click)="addAbility()">
+            Añadir habilidad
+          </button>
+        </div>
+        <div formArrayName="abilities" class="abilities-container">
+          @if (abilitiesFormArray.controls.length === 0) {
+            <p class="empty-msg">No class abilities registered yet.</p>
+          }
+          @for (ability of abilities; track $index) {
+            <ability [itemGroup]="ability" [index]="$index" (remove)="removeAbility($event)" />
+          }
+        </div>
+      </div>
 
         <div class="save-section">
           <p class="save-error" *ngIf="saveError">{{ saveError }}</p>
