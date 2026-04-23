@@ -4,13 +4,19 @@ import {
   addDoc,
   doc,
   getDoc,
+  getDocs,
   updateDoc,
   arrayUnion,
   onSnapshot,
+  query,
+  where,
   serverTimestamp,
   Unsubscribe
 } from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
+import { AuthService } from './auth.service';
+import { PresenceService } from './presence.service';
+import { Subscription } from 'rxjs';
 
 export interface Session {
   id?: string;
@@ -18,6 +24,7 @@ export interface Session {
   masterId: string;
   players: string[];
   playerEmails: { [uid: string]: string };
+  selectedCharacters?: { [uid: string]: string | null };
   status: 'waiting' | 'active' | 'paused' | 'closed';
   password?: string;
   createdAt?: any;
@@ -27,11 +34,40 @@ export interface Session {
 export class SessionService {
   private readonly sessionsCol = 'sessions';
   private currentSessionId: string | null = null;
+  private authSub: Subscription | null = null;
+  private currentUserId: string | null = null;
 
-  constructor(private firebase: FirebaseService) {}
+  constructor(
+    private firebase: FirebaseService,
+    private authService: AuthService,
+    private presenceService: PresenceService
+  ) {
+    // Keep track of auth state to start/stop presence when user signs in/out
+    this.authSub = this.authService.onAuthState().subscribe((user) => {
+      const uid = user ? user.uid : null;
+      // user signed out: stop presence for previous uid
+      if (!uid && this.currentUserId && this.currentSessionId) {
+        this.presenceService.stopPresence(this.currentSessionId, this.currentUserId).catch(() => {});
+      }
+      this.currentUserId = uid;
+      // user signed in: if we already have a session id, announce presence
+      if (uid && this.currentSessionId) {
+        this.presenceService.startPresence(this.currentSessionId, uid);
+      }
+    });
+  }
 
   setCurrentSessionId(id: string | null): void {
+    const prev = this.currentSessionId;
     this.currentSessionId = id;
+    // If we left a previous session, stop presence for current user
+    if (prev && prev !== id && this.currentUserId) {
+      this.presenceService.stopPresence(prev, this.currentUserId).catch(() => {});
+    }
+    // If we joined a new session, start presence for current user
+    if (id && this.currentUserId) {
+      this.presenceService.startPresence(id, this.currentUserId);
+    }
   }
 
   getCurrentSessionId(): string | null {
@@ -45,6 +81,7 @@ export class SessionService {
       masterId,
       players: [masterId],
       playerEmails: { [masterId]: masterEmail },
+      selectedCharacters: {},
       status: 'waiting',
       password,
       createdAt: serverTimestamp()
@@ -96,5 +133,20 @@ export class SessionService {
   async updateStatus(sessionId: string, status: Session['status']): Promise<void> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     await updateDoc(ref, { status });
+  }
+
+  async setSelectedCharacter(sessionId: string, userId: string, characterId: string | null): Promise<void> {
+    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
+    await updateDoc(ref, { [`selectedCharacters.${userId}`]: characterId });
+  }
+
+  async getSessionsByPlayer(userId: string): Promise<Session[]> {
+    const ref = collection(this.firebase.db, this.sessionsCol);
+    const q = query(ref, where('players', 'array-contains', userId));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => {
+      const { password, ...data } = d.data() as Session;
+      return { id: d.id, ...data } as Session;
+    });
   }
 }

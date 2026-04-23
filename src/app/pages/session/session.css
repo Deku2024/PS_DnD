@@ -80,6 +80,8 @@ h2 {
   border-radius: 3px;
   font-family: monospace;
   font-size: 0.85em;
+  -webkit-user-select: all;
+  -ms-user-select: all;
   user-select: all;
 }
 
@@ -145,6 +147,25 @@ h2 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Presence indicator */
+.presence-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 0.5rem;
+  background: #6b7280;
+  box-shadow: 0 0 6px rgba(0,0,0,0.4);
+}
+.presence-dot.online {
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34,197,94,0.7);
+}
+.presence-dot.offline {
+  background: #6b7280;
+  opacity: 0.6;
 }
 
 .btn-character {
@@ -338,6 +359,28 @@ h2 {
   color: #e8d5a0;
 }
 
+.btn-change-char {
+  background: transparent;
+  border: 1px dashed rgba(198, 167, 71, 0.45);
+  color: #c6a747;
+  padding: 0.55rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  width: auto;
+  margin-left: 0.6rem;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn-change-char:hover {
+  background: rgba(198, 167, 71, 0.08);
+  color: #e8d5a0;
+  border-color: #c6a747;
+}
+
 .players-list li:last-child {
   border-bottom: none;
 }
@@ -351,6 +394,7 @@ h2 {
   color: #5a4a20;
   letter-spacing: 0.05em;
 }
+
 
 .master-player {
   font-size: 0.95rem;

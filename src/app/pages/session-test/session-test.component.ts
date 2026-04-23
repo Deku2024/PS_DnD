@@ -1,8 +1,8 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { SessionService } from '../../services/sessions.service';
+import { SessionService, Session } from '../../services/sessions.service';
 import { AuthService } from '../../services/auth.service';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
@@ -24,19 +24,52 @@ export class SessionTestComponent implements OnInit, OnDestroy {
 
   currentUser: User | null = null;
 
+  mySessions: Session[] = [];
+  showMySessions = false;
+  mySessionsLoading = false;
+
   private authSub?: Subscription;
 
   constructor(
     private sessionService: SessionService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.currentUser = this.authService.getCurrentUser();
+    let loaded = false;
     this.authSub = this.authService.onAuthState().subscribe(user => {
       this.currentUser = user;
+      if (user && !loaded) {
+        loaded = true;
+        this.loadMySessions();
+      }
     });
+  }
+
+  async loadMySessions() {
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
+    this.mySessionsLoading = true;
+    this.cd.markForCheck();
+    try {
+      this.mySessions = await this.sessionService.getSessionsByPlayer(user.uid);
+    } catch {
+      this.mySessions = [];
+    } finally {
+      this.mySessionsLoading = false;
+      this.cd.markForCheck();
+    }
+  }
+
+  toggleMySessions() {
+    this.showMySessions = !this.showMySessions;
+  }
+
+  enterSession(sessionId: string) {
+    this.router.navigate(['/session', sessionId]);
   }
 
   async onCreate() {
@@ -79,7 +112,7 @@ export class SessionTestComponent implements OnInit, OnDestroy {
         this.joinPassword
       );
       this.sessionService.setCurrentSessionId(this.joinId);
-      this.router.navigate(['/session', this.joinId]);
+      this.router.navigate(['/choose-character'], { queryParams: { sessionId: this.joinId } });
     } catch (e: any) {
       this.showMessage('Error: ' + e.message, true);
     }
