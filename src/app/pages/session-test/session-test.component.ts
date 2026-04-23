@@ -16,7 +16,7 @@ import { Subscription } from 'rxjs';
 export class SessionTestComponent implements OnInit, OnDestroy {
   sessionName = '';
   sessionPassword = '';
-  joinId = '';
+  joinCode = '';
   joinPassword = '';
   currentSession: Session | null = null;
   message = '';
@@ -49,15 +49,15 @@ export class SessionTestComponent implements OnInit, OnDestroy {
       return;
     }
     try {
-      const id = await this.sessionService.createSession(
+      const code = await this.sessionService.createSession(
         this.sessionName,
         this.currentUser.uid,
         this.currentUser.email || this.currentUser.uid,
         this.sessionPassword
       );
-      this.sessionService.setCurrentSessionId(id);
-      this.showMessage(`Sesión creada con ID: ${id}`, false);
-      this.listenTo(id);
+      this.sessionService.setCurrentSessionId(code);
+      this.showMessage(`Sesión creada — Código: ${code}`, false);
+      this.listenTo(code);
     } catch (e: any) {
       this.showMessage('Error: ' + e.message, true);
     }
@@ -68,28 +68,28 @@ export class SessionTestComponent implements OnInit, OnDestroy {
       this.showMessage('No hay usuario autenticado.', true);
       return;
     }
-    if (!this.joinId.trim()) {
-      this.showMessage('Introduce el ID y la contraseña de la sesión.', true);
+    if (!this.joinCode.trim() || !this.joinPassword.trim()) {
+      this.showMessage('Introduce el código y la contraseña de la sesión.', true);
       return;
     }
     try {
       await this.sessionService.joinSession(
-        this.joinId,
+        this.joinCode,
         this.currentUser.uid,
         this.currentUser.email || this.currentUser.uid,
         this.joinPassword
       );
-      this.sessionService.setCurrentSessionId(this.joinId);
-      this.showMessage(`Te uniste a la sesión ${this.joinId}`, false);
-      this.listenTo(this.joinId);
+      this.sessionService.setCurrentSessionId(this.joinCode);
+      this.showMessage(`Te uniste a la sesión ${this.joinCode}`, false);
+      this.listenTo(this.joinCode);
     } catch (e: any) {
       this.showMessage('Error: ' + e.message, true);
     }
   }
 
-  private listenTo(id: string) {
+  private listenTo(code: string) {
     this.unsubscribe?.();
-    this.unsubscribe = this.sessionService.listenSession(id, (session) => {
+    this.unsubscribe = this.sessionService.listenSessionByCode(code, (session) => {
       this.currentSession = session;
     });
   }

@@ -8,12 +8,16 @@ import {
   arrayUnion,
   onSnapshot,
   serverTimestamp,
+  query,
+  where,
+  getDocs,
   Unsubscribe
 } from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
 
 export interface Session {
   id?: string;
+  code: string;
   name: string;
   masterId: string;
   players: string[];
@@ -38,9 +42,33 @@ export class SessionService {
     return this.currentSessionId;
   }
 
-  async createSession(name: string, masterId: string, masterEmail: string, password: string): Promise<string> {
+  private generateCode(): string {
+    const chars = '123456789';
+    return Array.from({ length: 6 }, () =>
+      chars[Math.floor(Math.random() * chars.length)]
+    ).join('');
+  }
+
+  private async isCodeTaken(code: string): Promise<boolean> {
     const ref = collection(this.firebase.db, this.sessionsCol);
-    const docRef = await addDoc(ref, {
+    const q = query(ref, where('code', '==', code));
+    const snap = await getDocs(q);
+    return !snap.empty;
+  }
+
+  private async generateUniqueCode(): Promise<string> {
+    let code = this.generateCode();
+    while (await this.isCodeTaken(code)) {
+      code = this.generateCode();
+    }
+    return code;
+  }
+
+  async createSession(name: string, masterId: string, masterEmail: string, password: string): Promise<string> {
+    const code = await this.generateUniqueCode();
+    const ref = collection(this.firebase.db, this.sessionsCol);
+    await addDoc(ref, {
+      code,
       name,
       masterId,
       players: [masterId],
@@ -49,49 +77,58 @@ export class SessionService {
       password,
       createdAt: serverTimestamp()
     });
-    return docRef.id;
+    return code;
   }
 
-  async getSession(sessionId: string): Promise<Session | null> {
-    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return null;
-    const { password, ...sessionWithoutPassword } = snap.data() as Session;
-    return { id: snap.id, ...sessionWithoutPassword } as Session;
+  async getSessionByCode(code: string): Promise<Session | null> {
+    const ref = collection(this.firebase.db, this.sessionsCol);
+    const q = query(ref, where('code', '==', code.toUpperCase()));
+    const snap = await getDocs(q);
+    if (snap.empty) return null;
+    const docSnap = snap.docs[0];
+    const { password, ...sessionWithoutPassword } = docSnap.data() as Session;
+    return { id: docSnap.id, ...sessionWithoutPassword } as Session;
   }
 
-  async joinSession(sessionId: string, userId: string, userEmail: string, password: string): Promise<void> {
-    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
-    const snap = await getDoc(ref);
+  async joinSession(code: string, userId: string, userEmail: string, password: string): Promise<void> {
+    const ref = collection(this.firebase.db, this.sessionsCol);
+    const q = query(ref, where('code', '==', code.toUpperCase()));
+    const snap = await getDocs(q);
 
-    if (!snap.exists()) throw new Error('La sesión no existe.');
+    if (snap.empty) throw new Error('La sesión no existe.');
 
-    const session = snap.data() as Session;
+    const docSnap = snap.docs[0];
+    const session = docSnap.data() as Session;
 
     if (session.status === 'closed') throw new Error('La sesión está cerrada.');
     if (session.players.includes(userId)) return;
     if (session.password !== password) throw new Error('Contraseña incorrecta.');
 
-    await updateDoc(ref, {
+    await updateDoc(doc(this.firebase.db, this.sessionsCol, docSnap.id), {
       players: arrayUnion(userId),
       [`playerEmails.${userId}`]: userEmail
     });
   }
 
-  listenSession(sessionId: string, callback: (session: Session | null) => void): Unsubscribe {
-    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
-    return onSnapshot(ref, (snap) => {
-      if (!snap.exists()) {
+  listenSessionByCode(code: string, callback: (session: Session | null) => void): Unsubscribe {
+    const ref = collection(this.firebase.db, this.sessionsCol);
+    const q = query(ref, where('code', '==', code.toUpperCase()));
+    return onSnapshot(q, (snap) => {
+      if (snap.empty) {
         callback(null);
         return;
       }
-      const { password, ...sessionWithoutPassword } = snap.data() as Session;
-      callback({ id: snap.id, ...sessionWithoutPassword } as Session);
+      const docSnap = snap.docs[0];
+      const { password, ...sessionWithoutPassword } = docSnap.data() as Session;
+      callback({ id: docSnap.id, ...sessionWithoutPassword } as Session);
     });
   }
 
-  async updateStatus(sessionId: string, status: Session['status']): Promise<void> {
-    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
-    await updateDoc(ref, { status });
+  async updateStatus(code: string, status: Session['status']): Promise<void> {
+    const ref = collection(this.firebase.db, this.sessionsCol);
+    const q = query(ref, where('code', '==', code.toUpperCase()));
+    const snap = await getDocs(q);
+    if (snap.empty) throw new Error('La sesión no existe.');
+    await updateDoc(doc(this.firebase.db, this.sessionsCol, snap.docs[0].id), { status });
   }
 }
