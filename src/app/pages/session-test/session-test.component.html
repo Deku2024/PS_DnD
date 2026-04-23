@@ -11,6 +11,37 @@
 
   <hr class="divider" />
 
+  <!-- Mis partidas -->
+  <div class="card">
+    <h3>Mis partidas</h3>
+    <button
+      class="btn-toggle-sessions"
+      (click)="toggleMySessions()"
+      [disabled]="mySessionsLoading"
+    >
+      {{ mySessionsLoading ? 'Cargando...' : (showMySessions ? '▲ Ocultar partidas' : '▼ Ver mis partidas') }}
+    </button>
+    <div class="my-sessions-list" *ngIf="showMySessions && !mySessionsLoading">
+      <p class="empty-sessions" *ngIf="mySessions.length === 0">
+        Aún no te has unido a ninguna partida.
+      </p>
+      <div
+        *ngFor="let s of mySessions"
+        class="session-row"
+      >
+        <div class="session-info">
+          <span class="session-name">{{ s.name }}</span>
+          <div class="session-meta">
+            <span class="badge-master" *ngIf="currentUser && s.masterId === currentUser.uid">👑 Maestro</span>
+            <span class="meta-sep" *ngIf="currentUser && s.masterId === currentUser.uid"></span>
+            <span class="session-badge badge-{{ s.status }}">{{ s.status }}</span>
+          </div>
+        </div>
+        <button class="btn-enter" (click)="enterSession(s.id!)">Entrar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Crear sesión -->
   <div class="card">
     <h3>Crear sesión</h3>
@@ -22,7 +53,7 @@
   <!-- Unirse a sesión -->
   <div class="card">
     <h3>Unirse a sesión</h3>
-    <input [(ngModel)]="joinCode" placeholder="Código de sesión (ej: AB3X7K)" style="text-transform: uppercase" />
+    <input [(ngModel)]="joinCode" placeholder="Código de sesión (ej: 123456)" style="text-transform: uppercase" />
     <input [(ngModel)]="joinPassword" type="password" placeholder="Contraseña" />
     <button (click)="onJoin()" [disabled]="!currentUser">Unirse</button>
   </div>
@@ -30,18 +61,4 @@
   <!-- Mensaje -->
   <p class="message" *ngIf="message" [class.error]="isError">{{ message }}</p>
 
-  <!-- Sesión activa -->
-  <div class="card session-info" *ngIf="currentSession">
-    <h3>📜 Sesión activa</h3>
-    <p><strong>Nombre:</strong> {{ currentSession.name }}</p>
-    <p><strong>Código:</strong> {{ currentSession.code }}</p>
-    <p><strong>Estado:</strong> <span class="badge">{{ currentSession.status }}</span></p>
-    <p><strong>Master:</strong> {{ currentSession.playerEmails[currentSession.masterId] || currentSession.masterId }}</p>
-    <p><strong>Aventureros ({{ currentSession.players.length }}):</strong></p>
-    <ul>
-      <li *ngFor="let uid of currentSession.players">
-        {{ currentSession.playerEmails[uid] || uid }}
-      </li>
-    </ul>
-  </div>
 </div>

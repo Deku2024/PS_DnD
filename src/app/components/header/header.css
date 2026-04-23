@@ -33,6 +33,29 @@
   gap: 2px;
 }
 
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.logout-button {
+  background: transparent;
+  border: 1px solid #d4a056;
+  color: #d4a056;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.08s ease;
+}
+
+.logout-button:hover {
+  background: #d4a056;
+  color: #2c1810;
+  transform: translateY(-1px);
+}
+
 .header-title-main {
   font-family: 'MedievalSharp', 'Cinema', 'Georgia', serif;
   font-size: 1.3rem;
@@ -75,5 +98,11 @@
   .header-title-sub {
     font-size: 0.6rem;
     letter-spacing: 1.5px;
+  }
+
+  .logout-button {
+    padding: 5px 8px;
+    font-size: 0.8rem;
+    border-radius: 5px;
   }
 }

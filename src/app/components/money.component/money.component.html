@@ -1,0 +1,16 @@
+<div class="form-section">
+  <div [formGroup]="moneyGroup()" class="money-grid">
+    @for (coin of getMoneyList(); track coin.name) {
+      <div class="coin-field">
+        <label [for]="'coin-' + coin.name">{{ coin.label }}</label>
+        <input
+          type="number"
+          [id]="'coin-' + coin.name"
+          [formControlName]="coin.name"
+          min="0"
+          class="coin-input"
+        >
+      </div>
+    }
+  </div>
+</div>

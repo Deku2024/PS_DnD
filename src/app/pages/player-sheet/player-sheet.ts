@@ -1,21 +1,40 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { ReactiveFormsModule, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl, FormArray } from '@angular/forms';
-import { Dropdown } from "../../components/dropdown/dropdown";
+import {CommonModule} from '@angular/common';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {
+  AbstractControl,
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
+import {ActivatedRoute, Router} from '@angular/router';
+import {Dropdown} from "../../components/dropdown/dropdown";
 import {D20RollerButtonComponent} from '../../components/d20.roller.button.component/d20.roller.button.component';
 import {ResultThrowFrameComponent} from '../../components/result.throw.frame.component/result.throw.frame.component';
 import {
   GeneralThrowsButtonComponent
 } from '../../components/general.throws.button.component/general.throws.button.component';
+import {CharacterService} from '../../services/character.service';
+import {AuthService} from '../../services/auth.service';
+import {SessionService} from '../../services/sessions.service';
+import {InventoryItemComponent} from '../../components/inventory.component/inventory.component';
+import { MoneyComponent } from '../../components/money.component/money.component';
+import {AbilityComponent} from '../../components/ability.component/ability.component';
 
 @Component({
   selector: 'app-player-sheet',
-  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, ResultThrowFrameComponent, GeneralThrowsButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, ResultThrowFrameComponent, GeneralThrowsButtonComponent, InventoryItemComponent, MoneyComponent, AbilityComponent],
   templateUrl: './player-sheet.html',
   styleUrl: './player-sheet.css',
 })
 export class PlayerSheet implements OnInit {
   classHabilities: string = '';
+  sessionId: string | null = null;
+  characterId: string | null = null;
+  saving = false;
+  saveError = '';
 
   playerSheetForm: FormGroup;
 
@@ -49,7 +68,16 @@ export class PlayerSheet implements OnInit {
     { value: 'LG', label: 'Caótico caótico' },
   ];
 
-  constructor(private fb: FormBuilder) {
+
+  constructor(
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private router: Router,
+    private characterService: CharacterService,
+    private authService: AuthService,
+    private sessionService: SessionService,
+    private cdr: ChangeDetectorRef
+  ) {
     this.playerSheetForm = this.fb.group({
       name: ['Aragorn', [Validators.required, Validators.minLength(3)]],
       age: [18, [Validators.required, Validators.min(18), Validators.max(80)]],
@@ -73,7 +101,13 @@ export class PlayerSheet implements OnInit {
         wisdom: [10, [Validators.required, Validators.min(1), Validators.max(20)]],
         charisma: [10, [Validators.required, Validators.min(1), Validators.max(20)]]
       }),
-      gold: [0, [Validators.min(0)]],
+      money: this.fb.group({
+        ppt: [0, [Validators.min(0)]],
+        po:  [0, [Validators.min(0)]],
+        pe:  [0, [Validators.min(0)]],
+        pp:  [0, [Validators.min(0)]],
+        pc:  [0, [Validators.min(0)]]
+      }),
       inventory: this.fb.array([]),
       abilities: this.fb.array([])
 
@@ -84,13 +118,20 @@ export class PlayerSheet implements OnInit {
     return this.playerSheetForm.get('inventory') as FormArray;
   }
 
+  get inventoryItems(): FormGroup[] {
+    return this.inventoryFormArray.controls as FormGroup[];
+  }
+
   addItem(): void {
-    const itemForm = this.fb.group({
-      name: ['', Validators.required],
-      quantity: [1, [Validators.required, Validators.min(1)]],
-      description: ['']
-    });
-    this.inventoryFormArray.push(itemForm);
+    this.inventoryFormArray.push(
+      this.fb.group(
+        {
+          name: ['', Validators.required],
+          quantity: [1, [Validators.required, Validators.min(1)]],
+          description: ['']
+        }
+      )
+    );
   }
 
   removeItem(index: number): void {
@@ -101,18 +142,27 @@ export class PlayerSheet implements OnInit {
     return this.playerSheetForm.get('abilities') as FormArray;
   }
 
-  addAbility(): void {
-    const abilityForm = this.fb.group({
-      name: ['', Validators.required],
-      description: ['', Validators.required]
-    });
-    this.abilitiesFormArray.push(abilityForm);
+  get abilities(): FormGroup[] {
+    return this.abilitiesFormArray.controls as FormGroup[];
   }
+
+  addAbility(): void {
+    this.abilitiesFormArray.push(
+      this.fb.group(
+        {
+          name: ['', Validators.required],
+          description: ['', Validators.required]
+        }
+        )
+    );
+  }
+
   removeAbility(index: number): void {
     this.abilitiesFormArray.removeAt(index);
   }
+
   validateLifeNotExceedMax(): ValidatorFn {
-      return (group: AbstractControl): { [key: string]: any } | null => {
+    return (group: AbstractControl): { [key: string]: any } | null => {
       const life = group.get('life')?.value;
       const maxLife = group.get('maxLife')?.value;
 
@@ -124,16 +174,72 @@ export class PlayerSheet implements OnInit {
   }
 
   ngOnInit(): void {
-    //  TO-DO: cargar datos guardados de la ficha si existen
-    // TO-DO: escuchar cambios para autoguardar
+    this.sessionId = this.route.snapshot.queryParamMap.get('sessionId');
+    this.characterId = this.route.snapshot.queryParamMap.get('characterId');
+
+    if (this.sessionId && this.characterId) {
+      // Edit mode: load the specific character by id
+      this.characterService.getCharacterById(this.characterId).then(character => {
+        if (character) this.patchFormWithCharacter(character);
+      });
+    }
+    // No characterId → create mode: blank form, do not pre-load
   }
 
-  onSubmit(): void {
-    if (this.playerSheetForm.valid) {
-      console.log('Formulario enviado:', this.playerSheetForm.value);
-      // TO-DO: lógica de guardado de datos
-    } else {
+  private patchFormWithCharacter(character: any): void {
+    console.log(character);
+    const { userId, sessionId, updatedAt, inventory, abilities, money, ...basic } = character;
+    this.playerSheetForm.patchValue(basic);
+    this.playerSheetForm.get('money')?.patchValue(money ?? {ppt: 0, po: 0, pe: 0, pp: 0, pc: 0});
+    (inventory ?? []).forEach((item: any) => {
+      this.inventoryFormArray.push(this.fb.group({
+        name: [item.name, Validators.required],
+        quantity: [item.quantity, [Validators.required, Validators.min(1)]],
+        description: [item.description]
+      }));
+    });
+    (abilities ?? []).forEach((ability: any) => {
+      this.abilitiesFormArray.push(this.fb.group({
+        name: [ability.name, Validators.required],
+        description: [ability.description, Validators.required]
+      }));
+    });
+    this.cdr.detectChanges();
+  }
+
+  async onSubmit(): Promise<void> {
+    if (!this.playerSheetForm.valid) {
       console.log('Formulario inválido');
+      return;
+    }
+
+    const user = this.authService.getCurrentUser();
+    if (!user || !this.sessionId) {
+      // No session context: just log (future: save globally)
+      console.log('Formulario enviado (sin sesión):', this.playerSheetForm.value);
+      return;
+    }
+
+    this.saving = true;
+    this.saveError = '';
+    try {
+      let charId: string;
+      if (this.characterId) {
+        // Edit mode: update existing character
+        await this.characterService.updateCharacter(this.characterId, this.playerSheetForm.value);
+        charId = this.characterId;
+      } else {
+        // Create mode: always create a new character, never overwrite
+        charId = await this.characterService.createCharacter(user.uid, this.sessionId, this.playerSheetForm.value);
+      }
+      // Set selected character for this session
+      await this.sessionService.setSelectedCharacter(this.sessionId, user.uid, charId);
+      this.router.navigate(['/session', this.sessionId]);
+    } catch (e: any) {
+      this.saveError = 'Error al guardar el personaje. Inténtalo de nuevo.';
+      console.error(e);
+    } finally {
+      this.saving = false;
     }
   }
 
@@ -142,15 +248,15 @@ export class PlayerSheet implements OnInit {
   }
 
   getAttributesList() {
-  return [
-    { name: 'strength', label: 'Fuerza (STR)' },
-    { name: 'dexterity', label: 'Destreza (DEX)' },
-    { name: 'constitution', label: 'Constitución (CON)' },
-    { name: 'intelligence', label: 'Inteligencia (INT)' },
-    { name: 'wisdom', label: 'Sabiduría (WIS)' },
-    { name: 'charisma', label: 'Carisma (CHA)' }
-  ];
-}
+    return [
+      { name: 'strength', label: 'Fuerza (STR)' },
+      { name: 'dexterity', label: 'Destreza (DEX)' },
+      { name: 'constitution', label: 'Constitución (CON)' },
+      { name: 'intelligence', label: 'Inteligencia (INT)' },
+      { name: 'wisdom', label: 'Sabiduría (WIS)' },
+      { name: 'charisma', label: 'Carisma (CHA)' }
+    ];
+  }
 
-  protected readonly parseInt = parseInt;
+  protected readonly parseInt = parseInt; // ?? pa q sirve esto - Iván
 }

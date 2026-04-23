@@ -1,6 +1,7 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { SessionService, Session } from '../../services/sessions.service';
 import { AuthService } from '../../services/auth.service';
 import { User } from 'firebase/auth';
@@ -18,25 +19,57 @@ export class SessionTestComponent implements OnInit, OnDestroy {
   sessionPassword = '';
   joinCode = '';
   joinPassword = '';
-  currentSession: Session | null = null;
   message = '';
   isError = false;
 
   currentUser: User | null = null;
 
-  private unsubscribe?: () => void;
+  mySessions: Session[] = [];
+  showMySessions = false;
+  mySessionsLoading = false;
+
   private authSub?: Subscription;
 
   constructor(
     private sessionService: SessionService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.currentUser = this.authService.getCurrentUser();
+    let loaded = false;
     this.authSub = this.authService.onAuthState().subscribe(user => {
       this.currentUser = user;
+      if (user && !loaded) {
+        loaded = true;
+        this.loadMySessions();
+      }
     });
+  }
+
+  async loadMySessions() {
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
+    this.mySessionsLoading = true;
+    this.cd.markForCheck();
+    try {
+      this.mySessions = await this.sessionService.getSessionsByPlayer(user.uid);
+    } catch {
+      this.mySessions = [];
+    } finally {
+      this.mySessionsLoading = false;
+      this.cd.markForCheck();
+    }
+  }
+
+  toggleMySessions() {
+    this.showMySessions = !this.showMySessions;
+  }
+
+  enterSession(sessionId: string) {
+    this.router.navigate(['/session', sessionId]);
   }
 
   async onCreate() {
@@ -49,15 +82,14 @@ export class SessionTestComponent implements OnInit, OnDestroy {
       return;
     }
     try {
-      const code = await this.sessionService.createSession(
+      const id = await this.sessionService.createSession(
         this.sessionName,
         this.currentUser.uid,
         this.currentUser.email || this.currentUser.uid,
         this.sessionPassword
       );
-      this.sessionService.setCurrentSessionId(code);
-      this.showMessage(`Sesión creada — Código: ${code}`, false);
-      this.listenTo(code);
+      this.sessionService.setCurrentSessionId(id);
+      this.router.navigate(['/session', id]);
     } catch (e: any) {
       this.showMessage('Error: ' + e.message, true);
     }
@@ -79,19 +111,11 @@ export class SessionTestComponent implements OnInit, OnDestroy {
         this.currentUser.email || this.currentUser.uid,
         this.joinPassword
       );
-      this.sessionService.setCurrentSessionId(this.joinCode);
-      this.showMessage(`Te uniste a la sesión ${this.joinCode}`, false);
-      this.listenTo(this.joinCode);
+      const sessionId = this.sessionService.getCurrentSessionId();
+      this.router.navigate(['/choose-character'], { queryParams: { sessionId } });
     } catch (e: any) {
       this.showMessage('Error: ' + e.message, true);
     }
-  }
-
-  private listenTo(code: string) {
-    this.unsubscribe?.();
-    this.unsubscribe = this.sessionService.listenSessionByCode(code, (session) => {
-      this.currentSession = session;
-    });
   }
 
   private showMessage(msg: string, error: boolean) {
@@ -100,7 +124,6 @@ export class SessionTestComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.unsubscribe?.();
     this.authSub?.unsubscribe();
   }
 }

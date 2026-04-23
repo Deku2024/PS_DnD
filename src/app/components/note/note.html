@@ -3,15 +3,15 @@
         <input
         type="text"
         [(ngModel)]="note.title"
-        (blur)="onUpdate()"
+        (blur)="update()"
         placeholder="Título de la nota"
-        class="note-title">
-
+        class="note-title">    
         <button class="btn-delete" (click)="onDelete()">✕</button>
     </div>
     
     <textarea
         [(ngModel)]="note.content"
+        (blur)="update()"
         placeholder="Escribe tu nota aquí..."
         class="note-content"
     ></textarea>
