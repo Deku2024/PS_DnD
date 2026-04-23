@@ -11,6 +11,37 @@
 
   <hr class="divider" />
 
+  <!-- Mis partidas -->
+  <div class="card">
+    <h3>Mis partidas</h3>
+    <button
+      class="btn-toggle-sessions"
+      (click)="toggleMySessions()"
+      [disabled]="mySessionsLoading"
+    >
+      {{ mySessionsLoading ? 'Cargando...' : (showMySessions ? '▲ Ocultar partidas' : '▼ Ver mis partidas') }}
+    </button>
+    <div class="my-sessions-list" *ngIf="showMySessions && !mySessionsLoading">
+      <p class="empty-sessions" *ngIf="mySessions.length === 0">
+        Aún no te has unido a ninguna partida.
+      </p>
+      <div
+        *ngFor="let s of mySessions"
+        class="session-row"
+      >
+        <div class="session-info">
+          <span class="session-name">{{ s.name }}</span>
+          <div class="session-meta">
+            <span class="badge-master" *ngIf="currentUser && s.masterId === currentUser.uid">👑 Maestro</span>
+            <span class="meta-sep" *ngIf="currentUser && s.masterId === currentUser.uid"></span>
+            <span class="session-badge badge-{{ s.status }}">{{ s.status }}</span>
+          </div>
+        </div>
+        <button class="btn-enter" (click)="enterSession(s.id!)">Entrar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Crear sesión -->
   <div class="card">
     <h3>Crear sesión</h3>

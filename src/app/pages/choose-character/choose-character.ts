@@ -39,11 +39,23 @@ export class ChooseCharacter implements OnInit {
       this.router.navigate(['/auth']);
       return;
     }
-    // Listen in realtime so UI updates when DB changes
-    this.unsubscribe = this.characterService.listenCharactersByUserAndSession(user.uid, this.sessionId, (list) => {
-      this.characters = list;
+    // If current user is the session master, redirect to session (masters don't choose characters)
+    this.sessionService.getSession(this.sessionId).then(session => {
+      if (session?.masterId === user.uid) {
+            this.sessionService.setCurrentSessionId(this.sessionId!);
+            this.router.navigate(['/session', this.sessionId!]);
+        return;
+      }
+      // Listen in realtime so UI updates when DB changes
+          this.unsubscribe = this.characterService.listenCharactersByUserAndSession(user.uid, this.sessionId!, (list) => {
+        this.characters = list;
+        this.loading = false;
+        this.cdr.detectChanges();
+      });
+    }).catch(err => {
+      console.error('Error loading session', err);
+      this.error = 'Error al cargar la sesión.';
       this.loading = false;
-      this.cdr.detectChanges();
     });
   }
 

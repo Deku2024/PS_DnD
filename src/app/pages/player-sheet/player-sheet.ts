@@ -20,11 +20,12 @@ import {CharacterService} from '../../services/character.service';
 import {AuthService} from '../../services/auth.service';
 import {SessionService} from '../../services/sessions.service';
 import {InventoryItemComponent} from '../../components/inventory.component/inventory.component';
+import { MoneyComponent } from '../../components/money.component/money.component';
 import {AbilityComponent} from '../../components/ability.component/ability.component';
 
 @Component({
   selector: 'app-player-sheet',
-  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, ResultThrowFrameComponent, GeneralThrowsButtonComponent, InventoryItemComponent, AbilityComponent],
+  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, ResultThrowFrameComponent, GeneralThrowsButtonComponent, InventoryItemComponent, MoneyComponent, AbilityComponent],
   templateUrl: './player-sheet.html',
   styleUrl: './player-sheet.css',
 })
@@ -100,7 +101,13 @@ export class PlayerSheet implements OnInit {
         wisdom: [10, [Validators.required, Validators.min(1), Validators.max(20)]],
         charisma: [10, [Validators.required, Validators.min(1), Validators.max(20)]]
       }),
-      gold: [0, [Validators.min(0)]],
+      money: this.fb.group({
+        ppt: [0, [Validators.min(0)]],
+        po:  [0, [Validators.min(0)]],
+        pe:  [0, [Validators.min(0)]],
+        pp:  [0, [Validators.min(0)]],
+        pc:  [0, [Validators.min(0)]]
+      }),
       inventory: this.fb.array([]),
       abilities: this.fb.array([])
 
@@ -181,8 +188,9 @@ export class PlayerSheet implements OnInit {
 
   private patchFormWithCharacter(character: any): void {
     console.log(character);
-    const { userId, sessionId, updatedAt, inventory, abilities, ...basic } = character;
+    const { userId, sessionId, updatedAt, inventory, abilities, money, ...basic } = character;
     this.playerSheetForm.patchValue(basic);
+    this.playerSheetForm.get('money')?.patchValue(money ?? {ppt: 0, po: 0, pe: 0, pp: 0, pc: 0});
     (inventory ?? []).forEach((item: any) => {
       this.inventoryFormArray.push(this.fb.group({
         name: [item.name, Validators.required],
