@@ -1,0 +1,31 @@
+<div class="container">
+  <h2>⚔ Elige tu aventurero</h2>
+  <p class="subtitle">Dungeons &amp; Dragons</p>
+
+  <hr class="divider" />
+
+  <div *ngIf="loading" class="message">Invocando personajes...</div>
+  <div *ngIf="error" class="message error">{{ error }}</div>
+
+  <div class="card" *ngIf="!loading && characters.length">
+    <h3>Tus personajes</h3>
+    <ul class="char-list">
+      <li *ngFor="let c of characters" class="char-item">
+        <div class="char-info">
+          <span class="char-name">{{ c.name }}</span>
+          <span class="char-meta">{{ c.class }} · {{ c.race }}</span>
+        </div>
+        <button (click)="selectCharacter(c.id)">Seleccionar</button>
+      </li>
+    </ul>
+  </div>
+
+  <div class="card" *ngIf="!loading && !characters.length">
+    <p class="empty">No tienes personajes en esta sesión todavía.</p>
+  </div>
+
+  <div class="card">
+    <h3>Nuevo aventurero</h3>
+    <button (click)="createNew()">Crear nuevo personaje</button>
+  </div>
+</div>

@@ -18,6 +18,7 @@ import {
 } from '../../components/general.throws.button.component/general.throws.button.component';
 import {CharacterService} from '../../services/character.service';
 import {AuthService} from '../../services/auth.service';
+import {SessionService} from '../../services/sessions.service';
 import {InventoryItemComponent} from '../../components/inventory.component/inventory.component';
 import {AbilityComponent} from '../../components/ability.component/ability.component';
 
@@ -30,6 +31,7 @@ import {AbilityComponent} from '../../components/ability.component/ability.compo
 export class PlayerSheet implements OnInit {
   classHabilities: string = '';
   sessionId: string | null = null;
+  characterId: string | null = null;
   saving = false;
   saveError = '';
 
@@ -72,6 +74,7 @@ export class PlayerSheet implements OnInit {
     private router: Router,
     private characterService: CharacterService,
     private authService: AuthService,
+    private sessionService: SessionService,
     private cdr: ChangeDetectorRef
   ) {
     this.playerSheetForm = this.fb.group({
@@ -165,35 +168,35 @@ export class PlayerSheet implements OnInit {
 
   ngOnInit(): void {
     this.sessionId = this.route.snapshot.queryParamMap.get('sessionId');
+    this.characterId = this.route.snapshot.queryParamMap.get('characterId');
 
-    if (this.sessionId) {
-      const user = this.authService.getCurrentUser();
-      if (user) {
-        this.characterService.getCharacter(user.uid, this.sessionId).then(character => {
-          if (character) {
-            console.log(character);
-            // Patch the form with existing character data
-            const { userId, sessionId, updatedAt, inventory, abilities, ...basic } = character;
-            this.playerSheetForm.patchValue(basic);
-            (inventory ?? []).forEach((item: any) => {
-              this.inventoryFormArray.push(this.fb.group({
-                name: [item.name, Validators.required],
-                quantity: [item.quantity, [Validators.required, Validators.min(1)]],
-                description: [item.description]
-              }));
-            });
-            (abilities ?? []).forEach((ability: any) => {
-              this.abilitiesFormArray.push(this.fb.group({
-                name: [ability.name, Validators.required],
-                description: [ability.description, Validators.required]
-              }));
-            });
-
-            this.cdr.detectChanges();
-          }
-        });
-      }
+    if (this.sessionId && this.characterId) {
+      // Edit mode: load the specific character by id
+      this.characterService.getCharacterById(this.characterId).then(character => {
+        if (character) this.patchFormWithCharacter(character);
+      });
     }
+    // No characterId → create mode: blank form, do not pre-load
+  }
+
+  private patchFormWithCharacter(character: any): void {
+    console.log(character);
+    const { userId, sessionId, updatedAt, inventory, abilities, ...basic } = character;
+    this.playerSheetForm.patchValue(basic);
+    (inventory ?? []).forEach((item: any) => {
+      this.inventoryFormArray.push(this.fb.group({
+        name: [item.name, Validators.required],
+        quantity: [item.quantity, [Validators.required, Validators.min(1)]],
+        description: [item.description]
+      }));
+    });
+    (abilities ?? []).forEach((ability: any) => {
+      this.abilitiesFormArray.push(this.fb.group({
+        name: [ability.name, Validators.required],
+        description: [ability.description, Validators.required]
+      }));
+    });
+    this.cdr.detectChanges();
   }
 
   async onSubmit(): Promise<void> {
@@ -212,7 +215,17 @@ export class PlayerSheet implements OnInit {
     this.saving = true;
     this.saveError = '';
     try {
-      await this.characterService.saveCharacter(user.uid, this.sessionId, this.playerSheetForm.value);
+      let charId: string;
+      if (this.characterId) {
+        // Edit mode: update existing character
+        await this.characterService.updateCharacter(this.characterId, this.playerSheetForm.value);
+        charId = this.characterId;
+      } else {
+        // Create mode: always create a new character, never overwrite
+        charId = await this.characterService.createCharacter(user.uid, this.sessionId, this.playerSheetForm.value);
+      }
+      // Set selected character for this session
+      await this.sessionService.setSelectedCharacter(this.sessionId, user.uid, charId);
       this.router.navigate(['/session', this.sessionId]);
     } catch (e: any) {
       this.saveError = 'Error al guardar el personaje. Inténtalo de nuevo.';

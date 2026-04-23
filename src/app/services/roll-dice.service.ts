@@ -34,6 +34,10 @@ export class DiceRollerService {
 
   private type: TypeOfThrow = TypeOfThrow.Normal;
 
+  public setThrowType(type: TypeOfThrow): void {
+    this.type = type;
+  }
+
   public rollDiceOf(throws: string, dc?: number): void {
     const data = throws.split('d'); // formato esperado '4d6 + 4' (el bonus de manera opcional)
 

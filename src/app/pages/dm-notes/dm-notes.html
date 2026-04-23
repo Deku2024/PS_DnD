@@ -12,6 +12,16 @@
   <general-throw-component />
 
   <div id="create-note">
+    <div class="sort-container">
+      <label for="sort-notes">Ordenar por:</label>
+      <select id="sort-notes" [(ngModel)]="sortCriteria" (change)="sortNotes()" class="sort-select">
+        <option value="newest">Más recientes</option>
+        <option value="oldest">Más antiguas</option>
+        <option value="alphaAsc">Alfabético (A-Z)</option>
+        <option value="alphaDesc">Alfabético (Z-A)</option>
+      </select>
+    </div>
+
     <button (click)="addNote()" class="add-btn" [disabled]="maxNotesExceeded">
       <span>+</span>
     </button>

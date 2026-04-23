@@ -29,6 +29,9 @@ export class DmNotes implements OnInit, OnDestroy {
   notes: NoteItem[] = [];
   sessionId: string = '';
 
+  // NUEVO: Variable para guardar el criterio de ordenación seleccionado
+  sortCriteria: string = 'newest';
+
   unsubscribe: (() => void) | undefined;
 
   constructor(
@@ -60,10 +63,42 @@ export class DmNotes implements OnInit, OnDestroy {
       this.sessionId,
       (notes) => {
         this.notes = notes;
+        // NUEVO: Ordenamos las notas automáticamente al recibirlas o al haber un cambio
+        this.sortNotes();
         this.maxNotesExceeded = this.notes.length > this.maxNotes;
         this.cd.detectChanges();
       }
     );
+
+  }
+
+  // NUEVO: Función para ordenar el array de notas según el criterio
+  sortNotes() {
+    if (!this.notes) return;
+
+    this.notes.sort((a, b) => {
+      switch (this.sortCriteria) {
+        case 'newest':
+          return this.getTime(b.createdAt) - this.getTime(a.createdAt);
+        case 'oldest':
+          return this.getTime(a.createdAt) - this.getTime(b.createdAt);
+        case 'alphaAsc':
+          return (a.title || '').localeCompare(b.title || '');
+        case 'alphaDesc':
+          return (b.title || '').localeCompare(a.title || '');
+        default:
+          return 0;
+      }
+    });
+  }
+
+  // NUEVO: Función auxiliar para extraer el tiempo de forma segura (sea Timestamp de Firebase o Date normal)
+  private getTime(dateVal: any): number {
+    if (!dateVal) return 0;
+    if (typeof dateVal.toMillis === 'function') return dateVal.toMillis();
+    if (dateVal instanceof Date) return dateVal.getTime();
+    if (typeof dateVal.seconds === 'number') return dateVal.seconds * 1000;
+    return new Date(dateVal).getTime() || 0;
   }
 
   async addNote() {

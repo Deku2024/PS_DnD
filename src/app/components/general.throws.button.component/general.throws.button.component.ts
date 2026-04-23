@@ -2,7 +2,7 @@ import {Component, inject, input, signal} from '@angular/core';
 import {
   SingleCustomThrowButtonComponent
 } from '../single.custom.throw.button.component/single.custom.throw.button.component';
-import {DiceRollerService} from '../../services/roll-dice.service';
+import {DiceRollerService, TypeOfThrow} from '../../services/roll-dice.service';
 
 @Component({
   selector: 'general-throw-component',
@@ -18,9 +18,12 @@ export class GeneralThrowsButtonComponent {
   public dc = input<number>(-1);
   public errorMessage = signal<string>('');
 
+  public TypeOfThrow = TypeOfThrow;
+  public throwType = signal<TypeOfThrow>(TypeOfThrow.Normal);
+
   public diceRoller = inject(DiceRollerService);
 
-  public interactWithPanel():void {
+  public interactWithPanel(): void {
     if (this.isMenuOpen()) {
       this.closeMenu();
     } else {
@@ -28,19 +31,30 @@ export class GeneralThrowsButtonComponent {
     }
   }
 
-  public closeMenu():void {
-    if (this.errorMessage() !== "") {
-      return;
-    }
+  public closeMenu(): void {
+    this.errorMessage.set('');
     this.isMenuOpen.set(false);
   }
 
-  public openMenu():void {
+  public openMenu(): void {
     this.isMenuOpen.set(true);
+    this.setThrowType(TypeOfThrow.Normal);
+  }
+
+  public setThrowType(type: TypeOfThrow): void {
+    this.throwType.set(type);
+    this.diceRoller.setThrowType(type);
+  }
+
+  public toggleType(type: TypeOfThrow): void {
+    if (this.throwType() === type) {
+      this.setThrowType(TypeOfThrow.Normal);
+    } else {
+      this.setThrowType(type);
+    }
   }
 
   public throwCustom(dataThrow: string): void {
-
     if (!dataThrow || dataThrow.trim() === '') {
       this.errorMessage.set('Por favor, introduce una tirada válida (ej: 2d6+3)');
       return;
