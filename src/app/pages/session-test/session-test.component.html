@@ -32,7 +32,7 @@
         <div class="session-info">
           <span class="session-name">{{ s.name }}</span>
           <div class="session-meta">
-            <span class="badge-master" *ngIf="currentUser && s.masterId === currentUser.uid">👑 Maestro</span>
+            <span class="badge-master" *ngIf="currentUser && s.masterId === currentUser.uid">👑 Master</span>
             <span class="meta-sep" *ngIf="currentUser && s.masterId === currentUser.uid"></span>
             <span class="session-badge badge-{{ s.status }}">{{ s.status }}</span>
           </div>
@@ -53,7 +53,7 @@
   <!-- Unirse a sesión -->
   <div class="card">
     <h3>Unirse a sesión</h3>
-    <input [(ngModel)]="joinId" placeholder="ID de la sesión" />
+    <input [(ngModel)]="joinCode" placeholder="Código de sesión (ej: 123456)" style="text-transform: uppercase" />
     <input [(ngModel)]="joinPassword" type="password" placeholder="Contraseña" />
     <button (click)="onJoin()" [disabled]="!currentUser">Unirse</button>
   </div>
