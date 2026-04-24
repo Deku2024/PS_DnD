@@ -8,6 +8,21 @@
   <app-footer></app-footer>
 }
 
+@if (routeLoading()) {
+  <div class="route-loading-overlay">
+    <div class="route-loading-content">
+      <img src="logo.png" alt="S&N" class="route-loading-logo" />
+      <div class="route-loading-titles">
+        <span class="route-loading-main">Sheets &amp; Notes</span>
+        <span class="route-loading-sub">Dungeons &amp; Dragons</span>
+      </div>
+      <div class="route-loading-bar-track">
+        <div class="route-loading-bar-fill" [style.width.%]="loadingProgress()"></div>
+      </div>
+    </div>
+  </div>
+}
+
 <div class="pwa-backdrop" *ngIf="showInstallModal()">
 	<div class="pwa-modal">
 		<h3>Instalar PS_DnD</h3>
