@@ -9,6 +9,11 @@ export interface MonsterData {
   armourClass: number;
   race: string;
   alignment: string;
+  challengeValue: number;
+  challengePX: number;
+  life: number;
+  maxLife: number;
+  tempLife: number;
   attributes: {
     strength: number;
     dexterity: number;
@@ -17,6 +22,9 @@ export interface MonsterData {
     wisdom: number;
     charisma: number;
   };
+
+  inventory: { name: string; quantity: number; description: string }[];
+  abilities: { name: string; description: string }[];
 }
 
 @Injectable({

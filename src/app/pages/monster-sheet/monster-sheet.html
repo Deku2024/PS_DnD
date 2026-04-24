@@ -73,6 +73,53 @@
         </div>
 
         <div class="form-section">
+            <h2>Estadísticas</h2>
+            <div id="life-info">
+                <div class="field">
+                    <label for="life">Vida:</label>
+                    <input type="number" id="life" formControlName="life" min="0">
+
+                    @if (monsterSheetForm.get('life')?.errors?.['required']) {
+                        <span class="error">La vida es requerida</span>
+                    }
+
+                    @if (monsterSheetForm.get('life')?.errors?.['min']) {
+                        <span class="error">La vida mínima es 0</span>
+                    }
+
+                    @if (monsterSheetForm.errors?.['lifeExceedsMax']) {
+                        <span class="error">La vida no puede ser mayor que la vida máxima</span>
+                    }
+
+                </div>
+
+                <div class="field">
+                    <label for="max-life">Vida máxima:</label>
+                    <input type="number" id="max-life" formControlName="maxLife" min="0">
+
+                    @if (monsterSheetForm.get('maxLife')?.errors?.['required']) {
+                        <span class="error">La vida máxima es requerida</span>
+                    }
+
+                    @if (monsterSheetForm.get('maxLife')?.errors?.['min']) {
+                        <span class="error">La vida máxima mínima es 0</span>
+                    }
+
+                </div>
+
+                <div class="field">
+                    <label for="temp-life">Vida temp:</label>
+                    <input type="number" id="temp-life" formControlName="tempLife" min="0">
+
+                    @if (monsterSheetForm.get('tempLife')?.errors?.['min']) {
+                        <span class="error">La vida temporal mínima es 0</span>
+                    }
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
             <h2>Características</h2>
             <div formGroupName="attributes" class="attributes-grid">
                 @for (attr of getAttributesList(); track attr.name) {
@@ -92,33 +139,47 @@
                     </div>
                 }
             </div>
-            <general-throw-component />
+
         </div>
 
         <!--<div class="form-section">
           <div class="section-header">
-            <h2>Habilidades</h2>
-            <button type="button" class="btn-add" (click)="addAbility()">
-              Añadir habilidad
+            <h2>Inventario</h2>
+            <button type="button" class="btn-add" (click)="addItem()">
+              Añadir objeto
             </button>
           </div>
 
-          <div formArrayName="abilities" class="abilities-container">
-            @if (abilitiesFormArray.controls.length === 0) {
-              <p class="empty-msg">No class abilities registered yet.</p>
+          <div formArrayName="inventory" class="inventario">
+            @if (inventoryFormArray.controls.length === 0) {
+              <p class="empty-msg">El inventario está vacío.</p>
             }
 
-            @for (ability of abilities; track $index) {
-              <ability [itemGroup]="ability" [index]="$index" (remove)="removeAbility($event)" />
+            @for (item of inventoryItems; track $index) {
+              <inventory-item
+                [itemGroup]="item"
+                [index]="$index"
+                (remove)="removeItem($event)"
+              />
             }
           </div>
         </div>
 
-        <div class="save-section">
-          <p class="save-error" *ngIf="saveError">{{ saveError }}</p>
-          <button type="submit" class="btn-save" [disabled]="saving">
-            {{ saving ? 'Guardando...' : '💾 Guardar personaje' }}
-          </button>
-        </div>-->
+        <div class="form-section">
+            <div class="section-header">
+            <h2>Habilidades</h2>
+            <button type="button" class="btn-add" (click)="addAbility()">
+                Añadir habilidad
+            </button>
+            </div>
+            <div formArrayName="abilities" class="abilities-container">
+            @if (abilitiesFormArray.controls.length === 0) {
+                <p class="empty-msg">No hay habilidades todavía</p>
+            }
+            @for (ability of abilities; track $index) {
+                <ability [itemGroup]="ability" [index]="$index" (remove)="removeAbility($event)" />
+            }
+            </div>
+      </div>-->
     </form>
 </main>
