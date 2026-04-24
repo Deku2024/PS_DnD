@@ -14,11 +14,13 @@ export class App implements OnInit, OnDestroy {
   protected readonly title = signal('PS_DnD');
   protected isAuthPage = signal(false);
   protected routeLoading = signal(false);
+  protected loadingProgress = signal(0);
 
   protected showInstallModal = signal(false);
   private deferredPrompt: any = null;
   private beforeInstallHandler: ((e: Event) => void) | null = null;
   private mobileFallbackTimer: any = null;
+  private progressInterval: any = null;
 
   constructor(private router: Router) {}
 
@@ -26,12 +28,14 @@ export class App implements OnInit, OnDestroy {
     this.isAuthPage.set(this.router.url.startsWith('/auth'));
     this.router.events.subscribe(e => {
       if (e instanceof NavigationStart) {
+        this.loadingProgress.set(0);
         this.routeLoading.set(true);
+        this.startProgressSimulation();
       } else if (e instanceof NavigationEnd) {
         this.isAuthPage.set(e.urlAfterRedirects.startsWith('/auth'));
-        this.routeLoading.set(false);
+        this.finishProgress();
       } else if (e instanceof NavigationCancel || e instanceof NavigationError) {
-        this.routeLoading.set(false);
+        this.finishProgress();
       }
     });
     if (typeof window !== 'undefined') {
@@ -97,11 +101,35 @@ export class App implements OnInit, OnDestroy {
     try { document.body.classList.remove('pwa-modal-open'); } catch {}
     try { localStorage.setItem('pwa-install-dismissed', '1'); } catch {}
   }
+
+  private startProgressSimulation(): void {
+    if (this.progressInterval) clearInterval(this.progressInterval);
+    this.progressInterval = setInterval(() => {
+      const current = this.loadingProgress();
+      if (current < 80) {
+        this.loadingProgress.set(Math.min(80, current + Math.random() * 4 + 1));
+      } else {
+        clearInterval(this.progressInterval);
+        this.progressInterval = null;
+      }
+    }, 80);
+  }
+
+  private finishProgress(): void {
+    if (this.progressInterval) {
+      clearInterval(this.progressInterval);
+      this.progressInterval = null;
+    }
+    this.loadingProgress.set(100);
+    setTimeout(() => this.routeLoading.set(false), 400);
+  }
+
   ngOnDestroy(): void {
     if (typeof window !== 'undefined' && this.beforeInstallHandler) {
       window.removeEventListener('beforeinstallprompt', this.beforeInstallHandler as EventListener);
     }
     try { if (this.mobileFallbackTimer) clearTimeout(this.mobileFallbackTimer); } catch {}
+    try { if (this.progressInterval) clearInterval(this.progressInterval); } catch {}
     try { document.body.classList.remove('pwa-modal-open'); } catch {}
   }
 }
