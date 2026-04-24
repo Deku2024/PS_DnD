@@ -7,11 +7,12 @@ import { CharacterService, CharacterData, CharacterWithId } from '../../services
 import { PresenceService } from '../../services/presence.service';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
+import { BattleButtonComponent } from '../../components/battle.button.component/battle.button.component';
 
 @Component({
   selector: 'app-session',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BattleButtonComponent],
   templateUrl: './session.html',
   styleUrl: './session.css'
 })
