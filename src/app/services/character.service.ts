@@ -19,7 +19,7 @@ export interface CharacterWithId extends CharacterData {
 
 @Injectable({ providedIn: 'root' })
 export class CharacterService {
-  private readonly col = 'characters-test';
+  private readonly col = 'characters';
 
   constructor(private firebase: FirebaseService) {}
 

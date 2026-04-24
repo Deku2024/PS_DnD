@@ -37,7 +37,7 @@ export const routes: Routes = [
 	},
   {
 		path: 'dm-combat',
-		loadComponent: () => import('./pages/dm-notes/dm-notes').then(m => m.DmNotes),
+		loadComponent: () => import('./pages/dm-combat/dm-combat').then(m => m.DmCombat),
 		canActivate: [AuthGuard],
 	},
   { path: '', redirectTo: 'home', pathMatch: 'full' },
