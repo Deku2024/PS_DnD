@@ -32,7 +32,7 @@
         <div class="session-info">
           <span class="session-name">{{ s.name }}</span>
           <div class="session-meta">
-            <span class="badge-master" *ngIf="currentUser && s.masterId === currentUser.uid">👑 Maestro</span>
+            <span class="badge-master" *ngIf="currentUser && s.masterId === currentUser.uid">👑 Master</span>
             <span class="meta-sep" *ngIf="currentUser && s.masterId === currentUser.uid"></span>
             <span class="session-badge badge-{{ s.status }}">{{ s.status }}</span>
           </div>
