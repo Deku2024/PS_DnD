@@ -1,7 +1,6 @@
 import { Component, signal, OnInit, OnDestroy } from '@angular/core';
-import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
+import { Router, RouterOutlet, NavigationEnd, NavigationStart, NavigationCancel, NavigationError } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { filter } from 'rxjs/operators';
 import { Header } from './components/header/header';
 import { Footer } from './components/footer/footer';
 
@@ -14,6 +13,7 @@ import { Footer } from './components/footer/footer';
 export class App implements OnInit, OnDestroy {
   protected readonly title = signal('PS_DnD');
   protected isAuthPage = signal(false);
+  protected routeLoading = signal(false);
 
   protected showInstallModal = signal(false);
   private deferredPrompt: any = null;
@@ -24,10 +24,15 @@ export class App implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.isAuthPage.set(this.router.url.startsWith('/auth'));
-    this.router.events.pipe(
-      filter(e => e instanceof NavigationEnd)
-    ).subscribe((e: NavigationEnd) => {
-      this.isAuthPage.set(e.urlAfterRedirects.startsWith('/auth'));
+    this.router.events.subscribe(e => {
+      if (e instanceof NavigationStart) {
+        this.routeLoading.set(true);
+      } else if (e instanceof NavigationEnd) {
+        this.isAuthPage.set(e.urlAfterRedirects.startsWith('/auth'));
+        this.routeLoading.set(false);
+      } else if (e instanceof NavigationCancel || e instanceof NavigationError) {
+        this.routeLoading.set(false);
+      }
     });
     if (typeof window !== 'undefined') {
       this.beforeInstallHandler = (e: Event) => {
