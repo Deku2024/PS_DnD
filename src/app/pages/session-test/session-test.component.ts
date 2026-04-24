@@ -17,7 +17,7 @@ import { Subscription } from 'rxjs';
 export class SessionTestComponent implements OnInit, OnDestroy {
   sessionName = '';
   sessionPassword = '';
-  joinId = '';
+  joinCode = '';
   joinPassword = '';
   message = '';
   isError = false;
@@ -69,7 +69,7 @@ export class SessionTestComponent implements OnInit, OnDestroy {
   }
 
   enterSession(sessionId: string) {
-    this.router.navigate(['/session', sessionId]);
+    this.router.navigate(['/choose-character'], { queryParams: { sessionId } });
   }
 
   async onCreate() {
@@ -100,19 +100,19 @@ export class SessionTestComponent implements OnInit, OnDestroy {
       this.showMessage('No hay usuario autenticado.', true);
       return;
     }
-    if (!this.joinId.trim()) {
-      this.showMessage('Introduce el ID y la contraseña de la sesión.', true);
+    if (!this.joinCode.trim() || !this.joinPassword.trim()) {
+      this.showMessage('Introduce el código y la contraseña de la sesión.', true);
       return;
     }
     try {
       await this.sessionService.joinSession(
-        this.joinId,
+        this.joinCode,
         this.currentUser.uid,
         this.currentUser.email || this.currentUser.uid,
         this.joinPassword
       );
-      this.sessionService.setCurrentSessionId(this.joinId);
-      this.router.navigate(['/choose-character'], { queryParams: { sessionId: this.joinId } });
+      const sessionId = this.sessionService.getCurrentSessionId();
+      this.router.navigate(['/choose-character'], { queryParams: { sessionId } });
     } catch (e: any) {
       this.showMessage('Error: ' + e.message, true);
     }
