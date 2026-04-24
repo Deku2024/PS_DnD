@@ -8,6 +8,12 @@
   <app-footer></app-footer>
 }
 
+@if (routeLoading()) {
+  <div class="route-loading-overlay">
+    <div class="route-loading-spinner"></div>
+  </div>
+}
+
 <div class="pwa-backdrop" *ngIf="showInstallModal()">
 	<div class="pwa-modal">
 		<h3>Instalar PS_DnD</h3>
