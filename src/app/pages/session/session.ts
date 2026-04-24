@@ -21,7 +21,6 @@ export class SessionPage implements OnInit, OnDestroy {
   loading = true;
   errorMsg = '';
 
-  // Character modal
   characters: { [uid: string]: CharacterWithId | null } = {};
   showModal = false;
   modalCharacter: CharacterWithId | null = null;
@@ -51,10 +50,8 @@ export class SessionPage implements OnInit, OnDestroy {
       return;
     }
 
-    // Resolve auth first so the character check is never skipped due to timing
     this.authSub = this.authService.onAuthState().subscribe(async (user) => {
       this.currentUser = user;
-      // Only initialise once
       if (!this.unsubscribe && !this.initializing) {
         this.initializing = true;
         await this.initSession(id, user);
@@ -68,33 +65,37 @@ export class SessionPage implements OnInit, OnDestroy {
       return;
     }
 
-    // Peek session to determine if user is DM
     const snap = await this.sessionService.getSession(id);
     const isDm = snap?.masterId === user.uid;
 
     if (!isDm) {
       const selected = snap?.selectedCharacters?.[user.uid];
-      // Require explicit selection: if there is no selected character entry for this user, force choose-character
       if (!selected) {
         this.router.navigate(['/choose-character'], { queryParams: { sessionId: id } });
         return;
       }
     }
 
-    // Start real-time listener
     this.unsubscribe = this.sessionService.listenSession(id, async (session) => {
       this.loading = false;
       if (!session) {
         this.errorMsg = 'La sesión no existe o ha sido cerrada.';
         this.session = null;
       } else {
+        // Si el jugador actual fue expulsado, redirigir al home
+        if (user && !session.players.includes(user.uid)) {
+          this.unsubscribe?.();
+          this.presenceUnsub?.();
+          this.sessionService.setCurrentSessionId(null);
+          this.router.navigate(['/home']);
+          return;
+        }
         this.session = session;
         await this.loadCharacters(session);
       }
       this.cd.detectChanges();
     });
 
-    // Start presence listener and announce current user as online
     this.presenceUnsub = this.presenceService.listenPresence(id, (map) => {
       this.presenceMap = map;
       this.cd.detectChanges();
@@ -108,18 +109,15 @@ export class SessionPage implements OnInit, OnDestroy {
       const current = this.characters[uid] ?? null;
 
       if (selectedCharId) {
-        // If selected character changed (or not loaded yet), fetch it
-        if (!current || (current && (current as CharacterWithId).id !== selectedCharId)) {
+        if (!current || (current as CharacterWithId).id !== selectedCharId) {
           const ch = await this.characterService.getCharacterById(selectedCharId);
           this.characters[uid] = ch ?? null;
-          // If modal is open for this uid, refresh modalCharacter as well
           if (this.showModal && this.modalUid === uid) {
             this.modalCharacter = this.characters[uid];
           }
           this.cd.detectChanges();
         }
       } else {
-        // No selectedCharacters entry yet: take the first character for user+session if any
         const list = await this.characterService.listCharactersByUserAndSession(uid, session.id!);
         const ch = list.length > 0 ? list[0] : null;
         if (!current || (ch && (current as CharacterWithId).id !== ch.id)) {
@@ -163,6 +161,15 @@ export class SessionPage implements OnInit, OnDestroy {
     if (!this.session?.id || !this.currentUser) return;
     this.closeModal();
     this.router.navigate(['/choose-character'], { queryParams: { sessionId: this.session.id } });
+  }
+
+  async kickPlayer(uid: string): Promise<void> {
+    if (!this.session?.id || !this.isMaster) return;
+    try {
+      await this.sessionService.kickPlayer(this.session.id, uid);
+    } catch (e: any) {
+      console.error('Error al expulsar jugador:', e.message);
+    }
   }
 
   async toggleSessionStatus(): Promise<void> {

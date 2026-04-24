@@ -7,6 +7,7 @@ import {
   getDocs,
   updateDoc,
   arrayUnion,
+  arrayRemove,
   onSnapshot,
   query,
   where,
@@ -42,15 +43,12 @@ export class SessionService {
     private authService: AuthService,
     private presenceService: PresenceService
   ) {
-    // Keep track of auth state to start/stop presence when user signs in/out
     this.authSub = this.authService.onAuthState().subscribe((user) => {
       const uid = user ? user.uid : null;
-      // user signed out: stop presence for previous uid
       if (!uid && this.currentUserId && this.currentSessionId) {
         this.presenceService.stopPresence(this.currentSessionId, this.currentUserId).catch(() => {});
       }
       this.currentUserId = uid;
-      // user signed in: if we already have a session id, announce presence
       if (uid && this.currentSessionId) {
         this.presenceService.startPresence(this.currentSessionId, uid);
       }
@@ -60,11 +58,9 @@ export class SessionService {
   setCurrentSessionId(id: string | null): void {
     const prev = this.currentSessionId;
     this.currentSessionId = id;
-    // If we left a previous session, stop presence for current user
     if (prev && prev !== id && this.currentUserId) {
       this.presenceService.stopPresence(prev, this.currentUserId).catch(() => {});
     }
-    // If we joined a new session, start presence for current user
     if (id && this.currentUserId) {
       this.presenceService.startPresence(id, this.currentUserId);
     }
@@ -115,6 +111,30 @@ export class SessionService {
       players: arrayUnion(userId),
       [`playerEmails.${userId}`]: userEmail
     });
+  }
+
+  /** Expulsa a un jugador de la sesión (solo el master debe llamar esto) */
+  async kickPlayer(sessionId: string, userId: string): Promise<void> {
+    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) throw new Error('La sesión no existe.');
+
+    const session = snap.data() as Session;
+
+    if (session.masterId === userId) throw new Error('No puedes expulsar al master.');
+
+    const updates: any = {
+      players: arrayRemove(userId),
+      [`playerEmails.${userId}`]: null,
+    };
+
+    if (session.selectedCharacters?.[userId] !== undefined) {
+      updates[`selectedCharacters.${userId}`] = null;
+    }
+
+    await updateDoc(ref, updates);
+    await this.presenceService.stopPresence(sessionId, userId).catch(() => {});
   }
 
   listenSession(sessionId: string, callback: (session: Session | null) => void): Unsubscribe {

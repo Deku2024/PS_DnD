@@ -1,0 +1,31 @@
+.money-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+  background: rgba(255, 255, 255, 0.4);
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #c4a47a;
+}
+
+.coin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.coin-field label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  color: #5c3d2e;
+}
+
+.coin-input {
+  background: #fff8f0;
+  border: 2px solid #c4a47a;
+  border-radius: 6px;
+  padding: 8px;
+  font-weight: bold;
+  text-align: center;
+}
