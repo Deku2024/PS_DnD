@@ -70,7 +70,7 @@ export class SessionService {
     }
   }
 
-  getCurrentSessionId(): string | null {
+    getCurrentSessionId(): string | null {
     return this.currentSessionId;
   }
 

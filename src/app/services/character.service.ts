@@ -1,31 +1,15 @@
 import { Injectable } from '@angular/core';
 import { collection, doc, getDoc, addDoc, query, where, getDocs, updateDoc, onSnapshot } from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
+import {SheetInterface} from '../interfaces/SheetInterface';
 
-export interface CharacterData {
-  userId: string;
+export interface CharacterData extends SheetInterface{
   sessionId: string;
-  name: string;
   age: number;
   experience: number;
-  life: number;
-  maxLife: number;
-  tempLife: number;
-  armourClass: number;
   race: string;
   class: string;
-  alignment: string;
-  attributes: {
-    strength: number;
-    dexterity: number;
-    constitution: number;
-    intelligence: number;
-    wisdom: number;
-    charisma: number;
-  };
-  gold: number;
-  inventory: { name: string; quantity: number; description: string }[];
-  abilities: { name: string; description: string }[];
+  money: number;
   updatedAt: string;
 }
 
@@ -35,7 +19,7 @@ export interface CharacterWithId extends CharacterData {
 
 @Injectable({ providedIn: 'root' })
 export class CharacterService {
-  private readonly col = 'characters';
+  private readonly col = 'characters-test';
 
   constructor(private firebase: FirebaseService) {}
 
