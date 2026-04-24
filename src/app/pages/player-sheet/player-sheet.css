@@ -237,7 +237,7 @@ main {
 }
 
 /* Áreas de inventario y habilidades */
-.inventario, .habilidades, #dropdowns {
+.inventario, .abilities-container, #dropdowns {
     background: #fff8f0;
     border: 2px dashed #c4a47a;
     border-radius: 12px;

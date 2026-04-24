@@ -202,7 +202,7 @@ main {
 
 /* Objetos y habilidades*/
 
-.inventario, .habilidades, #dropdowns {
+.inventario, .abilities-container, #dropdowns {
     background: #fff8f0;
     border: 2px dashed #c4a47a;
     border-radius: 12px;
@@ -211,6 +211,11 @@ main {
     background-image: radial-gradient(circle at 10px 10px, #e8dcc8 1px, transparent 1px);
     background-size: 20px 20px;
 }
+
+#dropdowns {
+    margin-bottom: 2rem;
+}
+
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -228,10 +233,12 @@ main {
   cursor: pointer;
   transition: all 0.2s ease;
 }
+
 .btn-add:hover {
   background-color: #8b6914;
   transform: scale(1.05);
 }
+
 .inventory-item {
   display: flex;
   gap: 10px;
@@ -301,4 +308,69 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #8b6914;
+}
+
+@media (max-width: 480px) {
+    body {
+        padding-bottom: 150px;
+    }
+
+    .player-sheet-form {
+        padding: 16px 12px;
+    }
+
+    .attributes-grid {
+        gap: 8px;
+    }
+
+    .attribute-card input {
+        font-size: 1rem;
+        padding: 6px;
+    }
+
+    .attribute-card button {
+        font-size: 0.7rem;
+        padding: 5px 8px;
+    }
+
+    .field input {
+        padding: 10px 8px;
+        font-size: 14px;
+    }
+
+    .form-section h2 {
+        font-size: 1rem;
+    }
+
+    .attribute-card input {
+        font-size: 1rem;
+    }
+
+    #life-info {
+        gap: 8px;
+    }
+
+    #life-info .field label {
+        font-size: 0.6rem;
+    }
+
+     #basic-info .field label {
+        font-size: 0.7rem;
+     }
+
+    #life-info .field input {
+        padding: 6px 4px;
+        font-size: 0.85rem;
+    }
+
+
+    #challenge input {
+        width: 50%;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding-bottom: 150px;
+    }
 }

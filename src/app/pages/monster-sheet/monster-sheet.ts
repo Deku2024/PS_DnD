@@ -62,6 +62,10 @@ export class MonsterSheet {
       race: ['Elfo', Validators.required],
       alignment: ['Legal Bueno', Validators.required],
 
+      life: [30, [Validators.required, Validators.min(0)]],
+      maxLife: [60, [Validators.required, Validators.min(0)]],
+      tempLife: [13, [Validators.min(0)]],
+
       attributes: this.fb.group({
         strength: [10, [Validators.required, Validators.min(1), Validators.max(20)]],
         dexterity: [10, [Validators.required, Validators.min(1), Validators.max(20)]],
@@ -134,8 +138,7 @@ export class MonsterSheet {
     return this.monsterSheetForm.get(controlName);
   }
 
-  getAttributesList() {
-    return [
+   private attributes_list = [
       { name: 'strength', label: 'Fuerza (STR)' },
       { name: 'dexterity', label: 'Destreza (DEX)' },
       { name: 'constitution', label: 'Constitución (CON)' },
@@ -143,6 +146,9 @@ export class MonsterSheet {
       { name: 'wisdom', label: 'Sabiduría (WIS)' },
       { name: 'charisma', label: 'Carisma (CHA)' }
     ];
+
+  getAttributesList() {
+    return this.attributes_list;
   }
 
   protected readonly parseInt = parseInt;
