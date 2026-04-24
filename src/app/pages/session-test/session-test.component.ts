@@ -69,7 +69,7 @@ export class SessionTestComponent implements OnInit, OnDestroy {
   }
 
   enterSession(sessionId: string) {
-    this.router.navigate(['/session', sessionId]);
+    this.router.navigate(['/choose-character'], { queryParams: { sessionId } });
   }
 
   async onCreate() {
