@@ -36,11 +36,11 @@ export class MonsterService {
   constructor(private Firebase: FirebaseService) {}
 
   private monsterRef() {
-      return collection(this.Firebase.db, `monster`);
+      return collection(this.Firebase.db, `${this.collection}`);
   }
 
-  async createMonster(monster: MonsterData) {
-    return await addDoc(this.monsterRef(), monster);
+  async createMonster(userId:string, monster: MonsterData) {
+    return await addDoc(this.monsterRef(), {...monster, userId});
   }
 
   readMonster(monsterId: string, callback: (monsters: any) => void) {

@@ -65,7 +65,7 @@ export class PlayerSheet implements OnInit {
     { value: 'CN', label: 'Caótico neutral' },
     { value: 'LC', label: 'Legal caótico' },
     { value: 'NC', label: 'Neutral caótico' },
-    { value: 'LG', label: 'Caótico caótico' },
+    { value: 'CC', label: 'Caótico caótico' },
   ];
 
 

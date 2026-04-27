@@ -17,6 +17,7 @@ import { MonsterService } from '../../services/monster.service';
 import { InventoryItemComponent } from '../../components/inventory.component/inventory.component';
 import { AbilityComponent } from '../../components/ability.component/ability.component';
 import { MoneyComponent } from '../../components/money.component/money.component';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-monster-sheet',
@@ -26,6 +27,9 @@ import { MoneyComponent } from '../../components/money.component/money.component
 })
 export class MonsterSheet {
   monsterSheetForm: FormGroup;
+  saving = false;
+  monsterId = "";
+  saveError = '';
 
   raceOptions = [
     { value: "Aberración", label: "Aberration" },
@@ -48,11 +52,11 @@ export class MonsterSheet {
     { value: 'CN', label: 'Caótico neutral' },
     { value: 'LC', label: 'Legal caótico' },
     { value: 'NC', label: 'Neutral caótico' },
-    { value: 'LG', label: 'Caótico caótico' },
+    { value: 'CC', label: 'Caótico caótico' },
   ];
 
 
-  constructor(private fb: FormBuilder, private monsterService: MonsterService) {
+  constructor(private fb: FormBuilder, private monsterService: MonsterService, private authService: AuthService, private cdr: ChangeDetectorRef) {
     this.monsterSheetForm = this.fb.group({
       name: ['Aragorn', [Validators.required, Validators.minLength(3)]],
       challengeValue: [5, [Validators.required, Validators.min(0)]],
@@ -130,6 +134,40 @@ export class MonsterSheet {
 
   removeAbility(index: number): void {
     this.abilitiesFormArray.removeAt(index);
+  }
+
+  async onSubmit() {
+    const user = this.authService.getCurrentUser();
+
+    if (!this.monsterSheetForm.valid) {
+      console.log('Formulario inválido');
+      return;
+    }
+
+    if (!user) {
+      console.log('Formulario enviado (sin sesión):', this.monsterSheetForm.value);
+      return;
+    }
+
+    this.saving = true;
+    this.saveError = '';
+    try {
+      let monsterId: string;
+      if (this.monsterId) {
+        await this.monsterService.updateMonster(this.monsterId, this.monsterSheetForm.value);
+        monsterId = this.monsterId;
+      } else {
+        await this.monsterService.createMonster(user.uid, this.monsterSheetForm.value);
+        monsterId = this.monsterId;
+      }
+    } catch (e: any) {
+      this.saveError = 'Error al guardar el monstruo. Inténtalo de nuevo.';
+      console.error(e);
+    } finally {
+      this.saving = false;
+    }
+
+    this.cdr.detectChanges();
   }
 
 

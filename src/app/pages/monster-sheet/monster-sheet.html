@@ -1,5 +1,5 @@
 <main>
-    <form [formGroup]="monsterSheetForm" class="monster-sheet-form">
+    <form [formGroup]="monsterSheetForm" class="monster-sheet-form" (ngSubmit)="onSubmit()">
         <div id="basic-info" class="form-section">
             <div class="field">
                 <label for="name">Nombre:</label>
@@ -181,5 +181,12 @@
             }
             </div>
       </div>
+
+    <div class="save-section">
+        <p class="save-error" *ngIf="saveError">{{ saveError }}</p>
+        <button type="submit" class="btn-save" [disabled]="saving">
+        {{ saving ? 'Guardando...' : '💾 Guardar monstruo' }}
+        </button>
+    </div>
     </form>
 </main>
