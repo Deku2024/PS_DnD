@@ -196,7 +196,7 @@
         </div>
         <div formArrayName="abilities" class="abilities-container">
           @if (abilitiesFormArray.controls.length === 0) {
-            <p class="empty-msg">No class abilities registered yet.</p>
+            <p class="empty-msg">No hay habilidades todavía</p>
           }
           @for (ability of abilities; track $index) {
             <ability [itemGroup]="ability" [index]="$index" (remove)="removeAbility($event)" />

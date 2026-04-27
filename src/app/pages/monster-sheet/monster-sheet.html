@@ -1,0 +1,194 @@
+<main>
+    <form [formGroup]="monsterSheetForm" class="monster-sheet-form" (ngSubmit)="onSubmit()">
+        <div id="basic-info" class="form-section">
+            <div class="field">
+                <label for="name">Nombre:</label>
+                <input type="text" id="name" formControlName="name" placeholder="Ej: Aragorn">
+
+                @if (monsterSheetForm.get('name')?.errors?.['required']) {
+                    <span class="error">El nombre es requerido</span>
+                }
+
+                @if (monsterSheetForm.get('name')?.errors?.['minlength']) {
+                    <span class="error">El nombre debe tener al menos 3 caracteres</span>
+                }
+            </div>
+
+            <div id="dropdowns">
+                <app-dropdown
+                    formControlName="race"
+                    label="Raza"
+                    [options]="raceOptions"
+                    [placeholder]="'Selecciona una raza - Ej: Aberración'"
+                ></app-dropdown>
+
+                <app-dropdown
+                    formControlName="alignment"
+                    label="Alineamiento"
+                    [options]="alignmentOptions"
+                    [placeholder]="'Selecciona una alineamiento - Ej: Legal Bueno'"
+                ></app-dropdown>
+            </div>
+
+            <div class="field">
+                <label for="armour-class">Clase de armadura (CA):</label>
+                <input type="number" id="armour-class" formControlName="armourClass" min="1">
+
+                @if (monsterSheetForm.get('armourClass')?.errors?.['required']) {
+                        <span class="error">La clase de armadura (CA) es requerida</span>
+                }
+
+                @if (monsterSheetForm.get('armourClass')?.errors?.['min']) {
+                        <span class="error">La clase de armadura (CA) mínima es 1</span>
+                }
+            </div>
+
+            <div class="field">
+                <label>Desafío:</label>
+
+                <div id="challenge">
+                    <input type="number" id="challengeValue" formControlName="challengeValue" min="0">
+                    <span>VD</span>
+                    <input type="number" id="challengeXP" formControlName="challengeXP" min="1">
+                    <span>PX</span>
+                </div>
+                    
+                @if (monsterSheetForm.get('challengeValue')?.errors?.['required']) {
+                    <span class="error">El valor de desafío es requerido</span>
+                }
+
+                @if (monsterSheetForm.get('challengeXP')?.errors?.['required']) {
+                    <span class="error">La experiencia es requerida</span>
+                }
+
+                @if (monsterSheetForm.get('challengeValue')?.errors?.['min']) {
+                    <span class="error">El valor mínimo es 0</span>
+                }
+
+                @if (monsterSheetForm.get('challengeXP')?.errors?.['min']) {
+                    <span class="error">El valor mínimo es 1</span>
+                }
+            </div>
+
+        </div>
+
+        <div class="form-section">
+            <h2>Estadísticas</h2>
+            <div id="life-info">
+                <div class="field">
+                    <label for="life">Vida:</label>
+                    <input type="number" id="life" formControlName="life" min="0">
+
+                    @if (monsterSheetForm.get('life')?.errors?.['required']) {
+                        <span class="error">La vida es requerida</span>
+                    }
+
+                    @if (monsterSheetForm.get('life')?.errors?.['min']) {
+                        <span class="error">La vida mínima es 0</span>
+                    }
+
+                    @if (monsterSheetForm.errors?.['lifeExceedsMax']) {
+                        <span class="error">La vida no puede ser mayor que la vida máxima</span>
+                    }
+
+                </div>
+
+                <div class="field">
+                    <label for="max-life">Vida máxima:</label>
+                    <input type="number" id="max-life" formControlName="maxLife" min="0">
+
+                    @if (monsterSheetForm.get('maxLife')?.errors?.['required']) {
+                        <span class="error">La vida máxima es requerida</span>
+                    }
+
+                    @if (monsterSheetForm.get('maxLife')?.errors?.['min']) {
+                        <span class="error">La vida máxima mínima es 0</span>
+                    }
+
+                </div>
+
+                <div class="field">
+                    <label for="temp-life">Vida temp:</label>
+                    <input type="number" id="temp-life" formControlName="tempLife" min="0">
+
+                    @if (monsterSheetForm.get('tempLife')?.errors?.['min']) {
+                        <span class="error">La vida temporal mínima es 0</span>
+                    }
+
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Características</h2>
+            <div formGroupName="attributes" class="attributes-grid">
+                @for (attr of getAttributesList(); track attr.name) {
+                    <div class="attribute-card">
+                        <label [for]="'attr-' + attr.name">{{ attr.label }}</label>
+                        <input
+                            type="number"
+                            [id]="'attr-' + attr.name"
+                            [formControlName]="attr.name"
+                            [title]="attr.label"
+                            min="1"
+                            max="20"
+                            #charValueInput
+                        >
+
+                        <d20-roller [rollingForCharacteristic]="true" [charValue]="parseInt(charValueInput.value)"></d20-roller>
+                    </div>
+                }
+            </div>
+            <general-throw-component />
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <h2>Inventario</h2>
+            <button type="button" class="btn-add" (click)="addItem()">
+              Añadir objeto
+            </button>
+          </div>
+
+          <div formArrayName="inventory" class="inventario">
+            @if (inventoryFormArray.controls.length === 0) {
+              <p class="empty-msg">El inventario está vacío.</p>
+            }
+
+            @for (item of inventoryItems; track $index) {
+              <inventory-item
+                [itemGroup]="item"
+                [index]="$index"
+                (remove)="removeItem($event)"
+              />
+            }
+          </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-header">
+            <h2>Habilidades</h2>
+            <button type="button" class="btn-add" (click)="addAbility()">
+                Añadir habilidad
+            </button>
+            </div>
+            <div formArrayName="abilities" class="abilities-container">
+            @if (abilitiesFormArray.controls.length === 0) {
+                <p class="empty-msg">No hay habilidades todavía</p>
+            }
+            @for (ability of abilities; track $index) {
+                <ability [itemGroup]="ability" [index]="$index" (remove)="removeAbility($event)" />
+            }
+            </div>
+      </div>
+
+    <div class="save-section">
+        <p class="save-error" *ngIf="saveError">{{ saveError }}</p>
+        <button type="submit" class="btn-save" [disabled]="saving">
+        {{ saving ? 'Guardando...' : '💾 Guardar monstruo' }}
+        </button>
+    </div>
+    </form>
+
+    <result-frame />
+</main>
