@@ -38,7 +38,7 @@ export class DiceRollerService {
     this.type = type;
   }
 
-  public rollDiceOf(throws: string, dc?: number): void {
+  public rollDiceOf(throws: string, dc?: number): ThrowsResult {
     const data = throws.split('d'); // formato esperado '4d6 + 4' (el bonus de manera opcional)
 
     let amount: number;
@@ -59,14 +59,16 @@ export class DiceRollerService {
     result = this.roll(this.buildThrows(amount, side), dc ?? -1, result);
 
     this.lastResultSubject.next(result);
+    return result;
   }
 
-  public rollAD20(bonus?: number, dc?: number): void {
+  public rollAD20(bonus?: number, dc?: number): ThrowsResult {
     let throwsResult = this.initializeResult(bonus ?? 0, 20, 1, dc ?? -1);
     throwsResult = this.roll(this.buildThrows(1, 20), dc ?? -1, throwsResult);
 
     this.isCritic(throwsResult);
     this.lastResultSubject.next(throwsResult);
+    return throwsResult;
   }
 
   private isCritic(throwsResult: ThrowsResult): void {
@@ -154,5 +156,6 @@ export class DiceRollerService {
         return Math.min(roll(), roll());
     }
   }
+
 }
 
