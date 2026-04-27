@@ -26,6 +26,7 @@ export interface Session {
   players: string[];
   playerEmails: { [uid: string]: string };
   selectedCharacters?: { [uid: string]: string | null };
+  combatOrder?: string[];
   status: 'waiting' | 'active' | 'paused' | 'closed' | 'in-battle';
   password?: string;
   createdAt?: any;
@@ -168,6 +169,11 @@ export class SessionService {
       const { password, ...sessionWithoutPassword } = snap.data() as Session;
       callback({ id: snap.id, ...sessionWithoutPassword } as Session);
     });
+  }
+
+  async updateCombatOrder(sessionId: string, order: string[]): Promise<void> {
+    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
+    await updateDoc(ref, { combatOrder: order });
   }
 
   async updateStatus(sessionId: string, status: Session['status']): Promise<void> {
