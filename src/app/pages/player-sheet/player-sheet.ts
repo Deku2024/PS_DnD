@@ -22,10 +22,11 @@ import {SessionService} from '../../services/sessions.service';
 import {InventoryItemComponent} from '../../components/inventory.component/inventory.component';
 import { MoneyComponent } from '../../components/money.component/money.component';
 import {AbilityComponent} from '../../components/ability.component/ability.component';
+import { RollHistoryLogComponent } from '../../components/roll-history-log.component/roll-history-log.component';
 
 @Component({
   selector: 'app-player-sheet',
-  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, ResultThrowFrameComponent, GeneralThrowsButtonComponent, InventoryItemComponent, MoneyComponent, AbilityComponent],
+  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, ResultThrowFrameComponent, GeneralThrowsButtonComponent, InventoryItemComponent, MoneyComponent, AbilityComponent, RollHistoryLogComponent],
   templateUrl: './player-sheet.html',
   styleUrl: './player-sheet.css',
 })
