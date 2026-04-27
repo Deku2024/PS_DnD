@@ -1,1 +1,76 @@
-<p>dm-combat works!</p>
+<div class="dm-combat-page">
+
+  <div class="combat-header">
+    <button class="btn-back" (click)="goBack()">← Volver</button>
+    <h2>⚔ Combate</h2>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <p>Cargando...</p>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- Orden de combate activo -->
+    <div class="card" *ngIf="activeCombatants.length > 0">
+      <h3>Orden de batalla</h3>
+      <p class="card-hint">Jugadores activos ordenados por turno</p>
+      <ol class="active-list">
+        <li *ngFor="let c of activeCombatants; let i = index" class="active-entry">
+          <span class="turn-badge">{{ i + 1 }}</span>
+          <div class="combatant-info">
+            <span class="combatant-name">{{ c.character?.name || c.email }}</span>
+            <span class="combatant-meta" *ngIf="c.character">{{ c.character.race }}</span>
+            <span class="combatant-meta no-char" *ngIf="!c.character">Sin personaje</span>
+          </div>
+          <div class="combatant-stats" *ngIf="c.character">
+            <span class="stat" title="Destreza">DES {{ c.character.attributes.dexterity }}</span>
+            <span class="stat" title="Vida">❤ {{ c.character.life }}/{{ c.character.maxLife }}</span>
+            <span class="stat" title="Armadura">🛡 {{ c.character.armourClass }}</span>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <hr class="divider" *ngIf="activeCombatants.length > 0 && combatants.length > 0" />
+
+    <!-- Gestión de jugadores -->
+    <div class="card">
+      <h3>Jugadores en la sesión</h3>
+      <p class="card-hint">Activa o desactiva y reordena manualmente</p>
+
+      <div class="manage-list" *ngIf="combatants.length > 0; else noPlayers">
+        <div
+          class="manage-entry"
+          [class.excluded]="!c.inCombat"
+          *ngFor="let c of combatants; let i = index; let last = last">
+
+          <div class="reorder-btns">
+            <button class="btn-order" [disabled]="i === 0" (click)="moveUp(i)" title="Subir">▲</button>
+            <button class="btn-order" [disabled]="last" (click)="moveDown(i)" title="Bajar">▼</button>
+          </div>
+
+          <div class="combatant-info">
+            <span class="combatant-name">{{ c.character?.name || c.email }}</span>
+            <span class="combatant-meta" *ngIf="c.character">{{ c.character.race }}</span>
+            <span class="combatant-meta no-char" *ngIf="!c.character">Sin personaje</span>
+          </div>
+
+          <button
+            class="btn-toggle"
+            [class.btn-remove]="c.inCombat"
+            [class.btn-add]="!c.inCombat"
+            (click)="toggleCombat(c)">
+            {{ c.inCombat ? 'Quitar' : 'Añadir' }}
+          </button>
+        </div>
+      </div>
+
+      <ng-template #noPlayers>
+        <p class="no-chars">No hay jugadores en la sesión.</p>
+      </ng-template>
+    </div>
+
+  </ng-container>
+</div>
+

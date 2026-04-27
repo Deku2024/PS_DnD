@@ -4,11 +4,19 @@ import {CharacterService, CharacterWithId} from './character.service';
 import {SheetInterface} from '../interfaces/SheetInterface';
 import {DiceRollerService} from './roll-dice.service';
 
+export interface Combatant {
+  uid: string;
+  email: string;
+  character: CharacterWithId | null;
+  inCombat: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class BattleService {
   status: 'not-combat' | 'preparing' | 'in-combat' | 'ended';
+  combatants: Combatant[] = [];
 
   private combatOrder: { [name: string]: number } = {};
   private combatEntities: (SheetInterface | null)[] = []; // array para tener los datos de los objetos de manera centralizada para el combate
@@ -21,21 +29,40 @@ export class BattleService {
 
   public async startPreparingCombat(): Promise<void> {
     this.combatOrder = {};
+    this.combatants = [];
 
-    let selectedCharacters = (await this.sessionService.getSession(this.sessionService.getCurrentSessionId()!))?.selectedCharacters;
-
-    if (!selectedCharacters) {
-      console.error('No hay personajes creados');
+    const session = await this.sessionService.getSession(this.sessionService.getCurrentSessionId()!);
+    if (!session) {
+      console.error('No se encontró la sesión');
       return;
     }
 
-    for (let [uid, cid] of Object.entries(selectedCharacters)) {
-      let entity: SheetInterface | null = await this.characterService.getCharacterById(<string>cid);
-      if (entity == null) continue;
-      this.addToCombat(entity);
-      this.combatEntities.push(entity);
+    const players = session.players.filter(uid => uid !== session.masterId);
+    for (const uid of players) {
+      const charId = session.selectedCharacters?.[uid];
+      if (!charId) continue;
+      const email = session.playerEmails[uid] || uid;
+      const character = await this.characterService.getCharacterById(<string>charId);
+      this.combatants.push({ uid, email, character, inCombat: true });
+      this.addToCombat(character as SheetInterface);
     }
     console.log(this.combatOrder);
+  }
+
+  public toggleCombat(combatant: Combatant): void {
+    combatant.inCombat = !combatant.inCombat;
+  }
+
+  public moveUp(index: number): void {
+    if (index <= 0) return;
+    [this.combatants[index - 1], this.combatants[index]] =
+      [this.combatants[index], this.combatants[index - 1]];
+  }
+
+  public moveDown(index: number): void {
+    if (index >= this.combatants.length - 1) return;
+    [this.combatants[index], this.combatants[index + 1]] =
+      [this.combatants[index + 1], this.combatants[index]];
   }
 
   public removeFromCombat(name: string): void {
@@ -47,3 +74,4 @@ export class BattleService {
   }
 
 }
+
