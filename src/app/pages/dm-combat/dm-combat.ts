@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BattleService, Combatant } from '../../services/battle.service';
@@ -17,7 +17,8 @@ export class DmCombat implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private battleService: BattleService,
-    private sessionService: SessionService
+    private sessionService: SessionService,
+    private cd: ChangeDetectorRef
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -26,6 +27,7 @@ export class DmCombat implements OnInit {
     this.sessionService.setCurrentSessionId(id);
     await this.battleService.startPreparingCombat();
     this.loading = false;
+    this.cd.detectChanges();
   }
 
   get combatants(): Combatant[] {
