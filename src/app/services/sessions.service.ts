@@ -26,7 +26,7 @@ export interface Session {
   players: string[];
   playerEmails: { [uid: string]: string };
   selectedCharacters?: { [uid: string]: string | null };
-  status: 'waiting' | 'active' | 'paused' | 'closed';
+  status: 'waiting' | 'active' | 'paused' | 'closed' | 'in-battle';
   password?: string;
   createdAt?: any;
 }
@@ -71,7 +71,7 @@ export class SessionService {
     }
   }
 
-  getCurrentSessionId(): string | null {
+    getCurrentSessionId(): string | null {
     return this.currentSessionId;
   }
 

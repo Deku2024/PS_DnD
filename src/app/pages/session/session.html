@@ -64,6 +64,7 @@
         (click)="toggleSessionStatus()">
         {{ session.status === 'paused' || session.status === 'waiting' ? '▶️ REANUDAR PARTIDA' : '⏸️ PAUSAR PARTIDA' }}
       </button>
+      <battle-button-component *ngIf="isMaster"/>
     </div>
   </div>
 
@@ -83,7 +84,7 @@
         <div class="char-row"><span>Experiencia</span><strong>{{ modalCharacter.experience }}</strong></div>
         <div class="char-row"><span>Vida</span><strong>{{ modalCharacter.life }} / {{ modalCharacter.maxLife }}</strong></div>
         <div class="char-row"><span>Armadura</span><strong>{{ modalCharacter.armourClass }}</strong></div>
-        <div class="char-row"><span>Oro</span><strong>{{ modalCharacter.gold }}</strong></div>
+        <div class="char-row"><span>Oro</span><strong>{{ modalCharacter.money }}</strong></div>
 
         <hr class="modal-divider" />
         <h4 class="modal-section-title">Atributos</h4>
