@@ -34,8 +34,8 @@
 
     <hr class="divider" *ngIf="activeCombatants.length > 0 && combatants.length > 0" />
 
-    <!-- Gestión de jugadores -->
-    <div class="card">
+    <!-- Gestión de jugadores (solo DM) -->
+    <div class="card" *ngIf="isMaster">
       <h3>Jugadores en la sesión</h3>
       <p class="card-hint">Activa o desactiva y reordena manualmente</p>
 

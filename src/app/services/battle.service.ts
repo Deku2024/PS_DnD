@@ -1,11 +1,13 @@
 import {Injectable} from '@angular/core';
 import {SessionService} from './sessions.service';
-import {CharacterService, CharacterWithId} from './character.service';
+import {CharacterService} from './character.service';
+import { SheetInterface } from '../interfaces/SheetInterface';
 
 export interface Combatant {
   uid: string;
   email: string;
-  character: CharacterWithId | null;
+  characterId: string;
+  character: SheetInterface | null;
   inCombat: boolean;
 }
 
@@ -38,7 +40,7 @@ export class BattleService {
       if (!charId) continue;
       const email = session.playerEmails[uid] || uid;
       const character = await this.characterService.getCharacterById(<string>charId);
-      this.combatants.push({ uid, email, character, inCombat: true });
+      this.combatants.push({ uid, email, characterId: charId, character, inCombat: true });
     }
   }
 
@@ -56,6 +58,22 @@ export class BattleService {
     if (index >= this.combatants.length - 1) return;
     [this.combatants[index], this.combatants[index + 1]] =
       [this.combatants[index + 1], this.combatants[index]];
+  }
+
+  public async saveOrder(sessionId: string): Promise<void> {
+    const activeIds = this.combatants
+      .filter(c => c.inCombat)
+      .map(c => c.characterId);
+    await this.sessionService.updateCombatOrder(sessionId, activeIds);
+  }
+
+  public applySavedOrder(savedOrder: string[]): void {
+    const active = savedOrder
+      .map(id => this.combatants.find(c => c.characterId === id))
+      .filter((c): c is Combatant => !!c)
+      .map(c => ({ ...c, inCombat: true }));
+    const inactive = this.combatants.filter(c => !savedOrder.includes(c.characterId));
+    this.combatants = [...active, ...inactive];
   }
 
   public removeFromCombat(name: string): void {

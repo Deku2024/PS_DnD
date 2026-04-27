@@ -57,6 +57,7 @@
     <div class="actions">
       <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
       <button *ngIf="isMaster" class="btn-notes" (click)="goToNotes()">📝 Notas DM</button>
+      <button class="btn-notes" (click)="goToCombat()">⚔ Combate</button>
       <button
         *ngIf="isMaster"
         class="btn-toggle"
