@@ -62,4 +62,8 @@ export class CharacterService {
     await updateDoc(ref, { ...data, updatedAt: new Date().toISOString() });
   }
 
+  calculateBonus(characteristicValue: number): number {
+    return Math.floor((characteristicValue - 10) / 2);
+  }
+
 }

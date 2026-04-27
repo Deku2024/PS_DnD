@@ -1,7 +1,8 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {SessionService} from './sessions.service';
 import {CharacterService, CharacterWithId} from './character.service';
 import {SheetInterface} from '../interfaces/SheetInterface';
+import {DiceRollerService} from './roll-dice.service';
 
 @Injectable({
   providedIn: 'root',
@@ -10,7 +11,9 @@ export class BattleService {
   status: 'not-combat' | 'preparing' | 'in-combat' | 'ended';
 
   private combatOrder: { [name: string]: number } = {};
-  private combatEntities: (CharacterWithId | null)[] = []; // array para tener los datos de los objetos de manera centralizada para el combate
+  private combatEntities: (SheetInterface | null)[] = []; // array para tener los datos de los objetos de manera centralizada para el combate
+
+  rollerService = inject(DiceRollerService);
 
   constructor(private sessionService: SessionService, private characterService: CharacterService) {
     this.status = 'not-combat';
@@ -27,17 +30,20 @@ export class BattleService {
     }
 
     for (let [uid, cid] of Object.entries(selectedCharacters)) {
-      let entity = await this.characterService.getCharacterById(<string>cid);
+      let entity: SheetInterface | null = await this.characterService.getCharacterById(<string>cid);
+      if (entity == null) continue;
+      this.addToCombat(entity);
       this.combatEntities.push(entity);
     }
+    console.log(this.combatOrder);
   }
 
   public removeFromCombat(name: string): void {
     delete this.combatOrder[name];
   }
 
-  public addToCombat(name: string): void {
-    this.combatOrder[name] = 0;
+  public addToCombat(character: SheetInterface): void {
+    this.combatOrder[character.name] = this.rollerService.rollAD20(this.characterService.calculateBonus(character.attributes.dexterity)).result;
   }
 
 }
