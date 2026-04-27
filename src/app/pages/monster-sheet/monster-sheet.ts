@@ -18,10 +18,11 @@ import { InventoryItemComponent } from '../../components/inventory.component/inv
 import { AbilityComponent } from '../../components/ability.component/ability.component';
 import { MoneyComponent } from '../../components/money.component/money.component';
 import { AuthService } from '../../services/auth.service';
+import { ResultThrowFrameComponent } from '../../components/result.throw.frame.component/result.throw.frame.component';
 
 @Component({
   selector: 'app-monster-sheet',
-  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, GeneralThrowsButtonComponent, InventoryItemComponent, AbilityComponent],
+  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, GeneralThrowsButtonComponent, InventoryItemComponent, AbilityComponent, ResultThrowFrameComponent],
   templateUrl: './monster-sheet.html',
   styleUrl: './monster-sheet.css',
 })
