@@ -1,0 +1,20 @@
+<div class="container">
+    <h2>Bestiario de </h2>
+    <p class="uid">{{ user?.email }}</p>
+    <hr class="divider" />
+
+    @if (monsters.length === 0) {
+        <span>No tienes monstruos todavía</span>
+    }
+
+    @for (monster of monsters; track $index) {
+        <div class="card">
+            <h3>{{ capitalize(monster.name)}}</h3>
+            <button (click)="deleteMonster(monster)">Eliminar</button>
+            <button (click)="editMonster(monster)">Editar</button>
+        </div>
+    }
+
+    <button (click)="goBack()">← Volver</button>
+    
+</div>

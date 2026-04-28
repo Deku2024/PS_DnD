@@ -126,4 +126,10 @@ export class SessionTestComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.authSub?.unsubscribe();
   }
+
+  enterMonsterPage() {
+    this.router.navigate(['/bestiary']);
+  }
+
+
 }
