@@ -29,6 +29,8 @@ export class BattleService {
   }
 
   public async startPreparingCombat(): Promise<void> {
+    this.combatOrder = {};
+    this.combatants = [];
     this.combatOrder = new Map<string, number>();
     this.combatants = [];
 
@@ -57,6 +59,22 @@ export class BattleService {
       {uid, email, character, inCombat: true, intiative: this.combatOrder.get(character?.name || '') || 0}
     );
     this.addToCombat(character as SheetInterface);
+  }
+
+  public toggleCombat(combatant: Combatant): void {
+    combatant.inCombat = !combatant.inCombat;
+  }
+
+  public moveUp(index: number): void {
+    if (index <= 0) return;
+    [this.combatants[index - 1], this.combatants[index]] =
+      [this.combatants[index], this.combatants[index - 1]];
+  }
+
+  public moveDown(index: number): void {
+    if (index >= this.combatants.length - 1) return;
+    [this.combatants[index], this.combatants[index + 1]] =
+      [this.combatants[index + 1], this.combatants[index]];
   }
 
   public toggleCombat(combatant: Combatant): void {
