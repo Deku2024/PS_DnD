@@ -77,18 +77,42 @@ export class BattleService {
   }
 
   public async saveOrder(sessionId: string): Promise<void> {
-    const activeIds = this.combatants
+    const activeItems = this.combatants
       .filter(c => c.inCombat)
-      .map(c => c.characterId);
-    await this.sessionService.updateCombatOrder(sessionId, activeIds);
+      .map(c => {
+        if (c.email === 'Enemigo (NPC)') {
+          return 'NPC::' + JSON.stringify(c);
+        }
+        return c.characterId;
+      });
+
+    await this.sessionService.updateCombatOrder(sessionId, activeItems);
   }
 
   public applySavedOrder(savedOrder: string[]): void {
-    const active = savedOrder
-      .map(id => this.combatants.find(c => c.characterId === id))
-      .filter((c): c is Combatant => !!c)
-      .map(c => ({ ...c, inCombat: true }));
-    const inactive = this.combatants.filter(c => !savedOrder.includes(c.characterId));
+    const active: Combatant[] = [];
+    const incomingPlayerIds: string[] = [];
+    const incomingNpcIds: string[] = [];
+    for (const item of savedOrder) {
+      if (item.startsWith('NPC::')) {
+        const npcData = JSON.parse(item.substring(5)) as Combatant;
+        active.push({ ...npcData, inCombat: true });
+        incomingNpcIds.push(npcData.characterId);
+      } else {
+        const player = this.combatants.find(c => c.characterId === item && c.email !== 'Enemigo (NPC)');
+        if (player) {
+          active.push({ ...player, inCombat: true });
+          incomingPlayerIds.push(item);
+        }
+      }
+    }
+    const inactive = this.combatants.filter(c => {
+      if (c.email === 'Enemigo (NPC)') {
+        return !incomingNpcIds.includes(c.characterId);
+      }
+      return !incomingPlayerIds.includes(c.characterId);
+    }).map(c => ({ ...c, inCombat: false }));
+
     this.combatants = [...active, ...inactive];
   }
 
