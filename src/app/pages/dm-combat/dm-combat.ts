@@ -4,10 +4,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BattleService, Combatant } from '../../services/battle.service';
 import { SessionService } from '../../services/sessions.service';
 import { AuthService } from '../../services/auth.service';
+import { MonsterSearchComponent } from '../../components/monster-search.component/monster-search.component';
 
 @Component({
   selector: 'app-dm-combat',
-  imports: [CommonModule],
+  imports: [CommonModule, MonsterSearchComponent],
   templateUrl: './dm-combat.html',
   styleUrl: './dm-combat.css',
 })
@@ -15,6 +16,8 @@ export class DmCombat implements OnInit, OnDestroy {
   loading = true;
   isMaster = false;
   private unsubSession?: () => void;
+
+  showAddMenu = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -77,6 +80,29 @@ export class DmCombat implements OnInit, OnDestroy {
   moveDown(index: number): void {
     this.battleService.moveDown(index);
     this.saveOrder();
+  }
+
+  addMonsterToBattle(monster: any) {
+    const tempId = 'npc_' + Date.now();
+    const newEnemy = {
+      uid: tempId,
+      characterId: tempId,
+      email: 'Enemigo (NPC)',
+      inCombat: false,
+      initiative: 0,
+      character: {
+        name: monster.name,
+        race: monster.race || 'Monstruo',
+        life: monster.life,
+        maxLife: monster.maxLife,
+        armourClass: monster.armourClass,
+        attributes: monster.attributes || { dexterity: 10 }
+      }
+    } as unknown as Combatant;
+
+    this.battleService.combatants = [...this.battleService.combatants, newEnemy];
+    this.saveOrder();
+    this.showAddMenu = false;
   }
 
   private saveOrder(): void {

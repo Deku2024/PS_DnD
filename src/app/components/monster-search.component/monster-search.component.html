@@ -28,8 +28,7 @@
   </div>
 
   <div class="monster-list">
-    @for (monster of filteredMonsters; track monster.id) {
-      <div class="monster-card" (click)="selectMonster(monster)">
+    @for (monster of (filteredMonsters | slice:0:20); track monster.id) {      <div class="monster-card" (click)="selectMonster(monster)">
         <div class="monster-info">
           <h4>{{ monster.name }}</h4>
           <span class="monster-race">{{ monster.race }}</span>

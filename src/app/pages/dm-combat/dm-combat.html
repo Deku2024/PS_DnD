@@ -5,6 +5,18 @@
     <h2>⚔ Combate</h2>
   </div>
 
+  <div class="add-enemy-section" *ngIf="isMaster && !loading">
+    <button class="btn-primary" (click)="showAddMenu = !showAddMenu">
+      {{ showAddMenu ? '❌ Cerrar bestiario' : '➕ Añadir monstruo a la batalla' }}
+    </button>
+
+    <div class="monster-search-wrapper card" *ngIf="showAddMenu">
+      <h3>Bestiario del Tomo</h3>
+
+      <app-monster-search (monsterSelected)="addMonsterToBattle($event)"></app-monster-search>
+    </div>
+  </div>
+
   <div class="loading-state" *ngIf="loading">
     <p>Cargando...</p>
   </div>
