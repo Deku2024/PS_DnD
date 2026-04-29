@@ -82,8 +82,8 @@ export class SessionPage implements OnInit, OnDestroy {
         this.errorMsg = 'La sesión no existe o ha sido cerrada.';
         this.session = null;
       } else {
-        // Si el jugador actual fue expulsado, redirigir al home
-        if (user && !session.players.includes(user.uid)) {
+        // Usar this.currentUser para detectar expulsión en tiempo real
+        if (this.currentUser && !session.players.includes(this.currentUser.uid)) {
           this.unsubscribe?.();
           this.presenceUnsub?.();
           this.sessionService.setCurrentSessionId(null);
