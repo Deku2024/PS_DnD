@@ -1,17 +1,13 @@
-import {inject, Injectable} from '@angular/core';
 import {Session, SessionService} from './sessions.service';
-import {CharacterService, CharacterWithId} from './character.service';
-import {SheetInterface} from '../interfaces/SheetInterface';
-import {DiceRollerService} from './roll-dice.service';
-import {inject, Injectable} from '@angular/core';
-import {SessionService} from './sessions.service';
 import {CharacterService} from './character.service';
 import {SheetInterface} from '../interfaces/SheetInterface';
+import {inject, Injectable} from '@angular/core';
 import {DiceRollerService} from './roll-dice.service';
 
 export interface Combatant {
   uid: string;
   email: string;
+  characterId: string;
   character: SheetInterface | null;
   inCombat: boolean;
   intiative: number;
@@ -34,7 +30,7 @@ export class BattleService {
   }
 
   public async startPreparingCombat(): Promise<void> {
-    this.combatOrder = {};
+    this.combatOrder = new Map<string, number>();
     this.combatants = [];
     this.combatOrder = new Map<string, number>();
     this.combatants = [];
@@ -61,25 +57,9 @@ export class BattleService {
     const email = session.playerEmails[uid] || uid;
     const character = await this.characterService.getCharacterById(<string>charId);
     this.combatants.push(
-      {uid, email, character, inCombat: true, intiative: this.combatOrder.get(character?.name || '') || 0}
+      {uid, email, characterId: charId, character, inCombat: true, intiative: this.combatOrder.get(character?.name || '') || 0}
     );
     this.addToCombat(character as SheetInterface);
-  }
-
-  public toggleCombat(combatant: Combatant): void {
-    combatant.inCombat = !combatant.inCombat;
-  }
-
-  public moveUp(index: number): void {
-    if (index <= 0) return;
-    [this.combatants[index - 1], this.combatants[index]] =
-      [this.combatants[index], this.combatants[index - 1]];
-  }
-
-  public moveDown(index: number): void {
-    if (index >= this.combatants.length - 1) return;
-    [this.combatants[index], this.combatants[index + 1]] =
-      [this.combatants[index + 1], this.combatants[index]];
   }
 
   public toggleCombat(combatant: Combatant): void {
