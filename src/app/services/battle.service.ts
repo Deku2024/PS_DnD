@@ -10,7 +10,7 @@ export interface Combatant {
   characterId: string;
   character: SheetInterface | null;
   inCombat: boolean;
-  intiative: number;
+  initiative: number;
 }
 
 @Injectable({
@@ -32,9 +32,6 @@ export class BattleService {
   public async startPreparingCombat(): Promise<void> {
     this.combatOrder = new Map<string, number>();
     this.combatants = [];
-    this.combatOrder = new Map<string, number>();
-    this.combatants = [];
-
     const session = await this.sessionService.getSession(this.sessionService.getCurrentSessionId()!);
     if (!session) {
       console.error('No se encontró la sesión');
@@ -50,16 +47,17 @@ export class BattleService {
       if (!charId) continue;
       await this.addPlayerToCombat(session, uid, charId);
     }
-    console.log(this.combatOrder)
+    console.log(this.combatOrder);
+    console.log(this.combatants);
   }
 
   private async addPlayerToCombat(session: Session, uid: string, charId: string) {
     const email = session.playerEmails[uid] || uid;
     const character = await this.characterService.getCharacterById(<string>charId);
-    this.combatants.push(
-      {uid, email, characterId: charId, character, inCombat: true, intiative: this.combatOrder.get(character?.name || '') || 0}
-    );
     this.addToCombat(character as SheetInterface);
+    this.combatants.push(
+      {uid, email, characterId: charId, character, inCombat: true, initiative: this.combatOrder.get(character?.name || '') || 0}
+    );
   }
 
   public toggleCombat(combatant: Combatant): void {
