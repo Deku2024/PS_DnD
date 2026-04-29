@@ -19,10 +19,11 @@ import { AbilityComponent } from '../../components/ability.component/ability.com
 import { MoneyComponent } from '../../components/money.component/money.component';
 import { AuthService } from '../../services/auth.service';
 import { ResultThrowFrameComponent } from '../../components/result.throw.frame.component/result.throw.frame.component';
+import { MonsterSearchComponent } from '../../components/monster-search.component/monster-search.component';
 
 @Component({
   selector: 'app-monster-sheet',
-  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, GeneralThrowsButtonComponent, InventoryItemComponent, AbilityComponent, ResultThrowFrameComponent],
+  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, GeneralThrowsButtonComponent, InventoryItemComponent, AbilityComponent, ResultThrowFrameComponent, MonsterSearchComponent],
   templateUrl: './monster-sheet.html',
   styleUrl: './monster-sheet.css',
 })
@@ -135,6 +136,23 @@ export class MonsterSheet {
 
   removeAbility(index: number): void {
     this.abilitiesFormArray.removeAt(index);
+  }
+
+  loadMonster(monster: any) {
+    this.monsterId = monster.id;
+
+    this.monsterSheetForm.patchValue({
+      name: monster.name,
+      challengeValue: monster.challengeValue,
+      challengeXP: monster.challengePX || monster.challengeXP,
+      armourClass: monster.armourClass,
+      race: monster.race,
+      alignment: monster.alignment,
+      life: monster.life,
+      maxLife: monster.maxLife,
+      tempLife: monster.tempLife,
+      attributes: monster.attributes
+    });
   }
 
   async onSubmit() {

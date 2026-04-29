@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { doc, collection, addDoc, deleteDoc, query, onSnapshot, orderBy, updateDoc } from 'firebase/firestore';
+import { doc, collection, addDoc, deleteDoc, query, onSnapshot, orderBy, updateDoc, where } from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
 
 export interface MonsterData {
@@ -36,11 +36,22 @@ export class MonsterService {
   constructor(private Firebase: FirebaseService) {}
 
   private monsterRef() {
-      return collection(this.Firebase.db, `${this.collection}`);
+    return collection(this.Firebase.db, `${this.collection}`);
   }
 
   async createMonster(userId:string, monster: MonsterData) {
     return await addDoc(this.monsterRef(), {...monster, userId});
+  }
+
+  getMonstersList(userId: string, callback: (monsters: MonsterData[]) => void) {
+    const q = query(this.monsterRef(), where('userId', '==', userId));
+    return onSnapshot(q, (snapshot: any) => {
+      const monsters: MonsterData[] = [];
+      snapshot.forEach((doc: any) => {
+        monsters.push({ id: doc.id, ...doc.data() } as MonsterData);
+      });
+      callback(monsters);
+    });
   }
 
   readMonster(monsterId: string, callback: (monsters: any) => void) {
@@ -64,5 +75,5 @@ export class MonsterService {
     const monsterDoc = doc(this.Firebase.db, `monsters/${monsterId}`);
 
     return await updateDoc(monsterDoc, data);
-  }  
+  }
 }
