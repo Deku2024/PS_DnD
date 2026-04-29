@@ -178,6 +178,11 @@ export class SessionPage implements OnInit, OnDestroy {
     this.router.navigate(['/dm-notes'], { queryParams: { sessionId: this.session.id } });
   }
 
+  goToCombat(): void {
+    if (!this.session?.id) return;
+    this.router.navigate(['/session', this.session.id, 'dm-combat']);
+  }
+
   async leaveSession(): Promise<void> {
     this.unsubscribe?.();
     this.presenceUnsub?.();

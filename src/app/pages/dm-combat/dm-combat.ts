@@ -1,8 +1,9 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BattleService, Combatant } from '../../services/battle.service';
 import { SessionService } from '../../services/sessions.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dm-combat',
@@ -10,14 +11,17 @@ import { SessionService } from '../../services/sessions.service';
   templateUrl: './dm-combat.html',
   styleUrl: './dm-combat.css',
 })
-export class DmCombat implements OnInit {
+export class DmCombat implements OnInit, OnDestroy {
   loading = true;
+  isMaster = false;
+  private unsubSession?: () => void;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private battleService: BattleService,
     private sessionService: SessionService,
+    private authService: AuthService,
     private cd: ChangeDetectorRef
   ) {}
 
@@ -25,9 +29,31 @@ export class DmCombat implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) { this.router.navigate(['/home']); return; }
     this.sessionService.setCurrentSessionId(id);
+
+    const user = await new Promise<any>(resolve =>
+      this.authService.onAuthState().subscribe(u => resolve(u))
+    );
+    const session = await this.sessionService.getSession(id);
+    this.isMaster = session?.masterId === user?.uid;
+
     await this.battleService.startPreparingCombat();
+    if (session?.combatOrder?.length) {
+      this.battleService.applySavedOrder(session.combatOrder);
+    }
+
+    this.unsubSession = this.sessionService.listenSession(id, (s) => {
+      if (s?.combatOrder) {
+        this.battleService.applySavedOrder(s.combatOrder);
+        this.cd.detectChanges();
+      }
+    });
+
     this.loading = false;
     this.cd.detectChanges();
+  }
+
+  ngOnDestroy(): void {
+    this.unsubSession?.();
   }
 
   get combatants(): Combatant[] {
@@ -40,14 +66,22 @@ export class DmCombat implements OnInit {
 
   toggleCombat(combatant: Combatant): void {
     this.battleService.toggleCombat(combatant);
+    this.saveOrder();
   }
 
   moveUp(index: number): void {
     this.battleService.moveUp(index);
+    this.saveOrder();
   }
 
   moveDown(index: number): void {
     this.battleService.moveDown(index);
+    this.saveOrder();
+  }
+
+  private saveOrder(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) this.battleService.saveOrder(id);
   }
 
   goBack(): void {

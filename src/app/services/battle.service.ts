@@ -3,6 +3,11 @@ import {Session, SessionService} from './sessions.service';
 import {CharacterService, CharacterWithId} from './character.service';
 import {SheetInterface} from '../interfaces/SheetInterface';
 import {DiceRollerService} from './roll-dice.service';
+import {inject, Injectable} from '@angular/core';
+import {SessionService} from './sessions.service';
+import {CharacterService} from './character.service';
+import {SheetInterface} from '../interfaces/SheetInterface';
+import {DiceRollerService} from './roll-dice.service';
 
 export interface Combatant {
   uid: string;
@@ -91,6 +96,22 @@ export class BattleService {
     if (index >= this.combatants.length - 1) return;
     [this.combatants[index], this.combatants[index + 1]] =
       [this.combatants[index + 1], this.combatants[index]];
+  }
+
+  public async saveOrder(sessionId: string): Promise<void> {
+    const activeIds = this.combatants
+      .filter(c => c.inCombat)
+      .map(c => c.characterId);
+    await this.sessionService.updateCombatOrder(sessionId, activeIds);
+  }
+
+  public applySavedOrder(savedOrder: string[]): void {
+    const active = savedOrder
+      .map(id => this.combatants.find(c => c.characterId === id))
+      .filter((c): c is Combatant => !!c)
+      .map(c => ({ ...c, inCombat: true }));
+    const inactive = this.combatants.filter(c => !savedOrder.includes(c.characterId));
+    this.combatants = [...active, ...inactive];
   }
 
   public removeFromCombat(name: string): void {
