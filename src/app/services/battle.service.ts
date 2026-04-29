@@ -1,12 +1,15 @@
 import {inject, Injectable} from '@angular/core';
 import {Session, SessionService} from './sessions.service';
 import {CharacterService, CharacterWithId} from './character.service';
+import {SessionService} from './sessions.service';
+import {CharacterService} from './character.service';
 import {SheetInterface} from '../interfaces/SheetInterface';
 import {DiceRollerService} from './roll-dice.service';
 
 export interface Combatant {
   uid: string;
   email: string;
+  characterId: string;
   character: SheetInterface | null;
   inCombat: boolean;
   intiative: number;
@@ -49,7 +52,6 @@ export class BattleService {
       if (!charId) continue;
       await this.addPlayerToCombat(session, uid, charId);
     }
-    console.log(this.combatOrder)
   }
 
   private async addPlayerToCombat(session: Session, uid: string, charId: string) {
@@ -75,6 +77,12 @@ export class BattleService {
     if (index >= this.combatants.length - 1) return;
     [this.combatants[index], this.combatants[index + 1]] =
       [this.combatants[index + 1], this.combatants[index]];
+      const email = session.playerEmails[uid] || uid;
+      const character = await this.characterService.getCharacterById(<string>charId);
+      this.combatants.push({ uid, email, characterId: charId, character, inCombat: true });
+      this.addToCombat(character as SheetInterface);
+    }
+    console.log(this.combatOrder);
   }
 
   public toggleCombat(combatant: Combatant): void {
@@ -93,6 +101,22 @@ export class BattleService {
       [this.combatants[index + 1], this.combatants[index]];
   }
 
+  public async saveOrder(sessionId: string): Promise<void> {
+    const activeIds = this.combatants
+      .filter(c => c.inCombat)
+      .map(c => c.characterId);
+    await this.sessionService.updateCombatOrder(sessionId, activeIds);
+  }
+
+  public applySavedOrder(savedOrder: string[]): void {
+    const active = savedOrder
+      .map(id => this.combatants.find(c => c.characterId === id))
+      .filter((c): c is Combatant => !!c)
+      .map(c => ({ ...c, inCombat: true }));
+    const inactive = this.combatants.filter(c => !savedOrder.includes(c.characterId));
+    this.combatants = [...active, ...inactive];
+  }
+
   public removeFromCombat(name: string): void {
     this.combatOrder.delete(name);
   }
@@ -108,5 +132,6 @@ export class BattleService {
       return initiativeB - initiativeA;
     });
   }
+
 }
 
