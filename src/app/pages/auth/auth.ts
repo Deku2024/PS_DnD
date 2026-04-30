@@ -23,6 +23,7 @@ export class Auth implements OnDestroy {
   loading = false;
   showPassword = false;
   private messageTimer: any = null;
+  identification: string = '';
 
   constructor(
     private authService: AuthService,

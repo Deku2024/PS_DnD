@@ -1,16 +1,23 @@
-import { Injectable } from '@angular/core';
-import { FirebaseService } from './firebase.service';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail, User, updateProfile } from 'firebase/auth';
-import { Observable } from 'rxjs';
-import {collection, Firestore, getDocs, query, where} from 'firebase/firestore';
-import firebase from 'firebase/compat/app';
-import UserCredential = firebase.auth.UserCredential;
+import {Injectable} from '@angular/core';
+import {FirebaseService} from './firebase.service';
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile,
+  User
+} from 'firebase/auth';
+import {Observable} from 'rxjs';
+import {addDoc, collection, doc, getDoc} from 'firebase/firestore';
+import {UsernameService} from './username.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly collectionName = 'usernames';
 
-  constructor(private firebase: FirebaseService) {}
+  constructor(private firebase: FirebaseService, private usernameService: UsernameService) {}
 
   signInWithEmail(email: string, password: string) {
     return signInWithEmailAndPassword(this.firebase.auth, email, password);
@@ -19,6 +26,9 @@ export class AuthService {
   async signUpWithEmail(email: string, password: string, username: string) {
     let userCredential = await createUserWithEmailAndPassword(this.firebase.auth, email, password);
     await this.setUsernameToCurrentUser(username);
+    await this.usernameService.addRelation(email, username);
+    console.log(await this.usernameService.getUsernameFromEmail(email));
+    console.log(await this.usernameService.getEmailFromUsername(username));
     return userCredential;
   }
 

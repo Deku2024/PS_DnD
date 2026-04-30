@@ -15,12 +15,19 @@
 				</div>
 			</label>
 
-      <label class="field">
+      <label *ngIf="!this.isLogin" class="field">
 				<span class="label-text">Correo</span>
 				<div class="input-row">
 					<input type="email" [(ngModel)]="email" name="email" required placeholder="tu@correo.com" aria-required="true" />
 				</div>
 			</label>
+
+      <label *ngIf="this.isLogin" class="field">
+        <span class="label-text">Correo o nombre de usuario</span>
+        <div class="input-row">
+          <input type="text" [(ngModel)]="identification" name="email" required placeholder="tu@correo.com ó tu nombre de usuario" aria-required="true" />
+        </div>
+      </label>
 
 			<label class="field">
 				<span class="label-text">Contraseña</span>
