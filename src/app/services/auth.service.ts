@@ -1,18 +1,43 @@
-import { Injectable } from '@angular/core';
-import { FirebaseService } from './firebase.service';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail, User } from 'firebase/auth';
-import { Observable } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {FirebaseService} from './firebase.service';
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile,
+  User
+} from 'firebase/auth';
+import {Observable} from 'rxjs';
+import {UsernameService} from './username.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  constructor(private firebase: FirebaseService) {}
 
-  signIn(email: string, password: string) {
+  constructor(private firebase: FirebaseService, private usernameService: UsernameService) {}
+
+  signIn(input: string, password: string) {
+    if (input.includes('@')) {
+      return this.signInWithEmail(input, password);
+    }
+    return this.signInWithUsername(input, password);
+  }
+
+  signInWithEmail(email: string, password: string) {
     return signInWithEmailAndPassword(this.firebase.auth, email, password);
   }
 
-  signUp(email: string, password: string) {
-    return createUserWithEmailAndPassword(this.firebase.auth, email, password);
+  async signInWithUsername(username: string, password: string) {
+    return signInWithEmailAndPassword(this.firebase.auth, await this.usernameService.getEmailFromUsername(username), password);
+  }
+
+  async signUp(email: string, password: string, username: string) {
+    let userCredential = await createUserWithEmailAndPassword(this.firebase.auth, email, password);
+    await this.setUsernameToCurrentUser(username);
+    await this.usernameService.addRelation(email, username);
+    return userCredential;
   }
 
   getCurrentUser(): User | null {
@@ -49,6 +74,16 @@ export class AuthService {
       });
       return () => unsub();
     });
+  }
+
+  getCurrentUsername(): string {
+    return this.getCurrentUser()?.displayName || '';
+  }
+
+  async setUsernameToCurrentUser(username: string) : Promise<void> {
+    let currentUser = this.getCurrentUser();
+    if (currentUser === null) return;
+    await updateProfile(currentUser, {displayName: username});
   }
 
   /**
