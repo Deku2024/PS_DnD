@@ -1,18 +1,25 @@
 import { Injectable } from '@angular/core';
 import { FirebaseService } from './firebase.service';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail, User } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail, User, updateProfile } from 'firebase/auth';
 import { Observable } from 'rxjs';
+import {collection, Firestore, getDocs, query, where} from 'firebase/firestore';
+import firebase from 'firebase/compat/app';
+import UserCredential = firebase.auth.UserCredential;
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly collectionName = 'usernames';
+
   constructor(private firebase: FirebaseService) {}
 
-  signIn(email: string, password: string) {
+  signInWithEmail(email: string, password: string) {
     return signInWithEmailAndPassword(this.firebase.auth, email, password);
   }
 
-  signUp(email: string, password: string) {
-    return createUserWithEmailAndPassword(this.firebase.auth, email, password);
+  async signUpWithEmail(email: string, password: string, username: string) {
+    let userCredential = await createUserWithEmailAndPassword(this.firebase.auth, email, password);
+    await this.setUsernameToCurrentUser(username);
+    return userCredential;
   }
 
   getCurrentUser(): User | null {
@@ -49,6 +56,16 @@ export class AuthService {
       });
       return () => unsub();
     });
+  }
+
+  getCurrentUsername(): string {
+    return this.getCurrentUser()?.displayName || '';
+  }
+
+  async setUsernameToCurrentUser(username: string) : Promise<void> {
+    let currentUser = this.getCurrentUser();
+    if (currentUser === null) return;
+    await updateProfile(currentUser, {displayName: username});
   }
 
   /**

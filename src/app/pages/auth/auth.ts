@@ -16,6 +16,7 @@ export class Auth implements OnDestroy {
   isLogin = true;
   email = '';
   password = '';
+  username = '';
   confirmPassword = '';
   error = '';
   success = '';
@@ -89,7 +90,7 @@ export class Auth implements OnDestroy {
 
     try {
       if (this.isLogin) {
-        await this.authService.signIn(this.email, this.password);
+        await this.authService.signInWithEmail(this.email, this.password);
             // navigate to home on successful login
             await this.router.navigate(['/home']);
         this.ngZone.run(() => {
@@ -123,7 +124,8 @@ export class Auth implements OnDestroy {
         // use a timeout wrapper to avoid hanging if network/firebase stalls
         let userCredential: any = null;
         try {
-          userCredential = await this.withTimeout(this.authService.signUp(this.email, this.password), 12000);
+          userCredential = await this.withTimeout(this.authService.signUpWithEmail(this.email, this.password, this.username), 12000);
+          await this.router.navigate(['/home']);
         } catch (e: any) {
           if (e?.message === 'timeout') {
             this.ngZone.run(() => {

@@ -7,7 +7,15 @@
 		</header>
 
 		<form class="card-form" (ngSubmit)="submit()" role="form" aria-label="Formulario de autenticación">
-			<label class="field">
+
+			<label *ngIf="!this.isLogin" class="field">
+				<span class="label-text">Nombre de Usuario</span>
+				<div class="input-row">
+					<input type="text" [(ngModel)]="username" name="username" required placeholder="tu nombre de usuario" aria-required="true" />
+				</div>
+			</label>
+
+      <label class="field">
 				<span class="label-text">Correo</span>
 				<div class="input-row">
 					<input type="email" [(ngModel)]="email" name="email" required placeholder="tu@correo.com" aria-required="true" />
