@@ -88,6 +88,22 @@ export class BattleService {
       [this.combatants[index + 1], this.combatants[index]];
   }
 
+  public addCombatantWithInitiative(newCombatant: Combatant): void {
+    const dex = newCombatant.character?.attributes?.dexterity || 10;
+    const bonus = this.characterService.calculateBonus(dex);
+    const roll = this.rollerService.rollAD20(bonus).result;
+
+    newCombatant.initiative = roll;
+
+    const insertIndex = this.combatants.findIndex(c => c.initiative < newCombatant.initiative);
+
+    if (insertIndex === -1) {
+      this.combatants.push(newCombatant);
+    } else {
+      this.combatants.splice(insertIndex, 0, newCombatant);
+    }
+  }
+
   public async saveOrder(sessionId: string): Promise<void> {
     const activeItems = this.combatants
       .filter(c => c.inCombat)

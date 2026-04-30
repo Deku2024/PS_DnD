@@ -88,7 +88,7 @@ export class DmCombat implements OnInit, OnDestroy {
       uid: tempId,
       characterId: tempId,
       email: 'Enemigo (NPC)',
-      inCombat: false,
+      inCombat: true,
       initiative: 0,
       character: {
         name: monster.name,
@@ -100,7 +100,8 @@ export class DmCombat implements OnInit, OnDestroy {
       }
     } as unknown as Combatant;
 
-    this.battleService.combatants = [...this.battleService.combatants, newEnemy];
+    this.battleService.addCombatantWithInitiative(newEnemy);
+    this.battleService.combatants = [...this.battleService.combatants];
     this.saveOrder();
     this.showAddMenu = false;
   }
