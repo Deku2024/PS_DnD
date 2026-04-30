@@ -36,6 +36,9 @@ export class PlayerSheet implements OnInit {
   saving = false;
   saveError = '';
 
+  imagePreview: string | ArrayBuffer | null = null;
+  selectedFile: File | null = null;
+
   playerSheetForm: FormGroup;
 
   raceOptions = [
@@ -241,6 +244,34 @@ export class PlayerSheet implements OnInit {
     } finally {
       this.saving = false;
     }
+  }
+
+  //preview de la imagen
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+
+    console.log(input.files);
+
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+
+    if (!file.type.startsWith('image/')) {
+      console.error('El archivo no es una imagen');
+      return;
+    }
+
+    this.selectedFile = file;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      console.log('preview generado');
+      this.imagePreview = reader.result;
+      this.cdr.markForCheck();
+    };
+
+    reader.readAsDataURL(file);
   }
 
   getFormControl(controlName: string) {

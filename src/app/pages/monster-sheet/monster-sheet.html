@@ -1,5 +1,21 @@
 <main>
     <form [formGroup]="monsterSheetForm" class="monster-sheet-form" (ngSubmit)="onSubmit()">
+        <div>
+            <img
+            id="monster-image"
+            [src]="imagePreview || '/monster-icon-example.png'"
+            (click)="fileInput.click()"
+            alt="Character image"
+            >
+
+            <input
+            #fileInput
+            type="file"
+            accept="image/*"
+            style="display: none"
+            (change)="onFileSelected($event)"
+            >
+        </div>
         <div id="basic-info" class="form-section">
             <div class="field">
                 <label for="name">Nombre:</label>

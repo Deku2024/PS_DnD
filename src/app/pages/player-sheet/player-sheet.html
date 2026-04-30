@@ -1,5 +1,20 @@
 <main>
-    <img id="player-image" src="/player-icon-example.png" alt="elf girl">
+    <div>
+        <img
+          id="player-image"
+          [src]="imagePreview || '/player-icon-example.png'"
+          (click)="fileInput.click()"
+          alt="Character image"
+        >
+
+        <input
+          #fileInput
+          type="file"
+          accept="image/*"
+          style="display: none"
+          (change)="onFileSelected($event)"
+        >
+    </div>
     <form [formGroup]="playerSheetForm" (ngSubmit)="onSubmit()" class="player-sheet-form">
         <div id="basic-info" class="form-section">
             <div class="field">
