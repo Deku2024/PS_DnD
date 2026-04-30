@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { NgZone, ChangeDetectorRef } from '@angular/core';
+import {UsernameService} from '../../services/username.service';
 
 @Component({
   standalone: true,
@@ -27,6 +28,7 @@ export class Auth implements OnDestroy {
 
   constructor(
     private authService: AuthService,
+    private usernameService: UsernameService,
     private router: Router,
     private ngZone: NgZone,
     private cd: ChangeDetectorRef
@@ -115,6 +117,16 @@ export class Auth implements OnDestroy {
         if (this.password !== this.confirmPassword) {
           this.ngZone.run(() => {
             this.error = 'Las contraseñas no coinciden.';
+            this.loading = false;
+            this.cd.detectChanges();
+            this.autoClearMessage(3000);
+          });
+          return;
+        }
+
+        if (await this.usernameService.existsUsername(this.username)) {
+          this.ngZone.run(() => {
+            this.error = 'Este nombre de usuario ya existe';
             this.loading = false;
             this.cd.detectChanges();
             this.autoClearMessage(3000);

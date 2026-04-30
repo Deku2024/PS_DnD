@@ -27,8 +27,6 @@ export class AuthService {
     let userCredential = await createUserWithEmailAndPassword(this.firebase.auth, email, password);
     await this.setUsernameToCurrentUser(username);
     await this.usernameService.addRelation(email, username);
-    console.log(await this.usernameService.getUsernameFromEmail(email));
-    console.log(await this.usernameService.getEmailFromUsername(username));
     return userCredential;
   }
 
