@@ -12,12 +12,10 @@ export interface Relation {
 })
 export class UsernameService {
   private readonly collectionName = 'usernameWithEmail';
-  private readonly redundantCollection = 'usernames'; // se hace esta colección para tener solo los nombres de usuario que se puedan leer desde fuera y proteger los correos
   firebase = inject(FirebaseService);
 
   async addRelation(email: string, username: string) {
     await setDoc(doc(this.firebase.db, this.collectionName, username), this.createRelation(email, username) as any);
-    await setDoc(doc(this.firebase.db, this.redundantCollection, username), {username} as any);
   }
 
   private getReference() {
@@ -31,10 +29,10 @@ export class UsernameService {
     };
   }
 
-  async getEmailFromUsername(username: string): Promise<string | null> {
+  async getEmailFromUsername(username: string): Promise<string> {
     let snap = await getDoc(doc(this.getReference(), username));
     if (!snap.exists()) {
-      return null;
+      return '';
     }
     return (snap.data() as Relation).email;
   }
@@ -46,7 +44,7 @@ export class UsernameService {
   }
 
   async existsUsername(username: string) {
-    return (await getDoc(doc(this.firebase.db, this.redundantCollection, username))).exists();
+    return (await getDoc(doc(this.firebase.db, this.collectionName, username))).exists();
   }
 
 }

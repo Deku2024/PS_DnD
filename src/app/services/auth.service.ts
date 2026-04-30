@@ -11,7 +11,6 @@ import {
   User
 } from 'firebase/auth';
 import {Observable} from 'rxjs';
-import {addDoc, collection, doc, getDoc} from 'firebase/firestore';
 import {UsernameService} from './username.service';
 
 @Injectable({ providedIn: 'root' })
@@ -19,11 +18,22 @@ export class AuthService {
 
   constructor(private firebase: FirebaseService, private usernameService: UsernameService) {}
 
+  signIn(input: string, password: string) {
+    if (input.includes('@')) {
+      return this.signInWithEmail(input, password);
+    }
+    return this.signInWithUsername(input, password);
+  }
+
   signInWithEmail(email: string, password: string) {
     return signInWithEmailAndPassword(this.firebase.auth, email, password);
   }
 
-  async signUpWithEmail(email: string, password: string, username: string) {
+  async signInWithUsername(username: string, password: string) {
+    return signInWithEmailAndPassword(this.firebase.auth, await this.usernameService.getEmailFromUsername(username), password);
+  }
+
+  async signUp(email: string, password: string, username: string) {
     let userCredential = await createUserWithEmailAndPassword(this.firebase.auth, email, password);
     await this.setUsernameToCurrentUser(username);
     await this.usernameService.addRelation(email, username);
