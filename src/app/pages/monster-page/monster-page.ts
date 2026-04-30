@@ -57,4 +57,8 @@ export class MonsterPage implements OnInit {
     this.router.navigate(['/home']);
   }
 
+  goToCreate() {
+    this.router.navigate(['/monster-sheet']);
+  }
+
 }
