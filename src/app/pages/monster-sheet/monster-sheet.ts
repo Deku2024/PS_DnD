@@ -84,8 +84,7 @@ export class MonsterSheet {
       }),
 
       inventory: this.fb.array([]),
-      abilities: this.fb.array([]),
-      image: [null]
+      abilities: this.fb.array([])
     });
 
   }
@@ -176,27 +175,7 @@ export class MonsterSheet {
   }
   
 
-  //preview y guardado de la imagen
-  async resizeImage(base64: string): Promise<string> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = base64;
-
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const size = 200;
-
-        canvas.width = size;
-        canvas.height = size;
-
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0, size, size);
-
-        resolve(canvas.toDataURL('image/jpeg', 0.7));
-
-      }
-    })
-  }
+  //preview de la imagen
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -215,16 +194,9 @@ export class MonsterSheet {
     this.selectedFile = file;
 
     const reader = new FileReader();
-    reader.onload = async() => {
+    reader.onload = () => {
       console.log('preview generado');
-      const base64 = reader.result as string;
-      const compressed = await this.resizeImage(base64);
-
-      this.imagePreview = compressed;
-      this.monsterSheetForm.patchValue({
-        image: compressed
-      });
-
+      this.imagePreview = reader.result;
       this.cdr.markForCheck();
     };
 
