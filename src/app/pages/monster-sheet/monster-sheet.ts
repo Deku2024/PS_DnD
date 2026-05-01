@@ -33,6 +33,9 @@ export class MonsterSheet implements OnInit {
   monsterId: string | null = null;
   saveError = '';
 
+  imagePreview: string | ArrayBuffer | null = null;
+  selectedFile: File | null = null;
+
   raceOptions = [
     { value: "Aberration", label: "Aberración" },
     { value: "Monstrosity", label: "Monstruosidad" },
@@ -90,7 +93,8 @@ export class MonsterSheet implements OnInit {
       }),
 
       inventory: this.fb.array([]),
-      abilities: this.fb.array([])
+      abilities: this.fb.array([]),
+      image: null
     }, { validators: this.validateLifeNotExceedMax() });
 
   }
@@ -238,7 +242,63 @@ export class MonsterSheet implements OnInit {
       return null;
     };
   }
+  
 
+  //preview de la imagen y guardado en bd
+  async resizeImage(base64: string): Promise<string> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = base64;
+
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const size = 200;
+
+        canvas.width = size;
+        canvas.height = size;
+
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, size, size);
+
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+    });
+  }
+
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+
+    console.log(input.files);
+
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+
+    if (!file.type.startsWith('image/')) {
+      console.error('El archivo no es una imagen');
+      return;
+    }
+
+    this.selectedFile = file;
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      console.log('preview generado');
+      const base64 = reader.result as string;
+
+      const compressed = await this.resizeImage(base64);
+
+      this.imagePreview = compressed;
+
+      this.monsterSheetForm.patchValue({
+        image: compressed
+      });
+      this.cdr.markForCheck();
+    };
+
+    reader.readAsDataURL(file);
+  }
 
   getFormControl(controlName: string) {
     return this.monsterSheetForm.get(controlName);
