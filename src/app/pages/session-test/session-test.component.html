@@ -61,4 +61,7 @@
   <!-- Mensaje -->
   <p class="message" *ngIf="message" [class.error]="isError">{{ message }}</p>
 
+  <!---Botón para acceder al bestiario-->
+  <button (click)="enterMonsterPage()" [disabled]="!currentUser">Ver mi bestiario</button>
+
 </div>
