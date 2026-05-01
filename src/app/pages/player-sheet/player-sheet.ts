@@ -112,7 +112,8 @@ export class PlayerSheet implements OnInit {
         pc:  [0, [Validators.min(0)]]
       }),
       inventory: this.fb.array([]),
-      abilities: this.fb.array([])
+      abilities: this.fb.array([]),
+      image: [null]
 
     }, { validators: this.validateLifeNotExceedMax() });
   }
@@ -246,7 +247,26 @@ export class PlayerSheet implements OnInit {
     }
   }
 
-  //preview de la imagen
+  //preview de la imagen y guardado en bd
+  async resizeImage(base64: string): Promise<string> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = base64;
+
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const size = 200;
+
+        canvas.width = size;
+        canvas.height = size;
+
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, size, size);
+
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+    });
+  }
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -265,9 +285,17 @@ export class PlayerSheet implements OnInit {
     this.selectedFile = file;
 
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       console.log('preview generado');
-      this.imagePreview = reader.result;
+      const base64 = reader.result as string;
+
+      const compressed = await this.resizeImage(base64);
+
+      this.imagePreview = compressed;
+
+      this.playerSheetForm.patchValue({
+        image: compressed
+      });
       this.cdr.markForCheck();
     };
 

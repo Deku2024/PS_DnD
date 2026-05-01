@@ -94,7 +94,7 @@ export class MonsterSheet implements OnInit {
 
       inventory: this.fb.array([]),
       abilities: this.fb.array([]),
-      image: null
+      image: [null]
     }, { validators: this.validateLifeNotExceedMax() });
 
   }
@@ -121,6 +121,7 @@ export class MonsterSheet implements OnInit {
       maxLife: monster.maxLife,
       tempLife: monster.tempLife,
       attributes: monster.attributes,
+      image: monster.image
     });
 
     //load inventory
