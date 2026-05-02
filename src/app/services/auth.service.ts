@@ -76,10 +76,6 @@ export class AuthService {
     });
   }
 
-  getCurrentUsername(): string {
-    return this.getCurrentUser()?.displayName || '';
-  }
-
   async setUsernameToCurrentUser(username: string) : Promise<void> {
     let currentUser = this.getCurrentUser();
     if (currentUser === null) return;
