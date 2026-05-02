@@ -1,30 +1,12 @@
 import { Injectable } from '@angular/core';
-import { doc, collection, addDoc, deleteDoc, query, onSnapshot, orderBy, updateDoc, where } from 'firebase/firestore';
+import { doc, collection, addDoc, deleteDoc, query, onSnapshot, getDoc, orderBy, updateDoc, where } from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
+import { SheetInterface } from '../interfaces/SheetInterface';
 
-export interface MonsterData {
-  id?: string
-  userId: string;
-  name: string;
-  armourClass: number;
-  race: string;
-  alignment: string;
+export interface MonsterData extends SheetInterface {
+  id?: string;
   challengeValue: number;
   challengePX: number;
-  life: number;
-  maxLife: number;
-  tempLife: number;
-  attributes: {
-    strength: number;
-    dexterity: number;
-    constitution: number;
-    intelligence: number;
-    wisdom: number;
-    charisma: number;
-  };
-
-  inventory: { name: string; quantity: number; description: string }[];
-  abilities: { name: string; description: string }[];
 }
 
 @Injectable({
@@ -43,6 +25,23 @@ export class MonsterService {
     return await addDoc(this.monsterRef(), {...monster, userId});
   }
 
+  readMonsters(userId: string, callback: (monsters: any[]) => void) {
+    const q = query(this.monsterRef(), where('userId', '==', userId));
+
+    return onSnapshot(q, snapshot => {
+      const monsters: MonsterData[] = [];
+
+      snapshot.forEach(doc => {
+        monsters.push({
+          id: doc.id,
+          ...doc.data()
+        } as MonsterData);
+      });
+
+      callback(monsters);
+    });   
+   }
+  
   getMonstersList(userId: string, callback: (monsters: MonsterData[]) => void) {
     const q = query(this.monsterRef(), where('userId', '==', userId));
     return onSnapshot(q, (snapshot: any) => {
@@ -71,9 +70,22 @@ export class MonsterService {
     return await deleteDoc(monsterDoc);
   }
 
-  async updateMonster(monsterId: string, data: any) {
+  async updateMonster(monsterId: string, data: Partial<MonsterData>) {
     const monsterDoc = doc(this.Firebase.db, `monsters/${monsterId}`);
 
     return await updateDoc(monsterDoc, data);
+  }
+
+  async getMonsterById(monsterId: string) {
+    const docRef = doc(this.Firebase.db, `${this.collection}/${monsterId}`)
+    try {
+      const snap = await getDoc(docRef);
+      return snap.exists()
+        ? { id: snap.id, ...(snap.data() as MonsterData) }
+        : null;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
   }
 }

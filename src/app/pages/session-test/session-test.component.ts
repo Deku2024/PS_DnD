@@ -170,4 +170,10 @@ export class SessionTestComponent implements OnInit, OnDestroy {
       this.unsubscribeFirestore();
     }
   }
+
+  enterMonsterPage() {
+    this.router.navigate(['/bestiary']);
+  }
+
+
 }
