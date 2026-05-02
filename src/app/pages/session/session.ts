@@ -5,6 +5,8 @@ import { SessionService, Session } from '../../services/sessions.service';
 import { AuthService } from '../../services/auth.service';
 import { CharacterService, CharacterData, CharacterWithId } from '../../services/character.service';
 import { PresenceService } from '../../services/presence.service';
+import { RollHistoryService } from '../../services/roll-history.service';
+import { RollHistoryComponent } from '../../components/roll-history.component/roll-history.component'
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
 import { BattleButtonComponent } from '../../components/battle.button.component/battle.button.component';
@@ -13,7 +15,7 @@ import {UsernameService} from '../../services/username.service';
 @Component({
   selector: 'app-session',
   standalone: true,
-  imports: [CommonModule, BattleButtonComponent],
+  imports: [CommonModule, BattleButtonComponent, RollHistoryComponent],
   templateUrl: './session.html',
   styleUrl: './session.css'
 })
@@ -21,6 +23,7 @@ export class SessionPage implements OnInit, OnDestroy {
   session: Session | null = null;
   currentUser: User | null = null;
   loading = true;
+  showHistory = false;
   errorMsg = '';
 
   characters: { [uid: string]: CharacterWithId | null } = {};
@@ -42,8 +45,9 @@ export class SessionPage implements OnInit, OnDestroy {
     private authService: AuthService,
     private characterService: CharacterService,
     private cd: ChangeDetectorRef,
-    private presenceService: PresenceService
-  ) {}
+    private presenceService: PresenceService,
+    private rollHistoryService: RollHistoryService
+) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -93,6 +97,8 @@ export class SessionPage implements OnInit, OnDestroy {
           return;
         }
         this.session = session;
+        this.rollHistoryService.setSessionStatus(session.status);
+        this.rollHistoryService.startListening(id);
         await this.loadCharacters(session);
       }
       this.cd.detectChanges();
@@ -192,6 +198,7 @@ export class SessionPage implements OnInit, OnDestroy {
   }
 
   async leaveSession(): Promise<void> {
+    await this.rollHistoryService.saveAndClear();
     this.unsubscribe?.();
     this.presenceUnsub?.();
     this.sessionService.setCurrentSessionId(null);
