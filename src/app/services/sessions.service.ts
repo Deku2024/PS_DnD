@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   collection,
   addDoc,
@@ -17,7 +17,6 @@ import { FirebaseService } from './firebase.service';
 import { AuthService } from './auth.service';
 import { PresenceService } from './presence.service';
 import { Subscription } from 'rxjs';
-import { RollHistoryService } from './roll-history.service';
 
 export interface Session {
   id?: string;
@@ -43,7 +42,7 @@ export class SessionService {
   constructor(
     private firebase: FirebaseService,
     private authService: AuthService,
-    private presenceService: PresenceService,
+    private presenceService: PresenceService
   ) {
     // Keep track of auth state to start/stop presence when user signs in/out
     this.authSub = this.authService.onAuthState().subscribe((user) => {
@@ -180,11 +179,6 @@ export class SessionService {
   async updateStatus(sessionId: string, status: Session['status']): Promise<void> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     await updateDoc(ref, { status });
-
-    if (status === 'closed') {
-      const historyService = inject(RollHistoryService);
-      await historyService.saveHistoryToFirebase(); 
-    }
   }
 
   async setSelectedCharacter(sessionId: string, userId: string, characterId: string | null): Promise<void> {
