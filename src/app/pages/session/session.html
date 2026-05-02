@@ -66,6 +66,12 @@
         {{ session.status === 'paused' || session.status === 'waiting' ? '▶️ REANUDAR PARTIDA' : '⏸️ PAUSAR PARTIDA' }}
       </button>
       <battle-button-component *ngIf="isMaster"/>
+      <app-roll-history
+          *ngIf="currentUser"
+          [isMaster]="isMaster"
+          [currentUserId]="currentUser?.uid || ''"
+          [playerEmails]="session.playerEmails">
+      </app-roll-history>
     </div>
   </div>
 
@@ -119,5 +125,4 @@
       </ng-template>
     </div>
   </div>
-
 </div>
