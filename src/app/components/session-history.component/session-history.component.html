@@ -7,30 +7,57 @@
 </div>
 
 <div class="sheet-list" *ngIf="!loading && pastSessions.length > 0">
-  <div class="session-entry" *ngFor="let s of pastSessions">
-
-    <div class="session-header-row" (click)="toggleSession(s.id!)">
-      <div class="session-header-info">
+  <div class="session-card" *ngFor="let s of pastSessions">
+    <div class="session-card-header" (click)="toggleSession(s.id!)">
+      <div class="session-card-header-info">
         <span class="session-title">{{ s.sessionName }}</span>
-        <span class="session-meta">{{ formatDate(s.finishedAt) }} · {{ s.rollCount }} tiradas</span>
+        <span class="session-date">{{ formatDate(s.finishedAt) }}</span>
       </div>
-      <span class="session-chevron" [class.open]="expandedSessionId === s.id">▾</span>
+      <div class="session-card-header-right">
+        <span class="badge-rolls">{{ s.rollCount }} tiradas</span>
+        <span class="session-chevron" [class.open]="expandedSessionId === s.id">▾</span>
+      </div>
     </div>
 
-    <div class="session-body" *ngIf="expandedSessionId === s.id">
+    <div class="session-card-body" *ngIf="expandedSessionId === s.id">
       <p class="session-description" *ngIf="s.description">{{ s.description }}</p>
-      <p class="session-players">{{ s.players.length }} jugadores</p>
 
-      <div class="session-rolls" *ngIf="s.rolls && s.rolls.length > 0">
-        <app-roll-history-item
-          *ngFor="let entry of s.rolls.slice().reverse()"
-          [entry]="entry"
-          [compact]="true"
-          [showTime]="false"
-          [playerUsernames]="s.playerUsernames">
-        </app-roll-history-item>
+      <div class="section-label">Jugadores</div>
+      <div class="players-list">
+        <div class="player-block" *ngFor="let uid of s.players">
+
+          <div class="player-row" (click)="togglePlayer(s.id!, uid)">
+            <div class="player-avatar" [class.master-avatar]="uid === s.masterId">
+              {{ getPlayerInitial(uid, s) }}
+            </div>
+            <span class="player-name" [class.master-name]="uid === s.masterId">
+              {{ getPlayerName(uid, s) }}
+            </span>
+            <span class="badge-master" *ngIf="uid === s.masterId">👑 Master</span>
+            <div class="player-stats">
+              <span class="badge-count">{{ getRollCountForPlayer(uid, s) }}</span>
+              <span class="badge-crit" *ngIf="getCriticsForPlayer(uid, s) > 0">{{ getCriticsForPlayer(uid, s) }} crit</span>
+              <span class="badge-pifia" *ngIf="getPifiasForPlayer(uid, s) > 0">{{ getPifiasForPlayer(uid, s) }} pifia</span>
+            </div>
+            <span class="player-chevron" [class.open]="expandedPlayerId[s.id!] === uid">▾</span>
+          </div>
+
+          <div class="player-rolls" *ngIf="expandedPlayerId[s.id!] === uid">
+            <div class="roll-item" *ngFor="let entry of getRollsForPlayer(uid, s)">
+              <div class="roll-result-box" [ngClass]="getResultClass(entry)">
+                {{ entry.data.result }}
+              </div>
+              <span class="roll-label">{{ getThrowLabel(entry) }}</span>
+              <span class="roll-status-badge" [ngClass]="getStatusClass(entry)" *ngIf="getStatusLabel(entry)">
+                {{ getStatusLabel(entry) }}
+              </span>
+            </div>
+            <div class="no-rolls" *ngIf="getRollsForPlayer(uid, s).length === 0">
+              <span>Sin tiradas en esta sesión</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-
   </div>
 </div>

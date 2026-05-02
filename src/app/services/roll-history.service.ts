@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subject, Subscription, Observable } from 'rxjs';
-import { collection, addDoc, serverTimestamp, query, where, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, onSnapshot, orderBy, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { DiceRollerService, ThrowsResult } from './roll-dice.service';
 import { SessionService } from './sessions.service';
 import { FirebaseService } from './firebase.service';
@@ -25,6 +25,7 @@ export class RollHistoryService implements OnDestroy {
   private stopSnapshot?: () => void;
   private sessionStatus: string = 'active';
   private readonly rollsCol = 'rolls';
+  private currentListeningSessionId: string | null = null;
 
   constructor(
     private diceRollerService: DiceRollerService,
@@ -51,7 +52,14 @@ export class RollHistoryService implements OnDestroy {
   }
 
   startListening(sessionId: string) {
+    if (this.currentListeningSessionId && this.currentListeningSessionId !== sessionId) {
+      this.historyList = [];
+      this.lastSeenCount = 0;
+      this.historySubject.next(this.historyList);
+    }
+
     if (this.stopSnapshot) this.stopSnapshot();
+    this.currentListeningSessionId = sessionId;
 
     const q = query(
       collection(this.firebase.db, this.rollsCol),
@@ -72,6 +80,13 @@ export class RollHistoryService implements OnDestroy {
   async saveAndClear(): Promise<void> {
     this.historyList = [];
     this.historySubject.next(this.historyList);
+  }
+  async deleteSessionRolls(sessionId: string): Promise<void> {
+    const ref = collection(this.firebase.db, this.rollsCol);
+    const q = query(ref, where('sessionId', '==', sessionId));
+    const snap = await getDocs(q);
+    const deletes = snap.docs.map(d => deleteDoc(doc(this.firebase.db, this.rollsCol, d.id)));
+    await Promise.all(deletes);
   }
 
   getHistory(isMaster: boolean, currentUserId: string): RollHistoryEntry[] {

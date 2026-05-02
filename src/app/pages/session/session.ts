@@ -3,20 +3,18 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService, Session } from '../../services/sessions.service';
 import { AuthService } from '../../services/auth.service';
-import { CharacterService, CharacterData, CharacterWithId } from '../../services/character.service';
+import { CharacterService, CharacterWithId } from '../../services/character.service';
 import { PresenceService } from '../../services/presence.service';
 import { RollHistoryService } from '../../services/roll-history.service';
-import { RollHistoryComponent } from '../../components/roll-history.component/roll-history.component'
 import { HistoryButtonComponent} from '../../components/history.button.component/history.button.component';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
 import { BattleButtonComponent } from '../../components/battle.button.component/battle.button.component';
-import {UsernameService} from '../../services/username.service';
 
 @Component({
   selector: 'app-session',
   standalone: true,
-  imports: [CommonModule, BattleButtonComponent, RollHistoryComponent, HistoryButtonComponent],
+  imports: [CommonModule, BattleButtonComponent, HistoryButtonComponent],
   templateUrl: './session.html',
   styleUrl: './session.css'
 })
