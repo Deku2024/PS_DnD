@@ -1,0 +1,25 @@
+.history-container {
+  background: #f5e6c8;
+  border: 2px solid #5c3d2e;
+  padding: 1rem;
+  border-radius: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  font-family:'Cinema', 'MedievalSharp', cursive;
+}
+
+.session-block {
+  border-bottom: 1px dashed #5c3d2e;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+}
+
+.roll-entry {
+  font-size: 0.9rem;
+  margin: 4px 0;
+}
+
+.user { color: #8b6914; font-weight: bold; }
+.crit { color: #1b5e20; text-shadow: 0 0 2px #4caf50; }
+.fail { color: #b71c1c; }
+.details { color: #666; font-size: 0.8rem; margin-left: 5px; }
