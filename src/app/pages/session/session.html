@@ -57,17 +57,21 @@
 
     <!-- Acciones -->
     <div class="actions">
-      <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
-      <button *ngIf="isMaster" class="btn-notes" (click)="goToNotes()">📝 Notas DM</button>
-      <button class="btn-notes" (click)="goToCombat()">⚔ Combate</button>
-      <button
-        *ngIf="isMaster"
-        class="btn-toggle"
-        [ngClass]="session.status === 'paused' || session.status === 'waiting' ? 'btn-resume' : 'btn-pause'"
-        (click)="toggleSessionStatus()">
-        {{ session.status === 'paused' || session.status === 'waiting' ? '▶️ REANUDAR PARTIDA' : '⏸️ PAUSAR PARTIDA' }}
-      </button>
-      <battle-button-component *ngIf="isMaster"/>
+      <div class="btn-grp">
+        <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
+        <button *ngIf="isMaster" class="btn-notes" (click)="goToNotes()">📝 Notas DM</button>
+        <button class="btn-notes" (click)="goToCombat()">⚔ Combate</button>
+      </div>
+      <div class="btn-grp">
+        <button
+          *ngIf="isMaster"
+          class="btn-toggle"
+          [ngClass]="session.status === 'paused' || session.status === 'waiting' ? 'btn-resume' : 'btn-pause'"
+          (click)="toggleSessionStatus()">
+          {{ session.status === 'paused' || session.status === 'waiting' ? '▶️ REANUDAR PARTIDA' : '⏸️ PAUSAR PARTIDA' }}
+        </button>
+        <battle-button-component *ngIf="isMaster"/>
+      </div>
     </div>
   </div>
 
