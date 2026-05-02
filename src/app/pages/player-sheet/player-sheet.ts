@@ -36,6 +36,7 @@ export class PlayerSheet implements OnInit {
   saving = false;
   saveError = '';
 
+  defaultImage: string = '/player-icon-example.png';
   imagePreview: string | ArrayBuffer | null = null;
   selectedFile: File | null = null;
 
@@ -113,7 +114,7 @@ export class PlayerSheet implements OnInit {
       }),
       inventory: this.fb.array([]),
       abilities: this.fb.array([]),
-      image: [null]
+      image: [this.defaultImage]
 
     }, { validators: this.validateLifeNotExceedMax() });
   }
@@ -273,7 +274,16 @@ export class PlayerSheet implements OnInit {
 
     console.log(input.files);
 
-    if (!input.files || input.files.length === 0) return;
+    if (!input.files || input.files.length === 0) {
+      this.imagePreview = this.defaultImage;
+
+      this.playerSheetForm.patchValue({
+        image: this.defaultImage
+      });
+
+      this.cdr.markForCheck();
+      return;
+    }
 
     const file = input.files[0];
 

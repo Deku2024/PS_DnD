@@ -33,6 +33,7 @@ export class MonsterSheet implements OnInit {
   monsterId: string | null = null;
   saveError = '';
 
+  defaultImage: string = '/monster-icon-example.png';
   imagePreview: string | ArrayBuffer | null = null;
   selectedFile: File | null = null;
 
@@ -94,7 +95,7 @@ export class MonsterSheet implements OnInit {
 
       inventory: this.fb.array([]),
       abilities: this.fb.array([]),
-      image: [null]
+      image: [this.defaultImage]
     }, { validators: this.validateLifeNotExceedMax() });
 
   }
@@ -272,14 +273,18 @@ export class MonsterSheet implements OnInit {
 
     console.log(input.files);
 
-    if (!input.files || input.files.length === 0) return;
+    if (!input.files || input.files.length === 0) {
+      this.imagePreview = this.defaultImage;
 
-    const file = input.files[0];
+      this.monsterSheetForm.patchValue({
+        image: this.defaultImage
+      });
 
-    if (!file.type.startsWith('image/')) {
-      console.error('El archivo no es una imagen');
+      this.cdr.markForCheck();
       return;
     }
+
+    const file = input.files[0];
 
     this.selectedFile = file;
 
