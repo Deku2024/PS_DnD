@@ -6,6 +6,7 @@ import { SessionService, Session } from '../../services/sessions.service';
 import { AuthService } from '../../services/auth.service';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
+import { doc, onSnapshot, Unsubscribe, getFirestore } from 'firebase/firestore';
 
 @Component({
   selector: 'app-session-test',
@@ -29,6 +30,7 @@ export class SessionTestComponent implements OnInit, OnDestroy {
   mySessionsLoading = false;
 
   private authSub?: Subscription;
+  private unsubscribeFirestore?: Unsubscribe;
 
   constructor(
     private sessionService: SessionService,
@@ -47,6 +49,37 @@ export class SessionTestComponent implements OnInit, OnDestroy {
         this.loadMySessions();
       }
     });
+  }
+
+  watchSessionAccess(sessionId: string, userId: string) {
+    const db = getFirestore();
+    const docRef = doc(db, 'sessions', sessionId);
+
+    if (this.unsubscribeFirestore) {
+      this.unsubscribeFirestore();
+    }
+
+    this.unsubscribeFirestore = onSnapshot(docRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        const players = data['players'] || [];
+
+        if (!players.includes(userId)) {
+          this.handleKickOut();
+        }
+      } else {
+        this.handleKickOut();
+      }
+    }, (error) => {
+      if (error.code === 'permission-denied') {
+        this.handleKickOut();
+      }
+    });
+  }
+
+  private handleKickOut() {
+    this.showMessage('Acceso revocado de la sesión.', true);
+    this.router.navigate(['/login']);
   }
 
   async loadMySessions() {
@@ -69,6 +102,9 @@ export class SessionTestComponent implements OnInit, OnDestroy {
   }
 
   enterSession(sessionId: string) {
+    if (this.currentUser) {
+      this.watchSessionAccess(sessionId, this.currentUser.uid);
+    }
     this.router.navigate(['/choose-character'], { queryParams: { sessionId } });
   }
 
@@ -89,6 +125,7 @@ export class SessionTestComponent implements OnInit, OnDestroy {
         this.sessionPassword
       );
       this.sessionService.setCurrentSessionId(id);
+      this.watchSessionAccess(id, this.currentUser.uid);
       this.router.navigate(['/session', id]);
     } catch (e: any) {
       this.showMessage('Error: ' + e.message, true);
@@ -112,6 +149,9 @@ export class SessionTestComponent implements OnInit, OnDestroy {
         this.joinPassword
       );
       const sessionId = this.sessionService.getCurrentSessionId();
+      if (sessionId) {
+        this.watchSessionAccess(sessionId, this.currentUser.uid);
+      }
       this.router.navigate(['/choose-character'], { queryParams: { sessionId } });
     } catch (e: any) {
       this.showMessage('Error: ' + e.message, true);
@@ -121,9 +161,13 @@ export class SessionTestComponent implements OnInit, OnDestroy {
   private showMessage(msg: string, error: boolean) {
     this.message = msg;
     this.isError = error;
+    this.cd.markForCheck();
   }
 
   ngOnDestroy() {
     this.authSub?.unsubscribe();
+    if (this.unsubscribeFirestore) {
+      this.unsubscribeFirestore();
+    }
   }
 }

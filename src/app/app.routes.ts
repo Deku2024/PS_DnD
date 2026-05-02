@@ -41,6 +41,11 @@ export const routes: Routes = [
 		canActivate: [AuthGuard],
 	},
   {
+    path: 'sessions',
+    loadComponent: () => import('./pages/session-test/session-test.component').then(m => m.SessionTestComponent),
+    canActivate: [AuthGuard],
+  },
+  {
 		path: 'session/:id/dm-combat',
 		loadComponent: () => import('./pages/dm-combat/dm-combat').then(m => m.DmCombat),
 		canActivate: [AuthGuard],
