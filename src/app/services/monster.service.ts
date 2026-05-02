@@ -25,22 +25,22 @@ export class MonsterService {
     return await addDoc(this.monsterRef(), {...monster, userId});
   }
 
-readMonsters(userId: string, callback: (monsters: any[]) => void) {
-  const q = query(this.monsterRef(), where('userId', '==', userId));
+  readMonsters(userId: string, callback: (monsters: any[]) => void) {
+    const q = query(this.monsterRef(), where('userId', '==', userId));
 
-  return onSnapshot(q, snapshot => {
-    const monsters: MonsterData[] = [];
+    return onSnapshot(q, snapshot => {
+      const monsters: MonsterData[] = [];
 
-    snapshot.forEach(doc => {
-      monsters.push({
-        id: doc.id,
-        ...doc.data()
-      } as MonsterData);
+      snapshot.forEach(doc => {
+        monsters.push({
+          id: doc.id,
+          ...doc.data()
+        } as MonsterData);
+      });
+
+      callback(monsters);
     });
-
-    callback(monsters);
-  });
-}
+  }
 
   async deleteMonster(monsterId: string) {
     const monsterDoc = doc(this.Firebase.db, `monsters/${monsterId}`);
@@ -52,7 +52,7 @@ readMonsters(userId: string, callback: (monsters: any[]) => void) {
 
     return await updateDoc(monsterDoc, data);
   }
-  
+
   async getMonsterById(monsterId: string) {
     const docRef = doc(this.Firebase.db, `${this.collection}/${monsterId}`)
     try {
@@ -64,5 +64,5 @@ readMonsters(userId: string, callback: (monsters: any[]) => void) {
     console.error(error);
     return null;
   }
-  }
+}
 }
