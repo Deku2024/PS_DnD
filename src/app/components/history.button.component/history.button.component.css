@@ -1,0 +1,197 @@
+:host {
+  display: contents;
+}
+
+.history-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.btn-history {
+  position: relative;
+  background: transparent;
+  color: #c6a747;
+  border: 1px solid #c6a747;
+  padding: 0.65rem 1.5rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  transition: background 0.2s, color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-history:hover {
+  background: rgba(198, 167, 71, 0.15);
+  color: #e8d5a0;
+}
+
+.history-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #c6a747;
+  color: #1a1008;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 0.65rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+}
+
+.history-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.history-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 401;
+  background: #1e1208;
+  border: 1px solid rgba(198, 167, 71, 0.35);
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  max-height: 75vh;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.history-sheet.open {
+  transform: translateY(0);
+}
+
+.sheet-handle-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem 0.25rem;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: rgba(198, 167, 71, 0.35);
+  border-radius: 2px;
+}
+
+.sheet-close {
+  position: absolute;
+  right: 1.25rem;
+  background: transparent;
+  border: none;
+  color: #8a6e2f;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transition: color 0.15s;
+  width: auto;
+  margin-top: 0;
+}
+
+.sheet-close:hover {
+  color: #c6a747;
+}
+
+.sheet-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(198, 167, 71, 0.2);
+  flex-shrink: 0;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 0.6rem 0;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #5a4a20;
+  font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tab-btn.active {
+  color: #c6a747;
+  border-bottom-color: #c6a747;
+}
+
+.tab-badge {
+  background: rgba(198, 167, 71, 0.15);
+  color: #c6a747;
+  border: 1px solid rgba(198, 167, 71, 0.3);
+  border-radius: 10px;
+  padding: 0 6px;
+  font-size: 0.65rem;
+  font-family: monospace;
+}
+
+.sheet-empty {
+  padding: 2rem 1.25rem;
+  text-align: center;
+  color: #5a4a20;
+  font-size: 0.85rem;
+  font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+}
+
+.sheet-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.sheet-list::-webkit-scrollbar { width: 4px; }
+.sheet-list::-webkit-scrollbar-track { background: transparent; }
+.sheet-list::-webkit-scrollbar-thumb { background: rgba(198, 167, 71, 0.25); border-radius: 2px; }
+
+.sheet-footer {
+  flex-shrink: 0;
+  padding: 0.6rem 1.25rem 1rem;
+  border-top: 1px solid rgba(198, 167, 71, 0.15);
+}
+
+.btn-finalize {
+  width: 100%;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  padding: 0.6rem;
+  border-radius: 4px;
+  font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-finalize:hover {
+  background: rgba(239, 68, 68, 0.18);
+}

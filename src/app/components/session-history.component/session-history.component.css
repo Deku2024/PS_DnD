@@ -1,0 +1,100 @@
+.sheet-empty {
+  padding: 2rem 1.25rem;
+  text-align: center;
+  color: #5a4a20;
+  font-size: 0.85rem;
+  font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+}
+
+.sheet-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.sheet-list::-webkit-scrollbar { width: 4px; }
+.sheet-list::-webkit-scrollbar-track { background: transparent; }
+.sheet-list::-webkit-scrollbar-thumb { background: rgba(198, 167, 71, 0.25); border-radius: 2px; }
+
+.session-entry {
+  background: rgba(198, 167, 71, 0.05);
+  border: 1px solid rgba(198, 167, 71, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.session-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  cursor: pointer;
+  gap: 0.5rem;
+  transition: background 0.15s;
+}
+
+.session-header-row:hover {
+  background: rgba(198, 167, 71, 0.07);
+}
+
+.session-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.session-title {
+  font-size: 0.85rem;
+  color: #c6a747;
+  font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.session-meta {
+  font-size: 0.7rem;
+  color: #8a6e2f;
+}
+
+.session-chevron {
+  font-size: 0.9rem;
+  color: #8a6e2f;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+
+.session-chevron.open {
+  transform: rotate(180deg);
+}
+
+.session-body {
+  padding: 0 0.85rem 0.75rem;
+  border-top: 1px solid rgba(198, 167, 71, 0.1);
+}
+
+.session-description {
+  font-size: 0.8rem;
+  color: #a88a3a;
+  font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+  margin: 0.5rem 0 0.35rem;
+  line-height: 1.5;
+}
+
+.session-players {
+  font-size: 0.7rem;
+  color: #5a4a20;
+  margin: 0 0 0.5rem;
+}
+
+.session-rolls {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 0.5rem;
+}
