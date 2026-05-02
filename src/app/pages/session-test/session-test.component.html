@@ -3,7 +3,7 @@
   <p class="subtitle">Dungeons &amp; Dragons</p>
 
   <p class="uid" *ngIf="currentUser">
-    Aventurero: <strong>{{ currentUser.email }}</strong>
+    Aventurero: <strong>{{ currentUser.displayName }}</strong>
   </p>
   <p class="uid error" *ngIf="!currentUser">
     ⚠️ No hay usuario autenticado.

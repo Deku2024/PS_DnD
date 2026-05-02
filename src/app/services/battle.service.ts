@@ -3,10 +3,12 @@ import {CharacterService} from './character.service';
 import {SheetInterface} from '../interfaces/SheetInterface';
 import {inject, Injectable} from '@angular/core';
 import {DiceRollerService} from './roll-dice.service';
+import {UsernameService} from './username.service';
 
 export interface Combatant {
   uid: string;
   email: string;
+  username: string;
   characterId: string;
   character: SheetInterface | null;
   inCombat: boolean;
@@ -24,6 +26,7 @@ export class BattleService {
   private combatEntities: (SheetInterface | null)[] = []; // array para tener los datos de los objetos de manera centralizada para el combate
 
   rollerService = inject(DiceRollerService);
+  usernameService = inject(UsernameService);
 
   constructor(private sessionService: SessionService, private characterService: CharacterService) {
     this.status = 'not-combat';
@@ -53,10 +56,19 @@ export class BattleService {
 
   private async addPlayerToCombat(session: Session, uid: string, charId: string) {
     const email = session.playerEmails[uid] || uid;
+    const username = await this.usernameService.getUsernameFromEmail(email);
     const character = await this.characterService.getCharacterById(<string>charId);
     this.addToCombat(character as SheetInterface);
     this.combatants.push(
-      {uid, email, characterId: charId, character, inCombat: true, initiative: this.combatOrder.get(character?.name || '') || 0}
+      {
+        uid,
+        email,
+        username: username,
+        characterId: charId,
+        character: character,
+        inCombat: true,
+        initiative: this.combatOrder.get(character?.name || '') || 0
+      } as Combatant
     );
   }
 

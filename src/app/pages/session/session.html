@@ -30,24 +30,26 @@
     <div class="card">
       <h3>Dungeon Master</h3>
       <p class="player master-player">
-        👑 {{ session.playerEmails[session.masterId] || session.masterId }}
+        👑 {{ session.playersUsernames[session.masterId] || session.masterId }}
       </p>
     </div>
 
     <!-- Jugadores -->
     <div class="card">
-      <h3>Aventureros ({{ session.players.length }})</h3>
+      <h3>Aventureros ({{ session.players.length - 1 }})</h3>
       <ul class="players-list">
         <li *ngFor="let uid of session.players" [class.is-master]="uid === session.masterId">
-          <span class="presence-dot" [class.online]="presenceMap[uid]" [class.offline]="!presenceMap[uid]"></span>
-          <span class="player-icon">{{ uid === session.masterId ? '👑' : '🗡' }}</span>
-          <span class="player-email">{{ session.playerEmails[uid] || uid }}</span>
-          <span class="you-badge" *ngIf="currentUser && uid === currentUser.uid">(tú)</span>
-          <button
-            *ngIf="uid !== session.masterId"
-            class="btn-character"
-            (click)="openModal(uid)"
-            title="Ver ficha del personaje">📜</button>
+          @if (uid !== session.masterId) {
+
+            <span class="presence-dot" [class.online]="presenceMap[uid]" [class.offline]="!presenceMap[uid]"></span>
+            <span class="player-email">{{ session.playersUsernames[uid] || uid }}</span>
+            <span class="you-badge" *ngIf="currentUser && uid === currentUser.uid">(tú)</span>
+            <button
+              *ngIf="uid !== session.masterId"
+              class="btn-character"
+              (click)="openModal(uid)"
+              title="Ver ficha del personaje">📜</button>
+          }
         </li>
       </ul>
 

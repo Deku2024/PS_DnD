@@ -10,6 +10,7 @@ import { RollHistoryComponent } from '../../components/roll-history.component/ro
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
 import { BattleButtonComponent } from '../../components/battle.button.component/battle.button.component';
+import {UsernameService} from '../../services/username.service';
 
 @Component({
   selector: 'app-session',

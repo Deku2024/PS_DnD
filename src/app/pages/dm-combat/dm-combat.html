@@ -31,7 +31,7 @@
         <li *ngFor="let c of activeCombatants; let i = index" class="active-entry">
           <span class="turn-badge">{{ i + 1 }}</span>
           <div class="combatant-info">
-            <span class="combatant-name">{{ c.character?.name || c.email }}</span>
+            <span class="combatant-name">{{ c.character?.name || c.username }}</span>
             <span class="combatant-meta" *ngIf="c.character">{{ c.character.race }}</span>
             <span class="combatant-meta no-char" *ngIf="!c.character">Sin personaje</span>
           </div>
@@ -63,7 +63,7 @@
           </div>
 
           <div class="combatant-info">
-            <span class="combatant-name">{{ c.character?.name || c.email }}</span>
+            <span class="combatant-name">{{ c.character?.name || c.username }}</span>
             <span class="combatant-meta" *ngIf="c.character">{{ c.character.race }}</span>
             <span class="combatant-meta no-char" *ngIf="!c.character">Sin personaje</span>
           </div>
