@@ -17,6 +17,7 @@ import { FirebaseService } from './firebase.service';
 import { AuthService } from './auth.service';
 import { PresenceService } from './presence.service';
 import { Subscription } from 'rxjs';
+import {UsernameService} from './username.service';
 
 export interface Session {
   id?: string;
@@ -25,7 +26,9 @@ export interface Session {
   masterId: string;
   players: string[];
   playerEmails: { [uid: string]: string };
+  playersUsernames: { [uid: string]: string };
   selectedCharacters?: { [uid: string]: string | null };
+  combatOrder?: string[];
   status: 'waiting' | 'active' | 'paused' | 'closed' | 'in-battle';
   password?: string;
   createdAt?: any;
@@ -41,7 +44,8 @@ export class SessionService {
   constructor(
     private firebase: FirebaseService,
     private authService: AuthService,
-    private presenceService: PresenceService
+    private presenceService: PresenceService,
+    private usernameService: UsernameService,
   ) {
     // Keep track of auth state to start/stop presence when user signs in/out
     this.authSub = this.authService.onAuthState().subscribe((user) => {
@@ -100,12 +104,14 @@ export class SessionService {
   async createSession(name: string, masterId: string, masterEmail: string, password: string): Promise<string> {
     const code = await this.generateUniqueCode();
     const ref = collection(this.firebase.db, this.sessionsCol);
+    const masterUsername = await this.usernameService.getUsernameFromEmail(masterEmail);
     const docRef = await addDoc(ref, {
       code,
       name,
       masterId,
       players: [masterId],
       playerEmails: { [masterId]: masterEmail },
+      playersUsernames: { [masterId]: masterUsername },
       selectedCharacters: {},
       status: 'waiting',
       password,
@@ -168,6 +174,11 @@ export class SessionService {
       const { password, ...sessionWithoutPassword } = snap.data() as Session;
       callback({ id: snap.id, ...sessionWithoutPassword } as Session);
     });
+  }
+
+  async updateCombatOrder(sessionId: string, order: string[]): Promise<void> {
+    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
+    await updateDoc(ref, { combatOrder: order });
   }
 
   async updateStatus(sessionId: string, status: Session['status']): Promise<void> {
