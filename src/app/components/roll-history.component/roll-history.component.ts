@@ -15,17 +15,17 @@ export class RollHistoryComponent implements OnInit, OnDestroy {
   @Input() isMaster: boolean = false;
   @Input() currentUserId: string = '';
   @Input() playerEmails: { [uid: string]: string } = {};
+  @Input() playerUsernames: { [uid: string]: string } = {};
 
   isOpen: boolean = false;
   entries: RollHistoryEntry[] = [];
   private sub?: Subscription;
-
   constructor(private rollHistoryService: RollHistoryService) {}
 
   ngOnInit(): void {
     this.entries = this.rollHistoryService.getHistory(this.isMaster, this.currentUserId);
     this.sub = this.rollHistoryService.history$.subscribe(() => {
-      this.entries = this.rollHistoryService.getHistory(this.isMaster, this.currentUserId);
+        this.entries = this.rollHistoryService.getHistory(this.isMaster, this.currentUserId);
     });
   }
 
@@ -85,6 +85,12 @@ export class RollHistoryComponent implements OnInit, OnDestroy {
   }
 
   getPlayerName(entry: RollHistoryEntry): string {
+    if (this.playerUsernames && this.playerUsernames[entry.userId]) {
+      return this.playerUsernames[entry.userId];
+    }
+    if (entry.userName && !entry.userName.includes('@')) {
+      return entry.userName;
+    }
     return this.playerEmails[entry.userId] || entry.userName;
   }
 

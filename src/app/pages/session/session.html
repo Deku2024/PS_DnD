@@ -71,8 +71,9 @@
       <app-roll-history
           *ngIf="currentUser"
           [isMaster]="isMaster"
-          [currentUserId]="currentUser?.uid || ''"
-          [playerEmails]="session.playerEmails">
+          [currentUserId]="currentUser.uid"
+          [playerEmails]="session.playerEmails"
+          [playerUsernames]="session.playersUsernames">
       </app-roll-history>
     </div>
   </div>
