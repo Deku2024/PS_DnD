@@ -1,22 +1,22 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {
-  collection,
   addDoc,
+  arrayUnion,
+  collection,
   doc,
   getDoc,
   getDocs,
-  updateDoc,
-  arrayUnion,
   onSnapshot,
   query,
-  where,
   serverTimestamp,
-  Unsubscribe
+  Unsubscribe,
+  updateDoc,
+  where
 } from 'firebase/firestore';
-import { FirebaseService } from './firebase.service';
-import { AuthService } from './auth.service';
-import { PresenceService } from './presence.service';
-import { Subscription } from 'rxjs';
+import {FirebaseService} from './firebase.service';
+import {AuthService} from './auth.service';
+import {PresenceService} from './presence.service';
+import {Subscription} from 'rxjs';
 import {UsernameService} from './username.service';
 
 export interface Session {
@@ -156,9 +156,9 @@ export class SessionService {
       return;
     }
     if (session.password !== password) throw new Error('Contraseña incorrecta.');
-
     await updateDoc(doc(this.firebase.db, this.sessionsCol, docSnap.id), {
       players: arrayUnion(userId),
+      [`playersUsernames.${userId}`]: await this.usernameService.getUsernameFromEmail(userEmail) || "",
       [`playerEmails.${userId}`]: userEmail
     });
     this.setCurrentSessionId(docSnap.id);
