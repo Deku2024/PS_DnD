@@ -45,8 +45,6 @@ export class FinalizeSessionComponent implements OnInit {
     try {
       const allRolls = this.rollHistoryService.getHistory(true, '');
 
-      // 1. Creamos una copia de la lista de jugadores e incluimos al Master
-      // Esto asegura que tú también veas la sesión en el historial por ID de jugador
       const allParticipants = [...this.players];
       if (this.masterId && !allParticipants.includes(this.masterId)) {
         allParticipants.push(this.masterId);
@@ -58,14 +56,14 @@ export class FinalizeSessionComponent implements OnInit {
         description: this.finalizeDescription,
         masterId: this.masterId,
         masterName: this.masterName,
-        players: allParticipants, // <--- Usamos la lista completa con el Master
+        players: allParticipants,
         playerUsernames: this.playerUsernames,
         rollCount: allRolls.length,
         rolls: allRolls
       });
 
       await this.rollHistoryService.saveAndClear();
-      this.finalized.emit();
+      await this.rollHistoryService.deleteSessionRolls(this.sessionId);
     } finally {
       this.finalizing = false;
     }

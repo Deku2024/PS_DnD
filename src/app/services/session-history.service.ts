@@ -46,14 +46,9 @@ export class SessionHistoryService {
   }
 
   async getHistoryByPlayer(userId: string): Promise<SessionHistoryRecord[]> {
-    console.log("🔍 Buscando en 'session-history' para el ID:", userId); //
-
     const ref = collection(this.firebase.db, this.col);
     const q = query(ref, where('players', 'array-contains', userId), orderBy('finishedAt', 'desc'));
-
     const snap = await getDocs(q);
-    console.log("📄 Documentos brutos encontrados:", snap.size); //
-
     return snap.docs.map(d => ({ id: d.id, ...d.data() } as SessionHistoryRecord));
   }
 }
