@@ -56,13 +56,23 @@
     </div>
 
     <!-- Acciones -->
+
     <div class="actions">
-      <div class="btn-grp">
+      <div *ngIf="!isMaster">
+        <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
+      </div>
+
+      <div *ngIf="!isMaster">
+        <button class="btn-notes" (click)="goToCombat()">⚔ Combate</button>
+      </div>
+
+      <div class="btn-grp" *ngIf="isMaster">
         <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
         <button *ngIf="isMaster" class="btn-notes" (click)="goToNotes()">📝 Notas DM</button>
         <button class="btn-notes" (click)="goToCombat()">⚔ Combate</button>
       </div>
-      <div class="btn-grp">
+      
+      <div class="btn-grp" *ngIf="isMaster">
         <button
           *ngIf="isMaster"
           class="btn-toggle"
