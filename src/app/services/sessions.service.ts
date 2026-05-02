@@ -14,6 +14,7 @@ import {
   serverTimestamp,
   Unsubscribe
 } from 'firebase/firestore';
+import * as bcrypt from 'bcryptjs';
 import { FirebaseService } from './firebase.service';
 import { AuthService } from './auth.service';
 import { PresenceService } from './presence.service';
@@ -71,6 +72,9 @@ export class SessionService {
   }
 
   async createSession(name: string, masterId: string, masterEmail: string, password: string): Promise<string> {
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+
     const ref = collection(this.firebase.db, this.sessionsCol);
     const docRef = await addDoc(ref, {
       name,
@@ -79,7 +83,7 @@ export class SessionService {
       playerEmails: { [masterId]: masterEmail },
       selectedCharacters: {},
       status: 'waiting',
-      password,
+      password: passwordHash,
       createdAt: serverTimestamp()
     });
     this.setCurrentSessionId(docRef.id);
@@ -105,7 +109,9 @@ export class SessionService {
 
     if (session.status === 'closed') throw new Error('La sesión está cerrada.');
     if (session.players.includes(userId)) return;
-    if (session.password !== password) throw new Error('Contraseña incorrecta.');
+
+    const passwordMatch = await bcrypt.compare(password, session.password || '');
+    if (!passwordMatch) throw new Error('Contraseña incorrecta.');
 
     await updateDoc(ref, {
       players: arrayUnion(userId),
@@ -113,7 +119,6 @@ export class SessionService {
     });
   }
 
-  /** Expulsa a un jugador de la sesión (solo el master debe llamar esto) */
   async kickPlayer(sessionId: string, userId: string): Promise<void> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     const snap = await getDoc(ref);
