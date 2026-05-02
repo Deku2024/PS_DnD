@@ -1,0 +1,36 @@
+<div class="sheet-empty" *ngIf="loading">
+  <p>Cargando sesiones...</p>
+</div>
+
+<div class="sheet-empty" *ngIf="!loading && pastSessions.length === 0">
+  <p>No hay sesiones anteriores registradas.</p>
+</div>
+
+<div class="sheet-list" *ngIf="!loading && pastSessions.length > 0">
+  <div class="session-entry" *ngFor="let s of pastSessions">
+
+    <div class="session-header-row" (click)="toggleSession(s.id!)">
+      <div class="session-header-info">
+        <span class="session-title">{{ s.sessionName }}</span>
+        <span class="session-meta">{{ formatDate(s.finishedAt) }} · {{ s.rollCount }} tiradas</span>
+      </div>
+      <span class="session-chevron" [class.open]="expandedSessionId === s.id">▾</span>
+    </div>
+
+    <div class="session-body" *ngIf="expandedSessionId === s.id">
+      <p class="session-description" *ngIf="s.description">{{ s.description }}</p>
+      <p class="session-players">{{ s.players.length }} jugadores</p>
+
+      <div class="session-rolls" *ngIf="s.rolls && s.rolls.length > 0">
+        <app-roll-history-item
+          *ngFor="let entry of s.rolls.slice().reverse()"
+          [entry]="entry"
+          [compact]="true"
+          [showTime]="false"
+          [playerUsernames]="s.playerUsernames">
+        </app-roll-history-item>
+      </div>
+    </div>
+
+  </div>
+</div>
