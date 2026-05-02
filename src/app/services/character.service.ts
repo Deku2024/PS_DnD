@@ -1,31 +1,15 @@
 import { Injectable } from '@angular/core';
 import { collection, doc, getDoc, addDoc, query, where, getDocs, updateDoc, onSnapshot } from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
+import {SheetInterface} from '../interfaces/SheetInterface';
 
-export interface CharacterData {
-  userId: string;
+export interface CharacterData extends SheetInterface{
   sessionId: string;
-  name: string;
   age: number;
   experience: number;
-  life: number;
-  maxLife: number;
-  tempLife: number;
-  armourClass: number;
   race: string;
   class: string;
-  alignment: string;
-  attributes: {
-    strength: number;
-    dexterity: number;
-    constitution: number;
-    intelligence: number;
-    wisdom: number;
-    charisma: number;
-  };
-  gold: number;
-  inventory: { name: string; quantity: number; description: string }[];
-  abilities: { name: string; description: string }[];
+  money: number;
   updatedAt: string;
 }
 
@@ -76,6 +60,10 @@ export class CharacterService {
   async updateCharacter(characterId: string, data: Partial<Omit<CharacterData, 'userId' | 'sessionId' | 'updatedAt'>>): Promise<void> {
     const ref = doc(this.firebase.db, this.col, characterId);
     await updateDoc(ref, { ...data, updatedAt: new Date().toISOString() });
+  }
+
+  calculateBonus(characteristicValue: number): number {
+    return Math.floor((characteristicValue - 10) / 2);
   }
 
 }

@@ -7,11 +7,13 @@ import { CharacterService, CharacterData, CharacterWithId } from '../../services
 import { PresenceService } from '../../services/presence.service';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
+import { BattleButtonComponent } from '../../components/battle.button.component/battle.button.component';
+import {UsernameService} from '../../services/username.service';
 
 @Component({
   selector: 'app-session',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BattleButtonComponent],
   templateUrl: './session.html',
   styleUrl: './session.css'
 })
@@ -182,6 +184,11 @@ export class SessionPage implements OnInit, OnDestroy {
     if (!this.session?.id) return;
     this.sessionService.setCurrentSessionId(this.session.id);
     this.router.navigate(['/dm-notes'], { queryParams: { sessionId: this.session.id } });
+  }
+
+  goToCombat(): void {
+    if (!this.session?.id) return;
+    this.router.navigate(['/session', this.session.id, 'dm-combat']);
   }
 
   async leaveSession(): Promise<void> {

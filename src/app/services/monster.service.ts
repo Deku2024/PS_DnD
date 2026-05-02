@@ -1,0 +1,79 @@
+import { Injectable } from '@angular/core';
+import { doc, collection, addDoc, deleteDoc, query, onSnapshot, orderBy, updateDoc, where } from 'firebase/firestore';
+import { FirebaseService } from './firebase.service';
+
+export interface MonsterData {
+  id?: string
+  userId: string;
+  name: string;
+  armourClass: number;
+  race: string;
+  alignment: string;
+  challengeValue: number;
+  challengePX: number;
+  life: number;
+  maxLife: number;
+  tempLife: number;
+  attributes: {
+    strength: number;
+    dexterity: number;
+    constitution: number;
+    intelligence: number;
+    wisdom: number;
+    charisma: number;
+  };
+
+  inventory: { name: string; quantity: number; description: string }[];
+  abilities: { name: string; description: string }[];
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+export class MonsterService {
+  private readonly collection = 'monsters';
+
+  constructor(private Firebase: FirebaseService) {}
+
+  private monsterRef() {
+    return collection(this.Firebase.db, `${this.collection}`);
+  }
+
+  async createMonster(userId:string, monster: MonsterData) {
+    return await addDoc(this.monsterRef(), {...monster, userId});
+  }
+
+  getMonstersList(userId: string, callback: (monsters: MonsterData[]) => void) {
+    const q = query(this.monsterRef(), where('userId', '==', userId));
+    return onSnapshot(q, (snapshot: any) => {
+      const monsters: MonsterData[] = [];
+      snapshot.forEach((doc: any) => {
+        monsters.push({ id: doc.id, ...doc.data() } as MonsterData);
+      });
+      callback(monsters);
+    });
+  }
+
+  readMonster(monsterId: string, callback: (monsters: any) => void) {
+    const monsterDoc = doc(this.Firebase.db, `monsters/${monsterId}`);
+    return onSnapshot(monsterDoc, snapshot => {
+      if (snapshot.exists()) {
+        callback({
+          id: snapshot.id,
+          ...snapshot.data()
+        });
+      }
+    });
+  }
+
+  async deleteMonster(monsterId: string) {
+    const monsterDoc = doc(this.Firebase.db, `monsters/${monsterId}`);
+    return await deleteDoc(monsterDoc);
+  }
+
+  async updateMonster(monsterId: string, data: any) {
+    const monsterDoc = doc(this.Firebase.db, `monsters/${monsterId}`);
+
+    return await updateDoc(monsterDoc, data);
+  }
+}

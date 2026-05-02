@@ -1,0 +1,46 @@
+<aside class="bestiary-sidebar">
+  <div class="search-container">
+    <h3>Bestiario</h3>
+
+    <input type="text"
+           class="search-input"
+           placeholder="Buscar nombre o raza..."
+           [(ngModel)]="searchTerm"
+           (input)="applyFilters()">
+
+    <div class="extra-filters">
+      <div class="filter-group vd-group">
+        <label>VD:</label>
+        <input type="number"
+               placeholder="Ej: 5"
+               [(ngModel)]="filterVD"
+               (input)="applyFilters()">
+      </div>
+
+      <div class="filter-group">
+        <label>Orden:</label>
+        <select [(ngModel)]="sortOrder" (change)="applyFilters()">
+          <option value="asc">A-Z ↑</option>
+          <option value="desc">Z-A ↓</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="monster-list">
+    @for (monster of (filteredMonsters | slice:0:20); track monster.id) {      <div class="monster-card" (click)="selectMonster(monster)">
+        <div class="monster-info">
+          <h4>{{ monster.name }}</h4>
+          <span class="monster-race">{{ monster.race }}</span>
+        </div>
+        <div class="monster-vd">
+          VD {{ monster.challengeValue }}
+        </div>
+      </div>
+    }
+
+    @if (filteredMonsters.length === 0) {
+      <p class="empty-msg">No se encontraron monstruos en el tomo.</p>
+    }
+  </div>
+</aside>

@@ -65,7 +65,7 @@ export class PlayerSheet implements OnInit {
     { value: 'CN', label: 'Caótico neutral' },
     { value: 'LC', label: 'Legal caótico' },
     { value: 'NC', label: 'Neutral caótico' },
-    { value: 'LG', label: 'Caótico caótico' },
+    { value: 'CC', label: 'Caótico caótico' },
   ];
 
 
@@ -247,8 +247,7 @@ export class PlayerSheet implements OnInit {
     return this.playerSheetForm.get(controlName);
   }
 
-  getAttributesList() {
-    return [
+  private attributes_list = [
       { name: 'strength', label: 'Fuerza (STR)' },
       { name: 'dexterity', label: 'Destreza (DEX)' },
       { name: 'constitution', label: 'Constitución (CON)' },
@@ -256,7 +255,10 @@ export class PlayerSheet implements OnInit {
       { name: 'wisdom', label: 'Sabiduría (WIS)' },
       { name: 'charisma', label: 'Carisma (CHA)' }
     ];
+
+  getAttributesList() {
+    return this.attributes_list;
   }
 
-  protected readonly parseInt = parseInt; // ?? pa q sirve esto - Iván
+  protected readonly parseInt = parseInt;
 }
