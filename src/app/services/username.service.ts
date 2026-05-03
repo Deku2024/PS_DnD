@@ -46,4 +46,8 @@ export class UsernameService {
   async existsUsername(username: string) {
     return (await getDoc(doc(this.firebase.db, this.collectionName, username))).exists();
   }
+
+  getCurrentUsername(): string {
+    return this.firebase.auth.currentUser?.displayName || "";
+  }
 }
