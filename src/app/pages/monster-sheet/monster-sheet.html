@@ -1,4 +1,34 @@
-<div class="sheet-layout">
+<main>
+    <form [formGroup]="monsterSheetForm" class="monster-sheet-form" (ngSubmit)="onSubmit()">
+        <div>
+            <img
+            id="monster-image"
+            [src]="imagePreview || monsterSheetForm.value.image"
+            (click)="fileInput.click()"
+            alt="Character image"
+            >
+
+            <input
+            #fileInput
+            type="file"
+            accept="image/*"
+            style="display: none"
+            (change)="onFileSelected($event)"
+            >
+        </div>
+        <div id="basic-info" class="form-section">
+            <div class="field">
+                <label for="name">Nombre:</label>
+                <input type="text" id="name" formControlName="name" placeholder="Ej: Aragorn">
+
+                @if (monsterSheetForm.get('name')?.errors?.['required']) {
+                    <span class="error">El nombre es requerido</span>
+                }
+
+                @if (monsterSheetForm.get('name')?.errors?.['minlength']) {
+                    <span class="error">El nombre debe tener al menos 3 caracteres</span>
+                }
+            </div>
 
   <app-monster-search (monsterSelected)="loadMonster($event)"></app-monster-search>
 
@@ -195,5 +225,4 @@
     </form>
 
     <result-frame />
-  </main>
-</div>
+ </main>
