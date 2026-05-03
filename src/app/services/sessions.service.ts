@@ -1,18 +1,18 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {
-  collection,
   addDoc,
+  arrayUnion,
+  collection,
   doc,
   getDoc,
   getDocs,
-  updateDoc,
-  arrayUnion,
   arrayRemove,
   onSnapshot,
   query,
-  where,
   serverTimestamp,
-  Unsubscribe
+  Unsubscribe,
+  updateDoc,
+  where
 } from 'firebase/firestore';
 import * as bcrypt from 'bcryptjs';
 import { FirebaseService } from './firebase.service';
@@ -160,6 +160,7 @@ export class SessionService {
 
     await updateDoc(doc(this.firebase.db, this.sessionsCol, docSnap.id), {
       players: arrayUnion(userId),
+      [`playersUsernames.${userId}`]: await this.usernameService.getUsernameFromEmail(userEmail) || "",
       [`playerEmails.${userId}`]: userEmail
     });
     this.setCurrentSessionId(docSnap.id);
