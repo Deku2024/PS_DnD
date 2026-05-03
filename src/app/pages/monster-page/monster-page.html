@@ -5,6 +5,7 @@
             <p class="uid">{{ user?.displayName }}</p>
         </div>
         <button class="add-button" (click)="goToCreate()">+</button>
+        <button class="filter-button" (click)="openFilter()">Filtrar</button>
     </div>
     
     <hr class="divider" />
@@ -44,5 +45,20 @@
         </div>
     </div>
 
-    <button class="back-button" (click)="goBack()">← Volver</button>   
+    <button class="back-button" (click)="goBack()">← Volver</button>
+
+
+    @if (isFilterOpen) {
+        <div class="modal-backdrop" (click)="closeFilter()">
+            <div class="modal-content" (click)="$event.stopPropagation()">
+                
+                <button class="close-btn" (click)="closeFilter()">✕</button>
+    
+                <!-- Aquí metes tu componente de filtros -->
+                <app-monster-search></app-monster-search>
+    
+            </div>
+        </div>
+    }
+    
 </div>

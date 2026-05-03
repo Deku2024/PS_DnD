@@ -15,6 +15,7 @@ export class MonsterPage implements OnInit {
   monsters: MonsterData[] = [];
   unsubscribe: (() => void) | undefined;
   user: User | null = null;
+  isFilterOpen = false;
 
 
   constructor(private monsterService: MonsterService, private authService: AuthService, private router: Router, private ch: ChangeDetectorRef) {
@@ -60,6 +61,15 @@ export class MonsterPage implements OnInit {
 
   goToCreate() {
     this.router.navigate(['/monster-sheet']);
+  }
+
+  //lógica para modal en móviles
+  openFilter() {
+    this.isFilterOpen = true;
+  }
+
+  closeFilter() {
+    this.isFilterOpen = false;
   }
 
 }
