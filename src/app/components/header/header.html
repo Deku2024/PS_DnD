@@ -6,9 +6,102 @@
       <span class="header-title-sub">Dungeons &amp; Dragons</span>
     </div>
     <div class="header-actions">
-      <p>{{usernameService.getCurrentUsername()}}</p>
+      <p (click)="toggleShowAccountModal()">{{usernameService.getCurrentUsername()}}</p>
       <button class="logout-button" (click)="logout()" title="Cerrar sesión">Cerrar sesión</button>
     </div>
   </div>
   <div class="header-border-bottom"></div>
+
+  <!-- Modal 1: Información de la cuenta -->
+  @if (showAccountModal()) {
+    <div class="modal-overlay" (click)="toggleShowAccountModal()">
+      <div class="modal-content account-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Mi cuenta</h3>
+          <button class="close-btn" (click)="toggleShowAccountModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Usuario:</strong> {{ usernameService.getCurrentUsername() || 'Sin nombre' }}</p>
+          <p><strong>Email:</strong> {{ authService.getCurrentUser()?.email }}</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
+          <button class="btn-delete" (click)="openDeleteConfirm()">Borrar cuenta</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal 2: Confirmación inicial de borrado -->
+  @if (showDeleteConfirmModal()) {
+    <div class="modal-overlay" (click)="closeDeleteConfirm()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>⚠️ ¿Borrar cuenta?</h3>
+          <button class="close-btn" (click)="closeDeleteConfirm()">✕</button>
+        </div>
+        <div class="modal-body">
+          <p>Esta acción <strong>no se puede deshacer</strong>.</p>
+          <p>Se borrarán permanentemente:</p>
+          <ul>
+            <li>Tus personajes</li>
+            <li>Tus sesiones</li>
+            <li>Tus monstruos</li>
+            <li>Tu historial de tiradas</li>
+            <li>Todos tus datos asociados</li>
+          </ul>
+          <p class="warning">¿Estás completamente seguro?</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" (click)="closeDeleteConfirm()">Cancelar</button>
+          <button class="btn-confirm-delete" (click)="openEmailConfirm()">Sí, quiero borrar mi cuenta</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal 3: Confirmación con email y contraseña -->
+  @if (showConfirmModal()) {
+    <div class="modal-overlay" (click)="closeEmailConfirm()">
+      <div class="modal-content confirm-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Confirmación final</h3>
+          <button class="close-btn" (click)="closeEmailConfirm()">✕</button>
+        </div>
+        <div class="modal-body">
+          <p>Para borrar tu cuenta, confirma tus datos:</p>
+
+          <div class="field">
+            <label>Email de la cuenta:</label>
+            <input
+              type="email"
+              [(ngModel)]="confirmEmail"
+              placeholder="tu@correo.com"
+              class="confirm-input"
+            />
+          </div>
+
+          <div class="field">
+            <label>Contraseña:</label>
+            <input
+              type="password"
+              [(ngModel)]="confirmPassword"
+              placeholder="Tu contraseña"
+              class="confirm-input"
+            />
+          </div>
+
+          @if (deleteError) {
+            <p class="error">{{ deleteError }}</p>
+          }
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" (click)="closeEmailConfirm()">Cancelar</button>
+          <button class="btn-confirm-delete" (click)="confirmDeleteAccount()">
+            Borrar cuenta permanentemente
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </header>

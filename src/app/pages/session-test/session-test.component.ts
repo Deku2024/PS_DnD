@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -29,12 +29,13 @@ export class SessionTestComponent implements OnInit, OnDestroy {
   showMySessions = false;
   mySessionsLoading = false;
 
+  authService = inject(AuthService);
+
   private authSub?: Subscription;
   private unsubscribeFirestore?: Unsubscribe;
 
   constructor(
     private sessionService: SessionService,
-    private authService: AuthService,
     private router: Router,
     private cd: ChangeDetectorRef
   ) {}
