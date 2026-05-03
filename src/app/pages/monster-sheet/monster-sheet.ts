@@ -322,6 +322,10 @@ export class MonsterSheet implements OnInit {
     return this.attributes_list;
   }
 
+  goToBestiary() {
+    this.router.navigate(['/bestiary']);
+  }
+
   protected readonly parseInt = parseInt;
 
 
