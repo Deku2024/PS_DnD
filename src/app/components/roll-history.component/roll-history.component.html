@@ -1,0 +1,52 @@
+<div class="history-wrapper">
+
+  <button class="btn-history" (click)="toggle()">
+    Historial
+    <span class="history-badge" *ngIf="count > 0">{{ count }}</span>
+  </button>
+
+  <div class="history-overlay" *ngIf="isOpen" (click)="close()"></div>
+  <div class="history-sheet" [class.open]="isOpen">
+    <div class="sheet-handle-row">
+      <div class="sheet-handle"></div>
+      <button class="sheet-close" (click)="close()">✕</button>
+    </div>
+
+    <div class="sheet-header">
+      <span class="sheet-title">Historial de tiradas</span>
+      <span class="sheet-count" *ngIf="count > 0">{{ count }}</span>
+    </div>
+
+    <div class="sheet-empty" *ngIf="entries.length === 0">
+      <p>No hay tiradas en esta sesión.</p>
+    </div>
+
+    <div class="sheet-list" *ngIf="entries.length > 0">
+      <div class="roll-entry" *ngFor="let entry of entries.slice().reverse()">
+
+        <div class="roll-result" [ngClass]="getResultClass(entry)">
+          {{ entry.data.result }}
+        </div>
+
+        <div class="roll-info">
+          <span class="roll-label">{{ getThrowLabel(entry) }}{{ getTypeLabel(entry) }}</span>
+          <span class="roll-player">
+            {{ getPlayerName(entry) }}
+            &nbsp;•&nbsp; {{ getTimeAgo(entry) }}
+          </span>
+          <span class="roll-throws" *ngIf="entry.data.throws.length > 1">
+            Dados: {{ entry.data.throws.join(', ') }}
+          </span>
+        </div>
+
+        <span
+          class="roll-status"
+          [ngClass]="getStatusClass(entry)"
+          *ngIf="getStatusLabel(entry)">
+          {{ getStatusLabel(entry) }}
+        </span>
+
+      </div>
+    </div>
+  </div>
+</div>

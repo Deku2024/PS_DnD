@@ -1,0 +1,415 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #1a1008;
+  background-image:
+    radial-gradient(ellipse at top, #2a1a08 0%, #1a1008 60%),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c6a747' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    position: relative;
+    font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+h2 {
+    color: #d4a96a;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    display: block;
+    width: 100%;
+    padding-bottom: 0.5rem;
+}
+
+.uid {
+    color: #b8956a;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    font-style: italic;
+}
+
+.divider {
+    border: none;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #8b6914, #d4a96a, #8b6914, transparent);
+    margin-bottom: 2rem;
+}
+
+/* Header con el botón de añadir */
+.bestiario-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+.header-left {
+    flex: 1;
+}
+
+.add-button {
+    background: #5c3a1e;
+    color: #d4a96a;
+    border: 2px solid #8b6914;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.add-button:hover {
+    background: #7a4a28;
+    color: #f4d690;
+    border-color: #c49a2a;
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+}
+
+/* Layout principal con dos columnas */
+.main-layout {
+    display: flex;
+    gap: 2rem;
+    min-height: 500px;
+    position: relative;
+    z-index: 1;
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/* Barra de filtros - 30% */
+.filter-sidebar {
+    flex: 0 0 30%;
+    background: rgba(44, 24, 16, 0.85);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    height: fit-content;
+    position: sticky;
+    top: 2rem;
+    backdrop-filter: blur(5px);
+    border: 1px solid #8b6914;
+    border-top: 3px solid #d4a96a;
+}
+
+/* Sección de monstruos - 70% */
+.monsters-section {
+    flex: 0 0 70%;
+    overflow-x: hidden;
+    width: 100%;
+}
+
+.monsters {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+/* Estilos de las cards - layout rectangular horizontal */
+.card {
+    background: rgba(32, 20, 12, 0.9);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    transition: all 0.3s ease;
+    border: 1px solid #6b4a2a;
+    border-left: 4px solid #c49a2a;
+    backdrop-filter: blur(3px);
+    position: relative;
+    overflow: hidden;
+    font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    min-height: 110px;
+}
+
+.card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    background: rgba(44, 28, 20, 0.95);
+    border-left-color: #e4b94a;
+}
+
+/* Contenedor de la imagen */
+.image {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid #d4a056;
+    box-shadow: 0 0 0 2px #2c1810, 0 0 0 4px #8b6914;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: #3a2518;
+    background-image: radial-gradient(circle at 25% 40%, rgba(212, 160, 86, 0.2) 2%, transparent 2%);
+    background-size: 20px 20px;
+    transition: transform 0.3s ease;
+}
+
+.card:hover .image {
+    transform: scale(1.05);
+}
+
+.image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Sección de información (nombre) */
+.card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+}
+
+.card h3 {
+    color: #d4a96a;
+    font-size: 1.2rem;
+    margin: 0;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    word-break: break-word;
+    text-align: left;
+}
+
+/* Contenedor de botones - apilados verticalmente */
+.card-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.card button {
+    background: #2c1810;
+    border: 1px solid #6b4a2a;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+    font-weight: bold;
+    font-family: inherit;
+    white-space: nowrap;
+    width: auto;
+    min-width: 80px;
+}
+
+.card button:first-of-type {
+    background: #5c2a1e;
+    color: #d4a96a;
+    border-color: #8b4a2a;
+}
+
+.card button:first-of-type:hover {
+    background: #7a3a2a;
+    color: #f4d690;
+    transform: scale(1.02);
+}
+
+.card button:last-of-type {
+    background: #2a3a2a;
+    color: #90b86a;
+    border-color: #4a6a2a;
+}
+
+.card button:last-of-type:hover {
+    background: #3a5a3a;
+    color: #a0d47a;
+    transform: scale(1.02);
+}
+
+/* Mensaje cuando no hay monstruos */
+.monsters > span {
+    grid-column: span 2;
+    text-align: center;
+    color: #b8956a;
+    font-size: 1.2rem;
+    padding: 3rem;
+    background: rgba(32, 20, 12, 0.7);
+    border-radius: 12px;
+    border: 1px dashed #8b6914;
+    font-style: italic;
+    font-family: inherit;
+}
+
+/* Botón de volver */
+.back-button {
+    background: #2c1810;
+    color: #d4a96a;
+    border: 1px solid #8b6914;
+    padding: 0.75rem 1.5rem;
+    margin-top: 2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: all 0.2s;
+    display: inline-block;
+    font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+}
+
+.back-button:hover {
+    background: #3d2317;
+    color: #f4d690;
+    border-color: #c49a2a;
+    transform: translateX(-4px);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .main-layout {
+        gap: 1.5rem;
+    }
+    
+    .filter-sidebar {
+        flex: 0 0 35%;
+    }
+    
+    .monsters-section {
+        flex: 0 0 65%;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    .main-layout {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .filter-sidebar {
+        flex: 0 0 auto;
+        position: static;
+        width: 100%;
+    }
+    
+    .monsters-section {
+        flex: 0 0 auto;
+        width: 100%;
+    }
+    
+    .monsters {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    h2 {
+        font-size: 1.8rem;
+    }
+    
+    .bestiario-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .header-left {
+        text-align: center;
+    }
+    
+    .card {
+        padding: 0.8rem;
+        gap: 0.8rem;
+    }
+    
+    .image {
+        width: 55px;
+        height: 55px;
+    }
+    
+    .card h3 {
+        font-size: 1rem;
+    }
+    
+    .card button {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.6rem;
+        min-width: 70px;
+    }
+}
+
+@media (max-width: 480px) {
+    .card {
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .card-info {
+        text-align: center;
+        width: 100%;
+    }
+    
+    .card h3 {
+        text-align: center;
+    }
+    
+    .image {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .card-buttons {
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .add-button {
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+    }
+}
+
+/* Animación de entrada para las cartas */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.card {
+    animation: slideInLeft 0.4s ease-out forwards;
+}
