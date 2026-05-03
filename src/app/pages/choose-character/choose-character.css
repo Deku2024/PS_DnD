@@ -178,3 +178,24 @@ button:hover {
     background: rgba(180, 60, 50, 0.12);
   border-color: #c0564a;
 }
+
+.header-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 1rem;
+}
+
+.btn-back {
+  background: transparent;
+  color: #a5a5a5;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.btn-back:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
