@@ -21,6 +21,11 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'bestiary',
+    loadComponent: () => import('./pages/monster-page/monster-page').then(m => m.MonsterPage),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'monster-sheet',
     loadComponent: () => import('./pages/monster-sheet/monster-sheet').then((m) => m.MonsterSheet),
     canActivate: [AuthGuard],
@@ -40,6 +45,11 @@ export const routes: Routes = [
 		loadComponent: () => import('./pages/dm-notes/dm-notes').then(m => m.DmNotes),
 		canActivate: [AuthGuard],
 	},
+  {
+    path: 'sessions',
+    loadComponent: () => import('./pages/session-test/session-test.component').then(m => m.SessionTestComponent),
+    canActivate: [AuthGuard],
+  },
   {
 		path: 'session/:id/dm-combat',
 		loadComponent: () => import('./pages/dm-combat/dm-combat').then(m => m.DmCombat),

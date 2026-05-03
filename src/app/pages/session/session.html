@@ -17,7 +17,10 @@
     <div class="session-header">
       <div class="session-title-row">
         <h2>⚔ {{ session.name }}</h2>
-        <span class="badge" [class.badge-waiting]="session.status === 'waiting'" [class.badge-active]="session.status === 'active'" [class.badge-closed]="session.status === 'closed'">
+        <span class="badge"
+              [class.badge-waiting]="session.status === 'waiting'"
+              [class.badge-active]="session.status === 'active'"
+              [class.badge-closed]="session.status === 'closed'">
           {{ session.status }}
         </span>
       </div>
@@ -40,29 +43,48 @@
       <ul class="players-list">
         <li *ngFor="let uid of session.players" [class.is-master]="uid === session.masterId">
           @if (uid !== session.masterId) {
-
-            <span class="presence-dot" [class.online]="presenceMap[uid]" [class.offline]="!presenceMap[uid]"></span>
+            <span class="presence-dot"
+                  [class.online]="presenceMap[uid]"
+                  [class.offline]="!presenceMap[uid]">
+            </span>
             <span class="player-email">{{ session.playersUsernames[uid] || uid }}</span>
             <span class="you-badge" *ngIf="currentUser && uid === currentUser.uid">(tú)</span>
-            <button
-              *ngIf="uid !== session.masterId"
-              class="btn-character"
-              (click)="openModal(uid)"
-              title="Ver ficha del personaje">📜</button>
+
+            <div class="player-actions">
+              <button
+                class="btn-character"
+                (click)="openModal(uid)"
+                title="Ver ficha del personaje">📜
+              </button>
+              <button
+                *ngIf="isMaster"
+                class="btn-kick"
+                (click)="kickPlayer(uid)"
+                title="Expulsar jugador">✖
+              </button>
+            </div>
           }
         </li>
       </ul>
-
     </div>
 
     <!-- Acciones -->
+
     <div class="actions">
-      <div class="btn-grp">
+      <div *ngIf="!isMaster">
+        <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
+      </div>
+
+      <div *ngIf="!isMaster">
+        <button class="btn-notes" (click)="goToCombat()">⚔ Combate</button>
+      </div>
+
+      <div class="btn-grp" *ngIf="isMaster">
         <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
         <button *ngIf="isMaster" class="btn-notes" (click)="goToNotes()">📝 Notas DM</button>
         <button class="btn-notes" (click)="goToCombat()">⚔ Combate</button>
       </div>
-      <div class="btn-grp">
+      <div class="btn-grp" *ngIf="isMaster">
         <button
           *ngIf="isMaster"
           class="btn-toggle"
@@ -108,7 +130,9 @@
           <hr class="modal-divider" />
           <h4 class="modal-section-title">Habilidades</h4>
           <ul class="modal-list">
-            <li *ngFor="let a of modalCharacter.abilities"><strong>{{ a.name }}</strong> — {{ a.description }}</li>
+            <li *ngFor="let a of modalCharacter.abilities">
+              <strong>{{ a.name }}</strong> — {{ a.description }}
+            </li>
           </ul>
         </ng-container>
 
@@ -125,5 +149,4 @@
       </ng-template>
     </div>
   </div>
-
 </div>
