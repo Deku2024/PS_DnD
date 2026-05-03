@@ -3,10 +3,11 @@ import { MonsterData, MonsterService } from '../../services/monster.service';
 import { AuthService } from '../../services/auth.service';
 import { User } from 'firebase/auth';
 import { Router } from '@angular/router';
+import { MonsterSearchComponent } from '../../components/monster-search.component/monster-search.component';
 
 @Component({
   selector: 'app-monster-page',
-  imports: [],
+  imports: [MonsterSearchComponent],
   templateUrl: './monster-page.html',
   styleUrl: './monster-page.css',
 })

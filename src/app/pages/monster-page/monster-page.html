@@ -2,7 +2,7 @@
     <div class="bestiario-header">
         <div class="header-left">
             <h2>Bestiario de </h2>
-            <p class="uid">{{ user?.email }}</p>
+            <p class="uid">{{ user?.displayName }}</p>
         </div>
         <button class="add-button" (click)="goToCreate()">+</button>
     </div>
@@ -12,6 +12,7 @@
     <div class="main-layout">
         <!-- Barra de filtros - izquierda -->
         <div class="filter-sidebar">
+            <app-monster-search></app-monster-search>
         </div>
 
         <!-- Sección de monstruos - derecha -->
