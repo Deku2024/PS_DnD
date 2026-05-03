@@ -1,112 +1,109 @@
-<div class="session-page">
+  <div class="session-page">
 
-  <!-- Loading -->
-  <div class="loading-state" *ngIf="loading">
-    <span class="spinner">⏳</span>
-    <p>Cargando la sesión...</p>
-  </div>
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="loading">
+      <span class="spinner">⏳</span>
+      <p>Cargando la sesión...</p>
+    </div>
 
-  <!-- Error -->
-  <div class="error-state" *ngIf="!loading && errorMsg">
-    <p class="error-msg">{{ errorMsg }}</p>
-    <button class="btn-back" (click)="leaveSession()">← Volver al inicio</button>
-  </div>
+    <!-- Error -->
+    <div class="error-state" *ngIf="!loading && errorMsg">
+      <p class="error-msg">{{ errorMsg }}</p>
+      <button class="btn-back" (click)="leaveSession()">← Volver al inicio</button>
+    </div>
 
-  <!-- Sesión activa -->
-  <div class="session-content" *ngIf="!loading && session">
-    <div class="session-header">
-      <div class="session-title-row">
-        <h2>⚔ {{ session.name }}</h2>
-        <span class="badge"
-              [class.badge-waiting]="session.status === 'waiting'"
-              [class.badge-active]="session.status === 'active'"
-              [class.badge-closed]="session.status === 'closed'">
-          {{ session.status }}
-        </span>
+    <!-- Sesión activa -->
+    <div class="session-content" *ngIf="!loading && session">
+      <div class="session-header">
+        <div class="session-title-row">
+          <h2>⚔ {{ session.name }}</h2>
+          <span class="badge"
+                [class.badge-waiting]="session.status === 'waiting'"
+                [class.badge-active]="session.status === 'active'"
+                [class.badge-closed]="session.status === 'closed'">
+            {{ session.status }}
+          </span>
+        </div>
+        <p class="session-id">Código de sesión: <code>{{ session.code }}</code></p>
       </div>
-      <p class="session-id">Código de sesión: <code>{{ session.code }}</code></p>
-    </div>
 
-    <hr class="divider" />
+      <hr class="divider" />
 
-    <!-- Master -->
-    <div class="card">
-      <h3>Dungeon Master</h3>
-      <p class="player master-player">
-        👑 {{ session.playersUsernames[session.masterId] || session.masterId }}
-      </p>
-    </div>
+      <!-- Master -->
+      <div class="card">
+        <h3>Dungeon Master</h3>
+        <p class="player master-player">
+          👑 {{ session.playersUsernames[session.masterId] || session.masterId }}
+        </p>
+      </div>
 
-    <!-- Jugadores -->
-    <div class="card">
-      <h3>Aventureros ({{ session.players.length - 1 }})</h3>
-      <ul class="players-list">
-        <li *ngFor="let uid of session.players" [class.is-master]="uid === session.masterId">
-          @if (uid !== session.masterId) {
-            <span class="presence-dot"
-                  [class.online]="presenceMap[uid]"
-                  [class.offline]="!presenceMap[uid]">
-            </span>
-            <span class="player-email">{{ session.playersUsernames[uid] || uid }}</span>
-            <span class="you-badge" *ngIf="currentUser && uid === currentUser.uid">(tú)</span>
+      <!-- Jugadores -->
+      <div class="card">
+        <h3>Aventureros ({{ session.players.length - 1 }})</h3>
+        <ul class="players-list">
+          <li *ngFor="let uid of session.players" [class.is-master]="uid === session.masterId">
+            @if (uid !== session.masterId) {
+              <span class="presence-dot"
+                    [class.online]="presenceMap[uid]"
+                    [class.offline]="!presenceMap[uid]">
+              </span>
+              <span class="player-email">{{ session.playersUsernames[uid] || uid }}</span>
+              <span class="you-badge" *ngIf="currentUser && uid === currentUser.uid">(tú)</span>
 
-            <div class="player-actions">
-              <button
-                class="btn-character"
-                (click)="openModal(uid)"
-                title="Ver ficha del personaje">📜
-              </button>
-              <button
-                *ngIf="isMaster"
-                class="btn-kick"
-                (click)="kickPlayer(uid)"
-                title="Expulsar jugador">✖
-              </button>
-            </div>
-          }
-        </li>
-      </ul>
-    </div>
+              <div class="player-actions">
+                <button
+                  class="btn-character"
+                  (click)="openModal(uid)"
+                  title="Ver ficha del personaje">📜
+                </button>
+                <button
+                  *ngIf="isMaster"
+                  class="btn-kick"
+                  (click)="kickPlayer(uid)"
+                  title="Expulsar jugador">✖
+                </button>
+              </div>
+            }
+          </li>
+        </ul>
+      </div>
 
-    <!-- Acciones -->
-    <div class="actions">
-      <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
-      <button *ngIf="isMaster" class="btn-notes" (click)="goToNotes()">📝 Notas DM</button>
-      <button
-        *ngIf="session.status === 'in-battle'"
-        class="btn-notes"
-        (click)="goToCombat()">⚔ Batalla en curso</button>
-      <button
-        *ngIf="isMaster"
-        class="btn-toggle"
-        [ngClass]="session.status === 'paused' || session.status === 'waiting' ? 'btn-resume' : 'btn-pause'"
-        (click)="toggleSessionStatus()">
-        {{ session.status === 'paused' || session.status === 'waiting' ? '▶️ REANUDAR PARTIDA' : '⏸️ PAUSAR PARTIDA' }}
-      </button>
-      <battle-button-component
-        *ngIf="isMaster"
-        [hasActiveBattle]="session.status === 'in-battle'"/>
-      <history-button-component
-        *ngIf="currentUser"
-        [isMaster]="isMaster"
-        [currentUserId]="currentUser.uid"
-        [sessionId]="session.id || ''"
-        [sessionName]="session.name"
-        [masterId]="session.masterId"
-        [masterName]="session.playersUsernames[session.masterId] || session.masterId"
-        [players]="session.players"
-        [playerEmails]="session.playerEmails"
-        [playerUsernames]="session.playersUsernames">
-      </history-button-component>
-    </div>
-  </div>
-
-  <!-- Modal de personaje -->
-  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
-    <div class="modal-card" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>📜 {{ modalPlayerEmail }}</h3>
-        <button class="modal-close" (click)="closeModal()">✕</button>
+      <!-- Acciones -->
+      <div class="actions">
+        <div class="btn-grp">
+          <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
+          <button *ngIf="isMaster" class="btn-notes" (click)="goToNotes()">📝 Notas DM</button>
+          <button
+            *ngIf="session.status === 'in-battle'"
+            class="btn-notes"
+            (click)="goToCombat()">⚔ Batalla en curso
+          </button>
+        </div>
+        <div class="btn-grp">
+          <button
+            *ngIf="isMaster"
+            class="btn-toggle"
+            [ngClass]="session.status === 'paused' || session.status === 'waiting' ? 'btn-resume' : 'btn-pause'"
+            (click)="toggleSessionStatus()">
+            {{ session.status === 'paused' || session.status === 'waiting' ? '▶️ REANUDAR PARTIDA' : '⏸️ PAUSAR PARTIDA' }}
+          </button>
+          <battle-button-component
+            *ngIf="isMaster"
+            [hasActiveBattle]="session.status === 'in-battle'">
+          </battle-button-component>
+          <history-button-component
+            *ngIf="currentUser"
+            [isMaster]="isMaster"
+            [currentUserId]="currentUser.uid"
+            [sessionId]="session.id || ''"
+            [sessionName]="session.name"
+            [masterId]="session.masterId"
+            [masterName]="session.playersUsernames[session.masterId] || session.masterId"
+            [players]="session.players"
+            [playerEmails]="session.playerEmails"
+            [playerUsernames]="session.playersUsernames">
+          </history-button-component>
+        </div>
       </div>
 
       <div class="modal-body" *ngIf="modalCharacter; else noChar">
@@ -153,4 +150,3 @@
       </ng-template>
     </div>
   </div>
-</div>
