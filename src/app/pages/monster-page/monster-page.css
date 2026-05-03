@@ -318,6 +318,12 @@ h2 {
     }
 }
 
+.button-div {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+}
+
 @media (max-width: 768px) {
     .container {
         padding: 1rem;

@@ -4,8 +4,10 @@
             <h2>Bestiario de </h2>
             <p class="uid">{{ user?.displayName }}</p>
         </div>
-        <button class="add-button" (click)="goToCreate()">+</button>
-        <button class="filter-button" (click)="openFilter()">Filtrar</button>
+        <div class="button-div">
+            <button class="add-button" (click)="goToCreate()">+</button>
+            <button class="filter-button" (click)="openFilter()">Filtrar</button>
+        </div>
     </div>
     
     <hr class="divider" />
