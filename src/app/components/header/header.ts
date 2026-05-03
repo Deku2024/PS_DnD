@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import {UsernameService} from '../../services/username.service';
 
 @Component({
   selector: 'app-header',
@@ -8,6 +9,7 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './header.css'
 })
 export class Header {
+  usernameService = inject(UsernameService);
   constructor(private auth: AuthService, private router: Router) {}
 
   async logout(): Promise<void> {

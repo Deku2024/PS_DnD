@@ -17,4 +17,5 @@ export interface SheetInterface {
   };
   inventory: { name: string; quantity: number; description: string }[];
   abilities: { name: string; description: string }[];
+  image: string;
 }

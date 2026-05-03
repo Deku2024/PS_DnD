@@ -37,6 +37,7 @@
   margin-left: auto;
   display: flex;
   align-items: center;
+  gap: 10%;
 }
 
 .logout-button {
@@ -77,6 +78,11 @@
 .header-border-bottom {
   height: 2px;
   background: linear-gradient(90deg, transparent, #d4a056 20%, #8b6914 50%, #d4a056 80%, transparent);
+}
+
+p {
+  color: #d4a056;
+
 }
 
 @media (max-width: 480px) {
