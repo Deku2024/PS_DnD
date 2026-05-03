@@ -3,6 +3,9 @@
   <div class="combat-header">
     <button class="btn-back" (click)="goBack()">← Volver</button>
     <h2>⚔ Combate</h2>
+    <button class="btn-close-combat" *ngIf="isMaster && !loading" (click)="closeCombat()">
+      Cerrar combate
+    </button>
   </div>
 
   <div class="add-enemy-section" *ngIf="isMaster && !loading">

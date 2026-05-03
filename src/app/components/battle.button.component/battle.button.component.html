@@ -1,1 +1,19 @@
 <button (click)="startBattle()">Empezar batalla</button>
+
+<div class="battle-modal-overlay" *ngIf="showConfirmModal" (click)="closeConfirmModal()">
+  <div class="battle-modal-card" (click)="$event.stopPropagation()">
+    <div class="battle-modal-header">
+      <h3>Batalla en curso</h3>
+      <button class="modal-close" type="button" (click)="closeConfirmModal()">x</button>
+    </div>
+
+    <div class="battle-modal-body">
+      <p>Ya hay una batalla creada para esta sesion. Si empiezas otra, se sustituira el orden de combate actual.</p>
+    </div>
+
+    <div class="battle-modal-actions">
+      <button class="btn-cancel" type="button" (click)="closeConfirmModal()">Cancelar</button>
+      <button class="btn-confirm" type="button" (click)="confirmStartBattle()">Empezar batalla</button>
+    </div>
+  </div>
+</div>
