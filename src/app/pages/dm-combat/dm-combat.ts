@@ -45,7 +45,17 @@ export class DmCombat implements OnInit, OnDestroy {
     }
 
     this.unsubSession = this.sessionService.listenSession(id, (s) => {
-      if (s?.combatOrder) {
+      if (!s) {
+        this.router.navigate(['/home']);
+        return;
+      }
+
+      if (s.status !== 'in-battle') {
+        this.router.navigate(['/session', id]);
+        return;
+      }
+
+      if (s.combatOrder) {
         this.battleService.applySavedOrder(s.combatOrder);
         this.cd.detectChanges();
       }
@@ -108,6 +118,13 @@ export class DmCombat implements OnInit, OnDestroy {
   private saveOrder(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) this.battleService.saveOrder(id);
+  }
+
+  async closeCombat(): Promise<void> {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id || !this.isMaster) return;
+    await this.battleService.endCombat(id);
+    this.router.navigate(['/session', id]);
   }
 
   goBack(): void {

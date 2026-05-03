@@ -22,6 +22,7 @@
   align-items: center;
   gap: 1rem;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .combat-header h2 {
@@ -263,6 +264,26 @@
 .btn-back:hover {
   color: #c6a747;
   border-color: #c6a747;
+}
+
+.btn-close-combat {
+  margin-left: auto;
+  background: rgba(180, 60, 50, 0.08);
+  border: 1px solid rgba(180, 60, 50, 0.5);
+  border-radius: 4px;
+  color: #c0564a;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.82rem;
+  padding: 0.35rem 0.75rem;
+  letter-spacing: 0.04em;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn-close-combat:hover {
+  background: rgba(180, 60, 50, 0.14);
+  border-color: #c0564a;
+  color: #f0a39b;
 }
 
 /* ── Misc ── */
