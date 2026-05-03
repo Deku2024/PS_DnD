@@ -64,7 +64,7 @@
   border: 1px solid rgba(198, 167, 71, 0.35);
   border-bottom: none;
   border-radius: 12px 12px 0 0;
-  max-height: 75vh;
+  height: 75vh;
   display: flex;
   flex-direction: column;
   transform: translateY(100%);
@@ -156,11 +156,13 @@
   color: #5a4a20;
   font-size: 0.85rem;
   font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+  flex:1;
 }
 
 .sheet-list {
   overflow-y: auto;
   flex: 1;
+  min-height: 0;
   padding: 0.75rem 1.25rem;
   display: flex;
   flex-direction: column;

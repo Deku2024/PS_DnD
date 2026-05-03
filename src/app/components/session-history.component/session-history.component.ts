@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SessionHistoryService, SessionHistoryRecord } from '../../services/session-history.service';
 import { RollHistoryEntry } from '../../services/roll-history.service';
@@ -11,7 +11,7 @@ import { UsernameService } from '../../services/username.service';
   templateUrl: './session-history.component.html',
   styleUrl: './session-history.component.css'
 })
-export class SessionHistoryComponent implements OnInit {
+export class SessionHistoryComponent implements OnChanges {
   @Input() currentUserId: string = '';
   @Input() sessionId: string = '';
 
@@ -23,20 +23,25 @@ export class SessionHistoryComponent implements OnInit {
 
   constructor(
     private sessionHistoryService: SessionHistoryService,
-    private usernameService: UsernameService
+    private usernameService: UsernameService,
+    private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    this.load();
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['sessionId'] && this.sessionId) {
+      this.load();
+    }
   }
 
   async load(): Promise<void> {
+    this.pastSessions = [];
     this.loading = true;
     try {
       const data = await this.sessionHistoryService.getHistoryByPlayer(this.currentUserId);
       this.pastSessions = data.filter(s => s.sessionId === this.sessionId);
+      this.cdr.detectChanges();
     } catch (e) {
-      console.error('Error cargando:', e);
+      this.cdr.detectChanges();
     } finally {
       this.loading = false;
     }
@@ -77,7 +82,6 @@ export class SessionHistoryComponent implements OnInit {
         if (username) this.usernameCache[uid] = username;
       });
     }
-
     return fromRecord || uid;
   }
 
