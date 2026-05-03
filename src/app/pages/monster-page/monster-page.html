@@ -2,9 +2,12 @@
     <div class="bestiario-header">
         <div class="header-left">
             <h2>Bestiario de </h2>
-            <p class="uid">{{ user?.email }}</p>
+            <p class="uid">{{ user?.displayName }}</p>
         </div>
-        <button class="add-button" (click)="goToCreate()">+</button>
+        <div class="button-div">
+            <button class="add-button" (click)="goToCreate()">+</button>
+            <button class="filter-button" (click)="openFilter()">Filtrar</button>
+        </div>
     </div>
     
     <hr class="divider" />
@@ -12,6 +15,7 @@
     <div class="main-layout">
         <!-- Barra de filtros - izquierda -->
         <div class="filter-sidebar">
+            <app-monster-search></app-monster-search>
         </div>
 
         <!-- Sección de monstruos - derecha -->
@@ -43,5 +47,20 @@
         </div>
     </div>
 
-    <button class="back-button" (click)="goBack()">← Volver</button>   
+    <button class="back-button" (click)="goBack()">← Volver</button>
+
+
+    @if (isFilterOpen) {
+        <div class="modal-backdrop" (click)="closeFilter()">
+            <div class="modal-content" (click)="$event.stopPropagation()">
+                
+                <button class="close-btn" (click)="closeFilter()">✕</button>
+    
+                <!-- Aquí metes tu componente de filtros -->
+                <app-monster-search></app-monster-search>
+    
+            </div>
+        </div>
+    }
+    
 </div>

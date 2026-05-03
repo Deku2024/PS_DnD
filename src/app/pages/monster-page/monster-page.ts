@@ -3,10 +3,11 @@ import { MonsterData, MonsterService } from '../../services/monster.service';
 import { AuthService } from '../../services/auth.service';
 import { User } from 'firebase/auth';
 import { Router } from '@angular/router';
+import { MonsterSearchComponent } from '../../components/monster-search.component/monster-search.component';
 
 @Component({
   selector: 'app-monster-page',
-  imports: [],
+  imports: [MonsterSearchComponent],
   templateUrl: './monster-page.html',
   styleUrl: './monster-page.css',
 })
@@ -14,6 +15,7 @@ export class MonsterPage implements OnInit {
   monsters: MonsterData[] = [];
   unsubscribe: (() => void) | undefined;
   user: User | null = null;
+  isFilterOpen = false;
 
 
   constructor(private monsterService: MonsterService, private authService: AuthService, private router: Router, private ch: ChangeDetectorRef) {
@@ -59,6 +61,15 @@ export class MonsterPage implements OnInit {
 
   goToCreate() {
     this.router.navigate(['/monster-sheet']);
+  }
+
+  //lógica para modal en móviles
+  openFilter() {
+    this.isFilterOpen = true;
+  }
+
+  closeFilter() {
+    this.isFilterOpen = false;
   }
 
 }
