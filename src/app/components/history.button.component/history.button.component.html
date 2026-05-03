@@ -1,0 +1,69 @@
+<div class="history-wrapper">
+  <button class="btn-history" (click)="toggle()">
+    📜 Historial
+    <span class="history-badge" *ngIf="count > 0">{{ count }}</span>
+  </button>
+
+  <div class="history-overlay" *ngIf="isOpen" (click)="close()"></div>
+
+  <div class="history-sheet" [class.open]="isOpen">
+
+    <div class="sheet-handle-row">
+      <div class="sheet-handle"></div>
+      <button class="sheet-close" (click)="close()">✕</button>
+    </div>
+
+    <div class="sheet-tabs">
+      <button class="tab-btn" [class.active]="activeTab === 'rolls'" (click)="setTab('rolls')">
+        Tiradas
+        <span class="tab-badge" *ngIf="entries.length > 0">{{ entries.length }}</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'sessions'" (click)="setTab('sessions')">
+        Sesiones anteriores
+      </button>
+    </div>
+
+    <ng-container *ngIf="activeTab === 'rolls'">
+      <div class="sheet-empty" *ngIf="entries.length === 0">
+        <p>No hay tiradas en esta sesión.</p>
+      </div>
+
+      <div class="sheet-list" *ngIf="entries.length > 0">
+        <app-roll-history-item
+          *ngFor="let entry of entries.slice().reverse()"
+          [entry]="entry"
+          [playerUsernames]="playerUsernames"
+          [playerEmails]="playerEmails"
+          [showTime]="true">
+        </app-roll-history-item>
+      </div>
+
+      <div class="sheet-footer" *ngIf="isMaster">
+        <button class="btn-finalize" (click)="showFinalizeModal = true">
+          ⚑ Finalizar sesión
+        </button>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="activeTab === 'sessions'">
+      <session-history
+        [currentUserId]="currentUserId"
+        [sessionId]="sessionId">
+      </session-history>
+    </ng-container>
+
+  </div>
+
+  <finalize-session
+    *ngIf="showFinalizeModal"
+    [sessionId]="sessionId"
+    [sessionName]="sessionName"
+    [masterId]="masterId"
+    [masterName]="masterName"
+    [players]="players"
+    [playerUsernames]="playerUsernames"
+    [pastSessionCount]="pastSessionCount"
+    (finalized)="onFinalized()"
+    (cancelled)="showFinalizeModal = false">
+  </finalize-session>
+</div>
