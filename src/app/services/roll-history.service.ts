@@ -4,6 +4,7 @@ import { collection, addDoc, serverTimestamp, query, where, onSnapshot, orderBy,
 import { DiceRollerService, ThrowsResult } from './roll-dice.service';
 import { SessionService } from './sessions.service';
 import { FirebaseService } from './firebase.service';
+import { UsernameService } from './username.service';
 import { AuthService } from './auth.service';
 
 export interface RollHistoryEntry {
@@ -17,10 +18,10 @@ export interface RollHistoryEntry {
 @Injectable({ providedIn: 'root' })
 export class RollHistoryService implements OnDestroy {
   private historyList: RollHistoryEntry[] = [];
-  public lastSeenCount: number = 0;
   private historySubject = new Subject<RollHistoryEntry[]>();
-  public history$: Observable<RollHistoryEntry[]> = this.historySubject.asObservable();
 
+  public history$: Observable<RollHistoryEntry[]> = this.historySubject.asObservable();
+  public lastSeenCount: number = 0;
   private rollSub?: Subscription;
   private stopSnapshot?: () => void;
   private sessionStatus: string = 'active';
@@ -31,6 +32,7 @@ export class RollHistoryService implements OnDestroy {
     private diceRollerService: DiceRollerService,
     private sessionService: SessionService,
     private firebase: FirebaseService,
+    private usernameService: UsernameService,
     private authService: AuthService
   ) {
     this.rollSub = this.diceRollerService.lastResult$.subscribe(async (result) => {
@@ -40,13 +42,14 @@ export class RollHistoryService implements OnDestroy {
       const user = this.authService.getCurrentUser();
       if (!sessionId || !user) return;
 
+      const userName = this.usernameService.getCurrentUsername() || user.email || user.uid;
       const ref = collection(this.firebase.db, this.rollsCol);
       await addDoc(ref, {
         data: result,
         sessionId,
         timestamp: serverTimestamp(),
         userId: user.uid,
-        userName: user.email ?? user.uid
+        userName
       });
     });
   }

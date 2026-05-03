@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SessionHistoryService, SessionHistoryRecord } from '../../services/session-history.service';
 import { RollHistoryEntry } from '../../services/roll-history.service';
+import { UsernameService } from '../../services/username.service';
 
 @Component({
   selector: 'session-history',
@@ -18,8 +19,12 @@ export class SessionHistoryComponent implements OnInit {
   loading: boolean = false;
   expandedSessionId: string | null = null;
   expandedPlayerId: { [sessionId: string]: string | null } = {};
+  private usernameCache: { [uid: string]: string } = {};
 
-  constructor(private sessionHistoryService: SessionHistoryService) {}
+  constructor(
+    private sessionHistoryService: SessionHistoryService,
+    private usernameService: UsernameService
+  ) {}
 
   ngOnInit(): void {
     this.load();
@@ -28,7 +33,8 @@ export class SessionHistoryComponent implements OnInit {
   async load(): Promise<void> {
     this.loading = true;
     try {
-      this.pastSessions = await this.sessionHistoryService.getHistoryByPlayer(this.currentUserId);
+      const data = await this.sessionHistoryService.getHistoryByPlayer(this.currentUserId);
+      this.pastSessions = data.filter(s => s.sessionId === this.sessionId);
     } catch (e) {
       console.error('Error cargando:', e);
     } finally {
@@ -50,21 +56,37 @@ export class SessionHistoryComponent implements OnInit {
   }
 
   getPlayersInSession(s: SessionHistoryRecord): string[] {
-    return s.players;
+    if (s.masterId === this.currentUserId) return s.players;
+    return s.players.filter(uid => uid === this.currentUserId);
   }
 
   getPlayerInitial(uid: string, s: SessionHistoryRecord): string {
-    const name = s.playerUsernames?.[uid] || uid;
+    const name = this.getPlayerName(uid, s);
     return name.charAt(0).toUpperCase();
   }
 
   getPlayerName(uid: string, s: SessionHistoryRecord): string {
-    return s.playerUsernames?.[uid] || uid;
+    const fromRecord = s.playerUsernames?.[uid];
+    if (fromRecord && !fromRecord.includes('@') && fromRecord.length < 30) {
+      return fromRecord;
+    }
+    if (this.usernameCache[uid]) return this.usernameCache[uid];
+    const emailToSearch = fromRecord || '';
+    if (emailToSearch.includes('@')) {
+      this.usernameService.getUsernameFromEmail(emailToSearch).then(username => {
+        if (username) this.usernameCache[uid] = username;
+      });
+    }
+
+    return fromRecord || uid;
   }
 
   getRollsForPlayer(uid: string, s: SessionHistoryRecord): RollHistoryEntry[] {
     if (!s.rolls) return [];
-    return s.rolls.filter(r => r.userId === uid).reverse();
+    if (s.masterId === this.currentUserId) {
+      return s.rolls.filter(r => r.userId === uid).reverse();
+    }
+    return s.rolls.filter(r => r.userId === this.currentUserId).reverse();
   }
 
   getRollCountForPlayer(uid: string, s: SessionHistoryRecord): number {
