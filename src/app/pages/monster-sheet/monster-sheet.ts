@@ -24,7 +24,7 @@ import { MonsterSearchComponent } from '../../components/monster-search.componen
 
 @Component({
   selector: 'app-monster-sheet',
-  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, GeneralThrowsButtonComponent, InventoryItemComponent, AbilityComponent, ResultThrowFrameComponent, MonsterSearchComponent],
+  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, GeneralThrowsButtonComponent, InventoryItemComponent, AbilityComponent, ResultThrowFrameComponent],
   templateUrl: './monster-sheet.html',
   styleUrl: './monster-sheet.css',
 })
@@ -232,24 +232,6 @@ export class MonsterSheet implements OnInit {
     this.abilitiesFormArray.removeAt(index);
   }
 
-  loadMonster(monster: any) {
-    this.monsterId = monster.id;
-
-    this.monsterSheetForm.patchValue({
-      name: monster.name,
-      challengeValue: monster.challengeValue,
-      challengeXP: monster.challengePX || monster.challengeXP,
-      armourClass: monster.armourClass,
-      race: monster.race,
-      alignment: monster.alignment,
-      life: monster.life,
-      maxLife: monster.maxLife,
-      tempLife: monster.tempLife,
-      attributes: monster.attributes
-    });
-  }
-
-
   validateLifeNotExceedMax(): ValidatorFn {
     return (group: AbstractControl): { [key: string]: any } | null => {
       const life = group.get('life')?.value;
@@ -338,6 +320,10 @@ export class MonsterSheet implements OnInit {
 
   getAttributesList() {
     return this.attributes_list;
+  }
+
+  goToBestiary() {
+    this.router.navigate(['/bestiary']);
   }
 
   protected readonly parseInt = parseInt;
