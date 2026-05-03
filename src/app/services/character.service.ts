@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
-import { collection, doc, getDoc, addDoc, query, where, getDocs, updateDoc, onSnapshot } from 'firebase/firestore';
-import { FirebaseService } from './firebase.service';
+import {Injectable} from '@angular/core';
+import {addDoc, collection, doc, getDoc, getDocs, onSnapshot, query, updateDoc, where} from 'firebase/firestore';
+import {FirebaseService} from './firebase.service';
 import {SheetInterface} from '../interfaces/SheetInterface';
 
 export interface CharacterData extends SheetInterface{
