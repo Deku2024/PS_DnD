@@ -143,6 +143,8 @@ export class SessionService {
     const ref = collection(this.firebase.db, this.sessionsCol);
     const q = query(ref, where('code', '==', code.toUpperCase()));
     const snap = await getDocs(q);
+    const playerUsername = await this.usernameService.getUsernameFromEmail(userEmail);
+
 
     if (snap.empty) throw new Error('La sesión no existe.');
 
@@ -160,8 +162,10 @@ export class SessionService {
 
     await updateDoc(doc(this.firebase.db, this.sessionsCol, docSnap.id), {
       players: arrayUnion(userId),
-      [`playerEmails.${userId}`]: userEmail
-    });
+      [`playerEmails.${userId}`]: userEmail,
+      [`playersUsernames.${userId}`]: playerUsername ?? userEmail
+
+  });
     this.setCurrentSessionId(docSnap.id);
   }
 
