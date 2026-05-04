@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {FirebaseService} from './firebase.service';
-import {collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where} from 'firebase/firestore';
+import {collection, doc, getDoc, getDocs, query, setDoc, where} from 'firebase/firestore';
 
 export interface Relation {
   email: string;
@@ -49,9 +49,5 @@ export class UsernameService {
 
   getCurrentUsername(): string {
     return this.firebase.auth.currentUser?.displayName || "";
-  }
-
-  async removeCurrentUsername(username: string) {
-    await deleteDoc(doc(this.firebase.db, this.collectionName, username));
   }
 }

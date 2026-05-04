@@ -40,6 +40,29 @@ export class MonsterService {
 
       callback(monsters);
     });   
+   }
+  
+  getMonstersList(userId: string, callback: (monsters: MonsterData[]) => void) {
+    const q = query(this.monsterRef(), where('userId', '==', userId));
+    return onSnapshot(q, (snapshot: any) => {
+      const monsters: MonsterData[] = [];
+      snapshot.forEach((doc: any) => {
+        monsters.push({ id: doc.id, ...doc.data() } as MonsterData);
+      });
+      callback(monsters);
+    });
+  }
+
+  readMonster(monsterId: string, callback: (monsters: any) => void) {
+    const monsterDoc = doc(this.Firebase.db, `monsters/${monsterId}`);
+    return onSnapshot(monsterDoc, snapshot => {
+      if (snapshot.exists()) {
+        callback({
+          id: snapshot.id,
+          ...snapshot.data()
+        });
+      }
+    });
   }
 
   async deleteMonster(monsterId: string) {
