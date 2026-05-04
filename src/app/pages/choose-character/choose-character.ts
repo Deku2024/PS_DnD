@@ -80,4 +80,14 @@ export class ChooseCharacter implements OnInit {
   createNew() {
     this.router.navigate(['/player-sheet'], { queryParams: { sessionId: this.sessionId } });
   }
+
+  goBack() {
+    this.router.navigate(['/home']);
+  }
+
+  deleteCharacter(id: string): void {
+    if (id) {
+      this.characterService.deleteCharacter(id);
+    }
+  }
 }

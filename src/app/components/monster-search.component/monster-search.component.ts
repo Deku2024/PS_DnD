@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MonsterService, MonsterData } from '../../services/monster.service';
@@ -22,14 +22,16 @@ export class MonsterSearchComponent implements OnInit {
   sortOrder: 'asc' | 'desc' = 'asc';
 
   constructor(private monsterService: MonsterService,
-              private authService: AuthService) {}
+              private authService: AuthService,
+              private chr: ChangeDetectorRef) {}
 
   ngOnInit() {
     const user = this.authService.getCurrentUser();
     if (user) {
-      this.monsterService.getMonstersList(user.uid, (monsters) => {
+      this.monsterService.readMonsters(user.uid, (monsters) => {
         this.monstersList = monsters;
         this.applyFilters();
+        this.chr.detectChanges();
       });
     }
   }

@@ -1,0 +1,20 @@
+<div class="roll-entry" [class.compact]="compact">
+  <div class="roll-result" [ngClass]="getResultClass()">
+    {{ entry.data.result }}
+  </div>
+
+  <div class="roll-info">
+    <span class="roll-label">{{ getThrowLabel() }}{{ getTypeLabel() }}</span>
+    <span class="roll-player">
+      {{ getPlayerName() }}
+      <ng-container *ngIf="showTime">&nbsp;•&nbsp; {{ getTimeAgo() }}</ng-container>
+    </span>
+    <span class="roll-throws" *ngIf="entry.data.throws.length > 1">
+      Dados: {{ entry.data.throws.join(', ') }}
+    </span>
+  </div>
+
+  <span class="roll-status" [ngClass]="getStatusClass()" *ngIf="getStatusLabel()">
+    {{ getStatusLabel() }}
+  </span>
+</div>

@@ -101,6 +101,15 @@ export class BattleService {
     await this.sessionService.updateCombatOrder(sessionId, activeItems);
   }
 
+  public async endCombat(sessionId: string): Promise<void> {
+    this.status = 'ended';
+    this.combatOrder = new Map<string, number>();
+    this.combatants = [];
+    this.combatEntities = [];
+    await this.sessionService.updateCombatOrder(sessionId, []);
+    await this.sessionService.updateStatus(sessionId, 'active');
+  }
+
   public applySavedOrder(savedOrder: string[]): void {
     const active: Combatant[] = [];
     const incomingPlayerIds: string[] = [];

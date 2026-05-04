@@ -19,3 +19,103 @@ button:hover {
   background: rgba(198, 167, 71, 0.15);
   color: #e8d5a0;
 }
+
+.battle-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.battle-modal-card {
+  width: 100%;
+  max-width: 420px;
+  background: #1e1208;
+  border: 1px solid #c6a747;
+  border-radius: 6px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+  color: #c6a747;
+  font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+}
+
+.battle-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem 0.75rem;
+  border-bottom: 1px solid rgba(198, 167, 71, 0.2);
+}
+
+.battle-modal-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #c6a747;
+}
+
+.modal-close {
+  width: auto;
+  margin: 0;
+  padding: 2px 8px;
+  border: none;
+  border-radius: 3px;
+  color: #8a6e2f;
+  font-size: 1rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.modal-close:hover {
+  color: #c6a747;
+  background: rgba(198, 167, 71, 0.08);
+}
+
+.battle-modal-body {
+  padding: 1rem 1.25rem;
+}
+
+.battle-modal-body p {
+  margin: 0;
+  color: #a88a3a;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.battle-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  padding: 0 1.25rem 1.25rem;
+}
+
+.battle-modal-actions button {
+  width: auto;
+  margin: 0;
+}
+
+.btn-confirm {
+  color: #fecaca;
+  border-color: rgba(239, 68, 68, 0.65);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.btn-confirm:hover {
+  color: #fff1f2;
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.2);
+}
+
+@media (max-width: 480px) {
+  .battle-modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .battle-modal-actions button {
+    width: 100%;
+  }
+}

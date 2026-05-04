@@ -2,7 +2,10 @@ import {Injectable} from '@angular/core';
 import {FirebaseService} from './firebase.service';
 import {
   createUserWithEmailAndPassword,
+  deleteUser,
+  EmailAuthProvider,
   onAuthStateChanged,
+  reauthenticateWithCredential,
   sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
@@ -12,6 +15,8 @@ import {
 } from 'firebase/auth';
 import {Observable} from 'rxjs';
 import {UsernameService} from './username.service';
+import {collection, deleteDoc, doc, getDocs, query, where} from 'firebase/firestore';
+import {Session} from './sessions.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -76,14 +81,81 @@ export class AuthService {
     });
   }
 
-  getCurrentUsername(): string {
-    return this.getCurrentUser()?.displayName || '';
-  }
-
   async setUsernameToCurrentUser(username: string) : Promise<void> {
     let currentUser = this.getCurrentUser();
     if (currentUser === null) return;
     await updateProfile(currentUser, {displayName: username});
+  }
+
+  async deleteUserAccount(password: string) {
+    let currentUser = this.getCurrentUser();
+
+    if (!currentUser || !currentUser.email) {
+      return;
+    }
+
+    await reauthenticateWithCredential(currentUser, EmailAuthProvider.credential(<string>currentUser?.email, password));
+
+    await this.deleteUserData(currentUser);
+
+    await deleteUser(currentUser);
+  }
+
+  private async deleteUserData(currentUser: User) {
+    await deleteDoc(doc(this.firebase.db, 'usernameWithEmail', currentUser.displayName || ""));
+    await this.deleteUserSessions(currentUser);
+    await this.deleteUserCharacters(currentUser);
+    await this.deleteUserSessionHistories(currentUser);
+    await this.deleteUserMonsters(currentUser);
+  }
+
+  private async deleteUserMonsters(currentUser: User) {
+    (await getDocs(query(collection(this.firebase.db, 'monsters'), where('userId', '==', currentUser?.uid || "")))).forEach(doc => {
+      deleteDoc(doc.ref);
+    });
+  }
+
+  private async deleteUserSessionHistories(currentUser: User) {
+    (await getDocs(query(collection(this.firebase.db, 'session-history'), where('masterId', '==', currentUser?.uid || "")))).forEach(doc => {
+      deleteDoc(doc.ref);
+    });
+  }
+
+  private async deleteUserCharacters(currentUser: User) {
+    (await getDocs(query(collection(this.firebase.db, 'characters'), where('userId', '==', currentUser?.uid || "")))).forEach(doc => {
+      deleteDoc(doc.ref);
+    });
+  }
+  private async deleteUserSessions(currentUser: User) {
+    // para cada sesion en una query donde se obtienen todas las sesiones cuyo masteriId coincida con el del currentUser
+    for (
+      const sessionDoc
+      of (
+        await getDocs(
+          query(collection(this.firebase.db, 'sessions'),
+          where('masterId', '==', currentUser?.uid || ""))
+          )
+        )
+      .docs
+      )
+
+    {
+      await Promise.all(
+        (
+          // se obtienen los personajes cuyo sessionId coincida con el id de la sesión que está siendo iterada
+          await getDocs(
+            query(
+              collection(this.firebase.db, 'characters'
+              ),
+            where(
+              'sessionId', '==', ({id: sessionDoc.id, ...sessionDoc.data()} as Session).id)
+            )
+          )
+        ).docs.map(characterDoc =>
+        deleteDoc(characterDoc.ref) // y se borra cada uno
+      ));
+      await deleteDoc(sessionDoc.ref); // por último, se borra la sesión
+    }
   }
 
   /**

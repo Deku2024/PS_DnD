@@ -1,0 +1,66 @@
+<div class="container">
+    <div class="bestiario-header">
+        <div class="header-left">
+            <h2>Bestiario de </h2>
+            <p class="uid">{{ user?.displayName }}</p>
+        </div>
+        <div class="button-div">
+            <button class="add-button" (click)="goToCreate()">+</button>
+            <button class="filter-button" (click)="openFilter()">Filtrar</button>
+        </div>
+    </div>
+    
+    <hr class="divider" />
+    
+    <div class="main-layout">
+        <!-- Barra de filtros - izquierda -->
+        <div class="filter-sidebar">
+            <app-monster-search></app-monster-search>
+        </div>
+
+        <!-- Sección de monstruos - derecha -->
+        <div class="monsters-section">
+            <div class="monsters">
+                @if (monsters.length === 0) {
+                    <span>No tienes monstruos todavía</span>
+                }
+            
+                @for (monster of monsters; track $index) {
+                    <div class="card">
+                        <div class="image">
+                            <img
+                                [src]="monster.image || 'assets/default-monster.jpg'"
+                                [alt]="monster.name"
+                                (error)="monster.image = 'assets/default-monster.jpg'"
+                            >
+                        </div>
+                        <div class="card-info">
+                            <h3>{{ capitalize(monster.name) }}</h3>
+                        </div>
+                        <div class="card-buttons">
+                            <button (click)="deleteMonster(monster)">Eliminar</button>
+                            <button (click)="editMonster(monster)">Editar</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <button class="back-button" (click)="goBack()">← Volver</button>
+
+
+    @if (isFilterOpen) {
+        <div class="modal-backdrop" (click)="closeFilter()">
+            <div class="modal-content" (click)="$event.stopPropagation()">
+                
+                <button class="close-btn" (click)="closeFilter()">✕</button>
+    
+                <!-- Aquí metes tu componente de filtros -->
+                <app-monster-search></app-monster-search>
+    
+            </div>
+        </div>
+    }
+    
+</div>
