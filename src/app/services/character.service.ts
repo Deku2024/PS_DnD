@@ -3,13 +3,20 @@ import { collection, doc, getDoc, addDoc, query, where, getDocs, updateDoc, onSn
 import { FirebaseService } from './firebase.service';
 import {SheetInterface} from '../interfaces/SheetInterface';
 
+export interface Money {
+  ppt: number;
+  po: number;
+  pe: number;
+  pp: number;
+  pc: number;
+}
 export interface CharacterData extends SheetInterface{
   sessionId: string;
   age: number;
   experience: number;
   race: string;
   class: string;
-  money: number;
+  money: Money;
   updatedAt: string;
 }
 

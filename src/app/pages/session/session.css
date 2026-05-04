@@ -457,11 +457,11 @@ h2 {
 .actions {
   display: flex;
   justify-content: center;
-  gap: 2rem;
+  gap: 0.5rem;
   margin-top: 2rem;
 }
 
-.btn-back {
+.btn-back, btn-notes, btn-toggle {
   background: transparent;
   color: #c6a747;
   border: 1px solid #c6a747;
@@ -532,17 +532,16 @@ h2 {
   flex-direction: column;
   width: 250px;
   gap: 0.75rem;
+  align-items: stretch;
 }
-
-btn-grp button,.btn-grp history-button-component,
-.btn-grp battle-button-component {
+.battle-button-component,
+.btn-grp button,
+.history-button-component{
   width: 100%;
-  white-space: nowrap;
-  display: flex;
+  box-sizing: border-box;
+  display: block;
   align-items: center;
-  justify-content: center;
-  padding: 0.7rem 1rem;
-  font-size: 0.75rem;
+
 }
 
 @media (max-width: 480px) {

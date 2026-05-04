@@ -68,29 +68,15 @@
         </ul>
       </div>
 
-      <!-- Acciones -->
       <div class="actions">
-        <div class="btn-grp">
+
+        <div *ngIf="!isMaster">
           <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
-          <button *ngIf="isMaster" class="btn-notes" (click)="goToNotes()">📝 Notas DM</button>
-          <button
-            *ngIf="session.status === 'in-battle'"
-            class="btn-notes"
-            (click)="goToCombat()">⚔ Batalla en curso
-          </button>
         </div>
-        <div class="btn-grp">
-          <button
-            *ngIf="isMaster"
-            class="btn-toggle"
-            [ngClass]="session.status === 'paused' || session.status === 'waiting' ? 'btn-resume' : 'btn-pause'"
-            (click)="toggleSessionStatus()">
-            {{ session.status === 'paused' || session.status === 'waiting' ? '▶️ REANUDAR PARTIDA' : '⏸️ PAUSAR PARTIDA' }}
-          </button>
-          <battle-button-component
-            *ngIf="isMaster"
-            [hasActiveBattle]="session.status === 'in-battle'">
-          </battle-button-component>
+        <div *ngIf="!isMaster">
+          <button class="btn-notes" (click)="goToCombat()">⚔ Combate</button>
+        </div>
+        <div *ngIf="!isMaster">
           <history-button-component
             *ngIf="currentUser"
             [isMaster]="isMaster"
@@ -104,49 +90,97 @@
             [playerUsernames]="session.playersUsernames">
           </history-button-component>
         </div>
-      </div>
 
-      <div class="modal-body" *ngIf="modalCharacter; else noChar">
-        <div class="char-row"><span>Nombre</span><strong>{{ modalCharacter.name }}</strong></div>
-        <div class="char-row"><span>Raza</span><strong>{{ modalCharacter.race }}</strong></div>
-        <div class="char-row"><span>Clase</span><strong>{{ modalCharacter.class }}</strong></div>
-        <div class="char-row"><span>Alineamiento</span><strong>{{ modalCharacter.alignment }}</strong></div>
-        <div class="char-row"><span>Experiencia</span><strong>{{ modalCharacter.experience }}</strong></div>
-        <div class="char-row"><span>Vida</span><strong>{{ modalCharacter.life }} / {{ modalCharacter.maxLife }}</strong></div>
-        <div class="char-row"><span>Armadura</span><strong>{{ modalCharacter.armourClass }}</strong></div>
-        <div class="char-row"><span>Oro</span><strong>{{ modalCharacter.money }}</strong></div>
-
-        <hr class="modal-divider" />
-        <h4 class="modal-section-title">Atributos</h4>
-        <div class="attrs-grid">
-          <div class="attr-item"><span>FUE</span><strong>{{ modalCharacter.attributes.strength }}</strong></div>
-          <div class="attr-item"><span>DES</span><strong>{{ modalCharacter.attributes.dexterity }}</strong></div>
-          <div class="attr-item"><span>CON</span><strong>{{ modalCharacter.attributes.constitution }}</strong></div>
-          <div class="attr-item"><span>INT</span><strong>{{ modalCharacter.attributes.intelligence }}</strong></div>
-          <div class="attr-item"><span>SAB</span><strong>{{ modalCharacter.attributes.wisdom }}</strong></div>
-          <div class="attr-item"><span>CAR</span><strong>{{ modalCharacter.attributes.charisma }}</strong></div>
+        <div class="btn-grp" *ngIf="isMaster">
+          <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
+          <ng-container *ngIf="isMaster">
+            <button class="btn-notes" (click)="goToNotes()">📝 Notas DM</button>
+          </ng-container>
+          <button class="btn-notes" (click)="goToCombat()">⚔ Combate</button>
         </div>
 
-        <ng-container *ngIf="modalCharacter.abilities && modalCharacter.abilities.length > 0">
+        <div class="btn-grp" *ngIf="isMaster">
+          <button
+            *ngIf="isMaster"
+            class="btn-toggle"
+            [ngClass]="session.status === 'paused' || session.status === 'waiting' ? 'btn-resume' : 'btn-pause'"
+            (click)="toggleSessionStatus()">
+            {{ session.status === 'paused' || session.status === 'waiting' ? '▶️ REANUDAR PARTIDA' : '⏸️ PAUSAR PARTIDA' }}
+          </button>
+          <battle-button-component *ngIf="isMaster"/>
+          <history-button-component
+            *ngIf="currentUser"
+            [isMaster]="isMaster"
+            [currentUserId]="currentUser.uid"
+            [sessionId]="session.id || ''"
+            [sessionName]="session.name"
+            [masterId]="session.masterId"
+            [masterName]="session.playersUsernames[session.masterId] || session.masterId"
+            [players]="session.players"
+            [playerEmails]="session.playerEmails"
+            [playerUsernames]="session.playersUsernames"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de personaje -->
+    <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>📜 {{ modalPlayerEmail }}</h3>
+          <button class="modal-close" (click)="closeModal()">✕</button>
+        </div>
+
+        <div class="modal-body" *ngIf="modalCharacter; else noChar">
+          <div class="char-row"><span>Nombre</span><strong>{{ modalCharacter.name }}</strong></div>
+          <div class="char-row"><span>Raza</span><strong>{{ modalCharacter.race }}</strong></div>
+          <div class="char-row"><span>Clase</span><strong>{{ modalCharacter.class }}</strong></div>
+          <div class="char-row"><span>Alineamiento</span><strong>{{ modalCharacter.alignment }}</strong></div>
+          <div class="char-row"><span>Experiencia</span><strong>{{ modalCharacter.experience }}</strong></div>
+          <div class="char-row"><span>Vida</span><strong>{{ modalCharacter.life }} / {{ modalCharacter.maxLife }}</strong></div>
+          <div class="char-row"><span>Armadura</span><strong>{{ modalCharacter.armourClass }}</strong></div>
+          <div class="char-row">
+            <span>PPT / PO / PE / PP / PC</span>
+            <div class="money-values">
+              <strong>{{ modalCharacter?.money?.ppt ?? 0 }}</strong> /
+              <strong>{{ modalCharacter?.money?.po ?? 0 }}</strong> /
+              <strong>{{ modalCharacter?.money?.pe ?? 0 }}</strong> /
+              <strong>{{ modalCharacter?.money?.pp ?? 0 }}</strong> /
+              <strong>{{ modalCharacter?.money?.pc ?? 0 }}</strong>
+            </div>
+          </div>
           <hr class="modal-divider" />
-          <h4 class="modal-section-title">Habilidades</h4>
-          <ul class="modal-list">
-            <li *ngFor="let a of modalCharacter.abilities">
-              <strong>{{ a.name }}</strong> — {{ a.description }}
-            </li>
-          </ul>
-        </ng-container>
+          <h4 class="modal-section-title">Atributos</h4>
+          <div class="attrs-grid">
+            <div class="attr-item"><span>FUE</span><strong>{{ modalCharacter.attributes.strength }}</strong></div>
+            <div class="attr-item"><span>DES</span><strong>{{ modalCharacter.attributes.dexterity }}</strong></div>
+            <div class="attr-item"><span>CON</span><strong>{{ modalCharacter.attributes.constitution }}</strong></div>
+            <div class="attr-item"><span>INT</span><strong>{{ modalCharacter.attributes.intelligence }}</strong></div>
+            <div class="attr-item"><span>SAB</span><strong>{{ modalCharacter.attributes.wisdom }}</strong></div>
+            <div class="attr-item"><span>CAR</span><strong>{{ modalCharacter.attributes.charisma }}</strong></div>
+          </div>
 
-        <div class="modal-actions" *ngIf="currentUser && modalUid === currentUser.uid">
-          <button class="btn-edit-char" (click)="editMyCharacter()">✏ Editar mi personaje</button>
-          <button class="btn-change-char" (click)="changeMyCharacter()">🔁 Cambiar personaje</button>
+          <ng-container *ngIf="modalCharacter.abilities && modalCharacter.abilities.length > 0">
+            <hr class="modal-divider" />
+            <h4 class="modal-section-title">Habilidades</h4>
+            <ul class="modal-list">
+              <li *ngFor="let a of modalCharacter.abilities">
+                <strong>{{ a.name }}</strong> — {{ a.description }}
+              </li>
+            </ul>
+          </ng-container>
+
+          <div class="modal-actions" *ngIf="currentUser && modalUid === currentUser.uid">
+            <button class="btn-edit-char" (click)="editMyCharacter()">✏ Editar mi personaje</button>
+            <button class="btn-change-char" (click)="changeMyCharacter()">🔁 Cambiar personaje</button>
+          </div>
         </div>
+
+        <ng-template #noChar>
+          <div class="modal-body">
+            <p class="no-char">Este jugador aún no tiene personaje creado.</p>
+          </div>
+        </ng-template>
       </div>
-
-      <ng-template #noChar>
-        <div class="modal-body">
-          <p class="no-char">Este jugador aún no tiene personaje creado.</p>
-        </div>
-      </ng-template>
     </div>
   </div>
