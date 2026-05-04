@@ -1,14 +1,16 @@
 :host {
-  display: contents;
+  display: block;
+  width: 100%;
 }
 
 .history-wrapper {
   position: relative;
-  display: inline-block;
+  display: block;
+  width: 100%;
 }
 
 .btn-history {
-  position: relative;
+  width: 100%;
   background: transparent;
   color: #c6a747;
   border: 1px solid #c6a747;
@@ -20,13 +22,16 @@
   letter-spacing: 0.15em;
   text-transform: uppercase;
   transition: background 0.2s, color 0.2s;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  width: 100%;
-  margin-top: 2.5%;
-  margin-bottom: 2.5%;
+  gap: 0.5rem;
+  box-sizing: border-box;
+}
+
+.btn-history:hover {
+  background: rgba(198, 167, 71, 0.15);
+  color: #e8d5a0;
 }
 
 .btn-history:hover {
@@ -68,7 +73,7 @@
   border: 1px solid rgba(198, 167, 71, 0.35);
   border-bottom: none;
   border-radius: 12px 12px 0 0;
-  max-height: 75vh;
+  height: 75vh;
   display: flex;
   flex-direction: column;
   transform: translateY(100%);
@@ -160,11 +165,13 @@
   color: #5a4a20;
   font-size: 0.85rem;
   font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+  flex:1;
 }
 
 .sheet-list {
   overflow-y: auto;
   flex: 1;
+  min-height: 0;
   padding: 0.75rem 1.25rem;
   display: flex;
   flex-direction: column;

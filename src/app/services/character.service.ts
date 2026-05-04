@@ -1,15 +1,22 @@
 import { Injectable } from '@angular/core';
-import { collection, doc, getDoc, addDoc, query, where, getDocs, updateDoc, onSnapshot, deleteDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, addDoc, query, where, getDocs, updateDoc, onSnapshot } from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
 import {SheetInterface} from '../interfaces/SheetInterface';
 
+export interface Money {
+  ppt: number;
+  po: number;
+  pe: number;
+  pp: number;
+  pc: number;
+}
 export interface CharacterData extends SheetInterface{
   sessionId: string;
   age: number;
   experience: number;
   race: string;
   class: string;
-  money: number;
+  money: Money;
   updatedAt: string;
 }
 
@@ -64,11 +71,6 @@ export class CharacterService {
 
   calculateBonus(characteristicValue: number): number {
     return Math.floor((characteristicValue - 10) / 2);
-  }
-
-  async deleteCharacter(characterId: string) {
-    const docRef = doc(this.firebase.db, `${this.col}/${characterId}`);
-    return await deleteDoc(docRef);
   }
 
 }

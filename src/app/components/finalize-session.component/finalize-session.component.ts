@@ -63,7 +63,15 @@ export class FinalizeSessionComponent implements OnInit {
       });
 
       await this.rollHistoryService.saveAndClear();
-      await this.rollHistoryService.deleteSessionRolls(this.sessionId);
+      try {
+        await this.rollHistoryService.deleteSessionRolls(this.sessionId);
+      } catch (e) {
+        console.warn('No se pudieron borrar los rolls de Firestore:', e);
+      }
+
+      this.finalized.emit();
+    } catch (e) {
+      console.error('Error al finalizar sesión:', e);
     } finally {
       this.finalizing = false;
     }

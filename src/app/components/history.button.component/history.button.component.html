@@ -44,13 +44,11 @@
         </button>
       </div>
     </ng-container>
-
-    <ng-container *ngIf="activeTab === 'sessions'">
-      <session-history
-        [currentUserId]="currentUserId"
-        [sessionId]="sessionId">
-      </session-history>
-    </ng-container>
+    <session-history
+      [style.display]="activeTab === 'sessions' ? 'contents' : 'none'"
+      [currentUserId]="currentUserId"
+      [sessionId]="sessionId">
+    </session-history>
 
   </div>
 

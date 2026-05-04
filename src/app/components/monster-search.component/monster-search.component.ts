@@ -28,7 +28,7 @@ export class MonsterSearchComponent implements OnInit {
   ngOnInit() {
     const user = this.authService.getCurrentUser();
     if (user) {
-      this.monsterService.readMonsters(user.uid, (monsters) => {
+      this.monsterService.getMonstersList(user.uid, (monsters) => {
         this.monstersList = monsters;
         this.applyFilters();
         this.chr.detectChanges();
