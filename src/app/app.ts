@@ -11,7 +11,7 @@ import { Footer } from './components/footer/footer';
   styleUrl: './app.css'
 })
 export class App implements OnInit, OnDestroy {
-  protected readonly title = signal('PS_DnD');
+  protected readonly title = signal('Sheets & Notes');
   protected isAuthPage = signal(false);
   protected routeLoading = signal(false);
   protected loadingProgress = signal(0);

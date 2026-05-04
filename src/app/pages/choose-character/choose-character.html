@@ -1,4 +1,8 @@
 <div class="container">
+  <div class="header-actions">
+    <button (click)="goBack()" class="btn-back">← Volver al inicio</button>
+  </div>
+
   <h2>⚔ Elige tu aventurero</h2>
   <p class="subtitle">Dungeons &amp; Dragons</p>
 
@@ -15,7 +19,10 @@
           <span class="char-name">{{ c.name }}</span>
           <span class="char-meta">{{ c.class }} · {{ c.race }}</span>
         </div>
-        <button (click)="selectCharacter(c.id)">Seleccionar</button>
+        <div class="btn-div">
+          <button (click)="selectCharacter(c.id)">Seleccionar</button>
+          <button (click)="deleteCharacter(c.id)" class="btn-delete">Eliminar</button>
+        </div>
       </li>
     </ul>
   </div>

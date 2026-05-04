@@ -228,4 +228,5 @@ export class SessionService {
       return { id: d.id, ...data } as Session;
     });
   }
+
 }

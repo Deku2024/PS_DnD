@@ -1,4 +1,4 @@
-import {CommonModule} from '@angular/common';
+import {CommonModule, Location, LocationChangeListener} from '@angular/common';
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {
   AbstractControl,
@@ -80,7 +80,8 @@ export class PlayerSheet implements OnInit {
     private characterService: CharacterService,
     private authService: AuthService,
     private sessionService: SessionService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private location: Location
   ) {
     this.playerSheetForm = this.fb.group({
       name: ['Aragorn', [Validators.required, Validators.minLength(3)]],
@@ -327,6 +328,10 @@ export class PlayerSheet implements OnInit {
 
   getAttributesList() {
     return this.attributes_list;
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 
   protected readonly parseInt = parseInt;
