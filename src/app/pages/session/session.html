@@ -127,7 +127,7 @@
     <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
       <div class="modal-card" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>📜 {{ modalPlayerEmail }}</h3>
+          <h3>📜 {{ modalPlayerName }}</h3>
           <button class="modal-close" (click)="closeModal()">✕</button>
         </div>
 
@@ -142,11 +142,11 @@
           <div class="char-row">
             <span>PPT / PO / PE / PP / PC</span>
             <div class="money-values">
-              <strong>{{ modalCharacter?.money?.ppt ?? 0 }}</strong> /
-              <strong>{{ modalCharacter?.money?.po ?? 0 }}</strong> /
-              <strong>{{ modalCharacter?.money?.pe ?? 0 }}</strong> /
-              <strong>{{ modalCharacter?.money?.pp ?? 0 }}</strong> /
-              <strong>{{ modalCharacter?.money?.pc ?? 0 }}</strong>
+              <strong>{{ modalCharacter.money.ppt || 0 }}</strong> /
+              <strong>{{ modalCharacter.money.po || 0 }}</strong> /
+              <strong>{{ modalCharacter.money.pe || 0 }}</strong> /
+              <strong>{{ modalCharacter.money.pp || 0 }}</strong> /
+              <strong>{{ modalCharacter.money.pc || 0 }}</strong>
             </div>
           </div>
           <hr class="modal-divider" />
