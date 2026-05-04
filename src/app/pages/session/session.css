@@ -543,7 +543,13 @@ h2 {
   align-items: center;
 
 }
-
+::ng-deep .btn-grp battle-button-component .btn-battle,
+::ng-deep .btn-grp history-button-component .btn-history {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+}
 @media (max-width: 480px) {
   .session-page {
     padding: 1.25rem 1rem;
