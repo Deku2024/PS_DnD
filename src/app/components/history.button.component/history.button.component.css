@@ -22,7 +22,11 @@
   transition: background 0.2s, color 0.2s;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.4rem;
+  width: 100%;
+  margin-top: 2.5%;
+  margin-bottom: 2.5%;
 }
 
 .btn-history:hover {

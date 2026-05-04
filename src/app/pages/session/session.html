@@ -66,38 +66,57 @@
           }
         </li>
       </ul>
+
     </div>
 
     <!-- Acciones -->
     <div class="actions">
-      <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
-      <button *ngIf="isMaster" class="btn-notes" (click)="goToNotes()">📝 Notas DM</button>
-      <button
-        *ngIf="session.status === 'in-battle'"
-        class="btn-notes"
-        (click)="goToCombat()">⚔ Batalla en curso</button>
-      <button
-        *ngIf="isMaster"
-        class="btn-toggle"
-        [ngClass]="session.status === 'paused' || session.status === 'waiting' ? 'btn-resume' : 'btn-pause'"
-        (click)="toggleSessionStatus()">
-        {{ session.status === 'paused' || session.status === 'waiting' ? '▶️ REANUDAR PARTIDA' : '⏸️ PAUSAR PARTIDA' }}
-      </button>
-      <battle-button-component
-        *ngIf="isMaster"
-        [hasActiveBattle]="session.status === 'in-battle'"/>
-      <history-button-component
-        *ngIf="currentUser"
-        [isMaster]="isMaster"
-        [currentUserId]="currentUser.uid"
-        [sessionId]="session.id || ''"
-        [sessionName]="session.name"
-        [masterId]="session.masterId"
-        [masterName]="session.playersUsernames[session.masterId] || session.masterId"
-        [players]="session.players"
-        [playerEmails]="session.playerEmails"
-        [playerUsernames]="session.playersUsernames">
-      </history-button-component>
+      <div *ngIf="!isMaster">
+        <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
+      </div>
+
+      <div *ngIf="!isMaster">
+        <button
+          *ngIf="session.status === 'in-battle'"
+          class="btn-notes"
+          (click)="goToCombat()">⚔ Batalla en curso
+        </button>
+      </div>
+
+      <div class="btn-grp" *ngIf="isMaster">
+        <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
+        <button *ngIf="isMaster" class="btn-notes" (click)="goToNotes()">📝 Notas DM</button>
+        <button
+          *ngIf="session.status === 'in-battle'"
+          class="btn-notes"
+          (click)="goToCombat()">⚔ Batalla en curso
+        </button>
+      </div>
+
+      <div class="btn-grp" *ngIf="isMaster">
+        <button
+          *ngIf="isMaster"
+          class="btn-toggle"
+          [ngClass]="session.status === 'paused' || session.status === 'waiting' ? 'btn-resume' : 'btn-pause'"
+          (click)="toggleSessionStatus()">
+          {{ session.status === 'paused' || session.status === 'waiting' ? '▶️ REANUDAR PARTIDA' : '⏸️ PAUSAR PARTIDA' }}
+        </button>
+        <battle-button-component
+          *ngIf="isMaster"
+          [hasActiveBattle]="session.status === 'in-battle'"/>
+        <history-button-component
+          *ngIf="currentUser"
+          [isMaster]="isMaster"
+          [currentUserId]="currentUser.uid"
+          [sessionId]="session.id || ''"
+          [sessionName]="session.name"
+          [masterId]="session.masterId"
+          [masterName]="session.playersUsernames[session.masterId] || session.masterId"
+          [players]="session.players"
+          [playerEmails]="session.playerEmails"
+          [playerUsernames]="session.playersUsernames">
+        </history-button-component>
+      </div>
     </div>
   </div>
 
@@ -153,4 +172,5 @@
       </ng-template>
     </div>
   </div>
+
 </div>
