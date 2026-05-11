@@ -120,7 +120,8 @@ export class BattleService {
         if (c.email === 'Enemigo (NPC)') {
           return 'NPC::' + JSON.stringify(c);
         }
-        return c.characterId;
+        // Serialize players with current character data so HP propagates to all screens
+        return 'PLAYER::' + JSON.stringify(c);
       });
 
     await this.sessionService.updateCombatOrder(sessionId, activeItems);
@@ -144,7 +145,17 @@ export class BattleService {
         const npcData = JSON.parse(item.substring(5)) as Combatant;
         active.push({ ...npcData, inCombat: true });
         incomingNpcIds.push(npcData.characterId);
+      } else if (item.startsWith('PLAYER::')) {
+        const savedPlayer = JSON.parse(item.substring(8)) as Combatant;
+        // Merge: keep local player metadata but apply saved character (which has current HP)
+        const local = this.combatants.find(c => c.characterId === savedPlayer.characterId && c.email !== 'Enemigo (NPC)');
+        const merged = local
+          ? { ...local, character: savedPlayer.character, initiative: savedPlayer.initiative, inCombat: true }
+          : { ...savedPlayer, inCombat: true };
+        active.push(merged);
+        incomingPlayerIds.push(savedPlayer.characterId);
       } else {
+        // Legacy: bare characterId (backwards compat)
         const player = this.combatants.find(c => c.characterId === item && c.email !== 'Enemigo (NPC)');
         if (player) {
           active.push({ ...player, inCombat: true });

@@ -173,6 +173,8 @@ export class DmCombat implements OnInit, OnDestroy {
         const local = this.battleService.combatants.find(c => c.characterId === charId);
         if (local) local.character = updated;
       }
+      // Persist updated HP in session so all screens see the change via listenSession
+      this.saveOrder();
       this.closeDamageModal();
     } catch (e: any) {
       this.damageError = e.message || 'Error al aplicar el daño.';
