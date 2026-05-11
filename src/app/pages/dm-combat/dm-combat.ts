@@ -55,7 +55,7 @@ export class DmCombat implements OnInit, OnDestroy {
         return;
       }
 
-      if (s.combatOrder) {
+      if (s.combatOrder?.length) {
         this.battleService.applySavedOrder(s.combatOrder);
         this.cd.detectChanges();
       }
