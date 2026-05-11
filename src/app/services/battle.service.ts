@@ -43,6 +43,31 @@ export class BattleService {
     await this.autoStartCombatOrder(session).then(() => this.autoOrder());
   }
 
+  /** Load players into combatants WITHOUT rolling initiative. Use when a saved order already exists. */
+  public async prepareExistingCombat(): Promise<void> {
+    this.combatOrder = new Map<string, number>();
+    this.combatants = [];
+    const session = await this.sessionService.getSession(this.sessionService.getCurrentSessionId()!);
+    if (!session) return;
+    const players = session.players.filter((uid: string) => uid !== session.masterId);
+    for (const uid of players) {
+      const charId = session.selectedCharacters?.[uid];
+      if (!charId) continue;
+      const email = session.playerEmails[uid] || uid;
+      const username = await this.usernameService.getUsernameFromEmail(email);
+      const character = await this.characterService.getCharacterById(charId as string);
+      this.combatants.push({
+        uid,
+        email,
+        username,
+        characterId: charId,
+        character,
+        inCombat: false,
+        initiative: 0
+      } as Combatant);
+    }
+  }
+
   private async autoStartCombatOrder(session: Session) {
     const players = session.players.filter(uid => uid !== session.masterId);
     for (const uid of players) {

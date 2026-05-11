@@ -52,9 +52,13 @@ export class DmCombat implements OnInit, OnDestroy {
     const session = await this.sessionService.getSession(id);
     this.isMaster = session?.masterId === user?.uid;
 
-    await this.battleService.startPreparingCombat();
     if (session?.combatOrder?.length) {
+      // Combat already started — restore saved order without re-rolling initiative
+      await this.battleService.prepareExistingCombat();
       this.battleService.applySavedOrder(session.combatOrder);
+    } else {
+      // First time — roll initiative and sort
+      await this.battleService.startPreparingCombat();
     }
     this.activeTurnIndex = session?.activeTurnIndex ?? 0;
 
