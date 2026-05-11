@@ -154,6 +154,7 @@ export class DmCombat implements OnInit, OnDestroy {
         target.character.life = Math.max(0, (target.character.life ?? 0) - this.damageAmount);
       }
       this.closeDamageModal();
+      this.saveOrder(); // persist updated NPC life to Firestore session
       this.cd.detectChanges();
       return;
     }
@@ -179,6 +180,22 @@ export class DmCombat implements OnInit, OnDestroy {
 
   addMonsterToBattle(monster: any) {
     const tempId = 'npc_' + Date.now();
+
+    // Count existing instances of this monster to assign numbered names
+    const existingCount = this.battleService.combatants.filter(
+      c => c.email === 'Enemigo (NPC)' && c.character?.name?.startsWith(monster.name)
+    ).length;
+    const instanceName = existingCount === 0
+      ? monster.name + ' x1'
+      : monster.name + ' x' + (existingCount + 1);
+    // Rename x1 on the first existing instance if this is the second
+    if (existingCount === 1) {
+      const first = this.battleService.combatants.find(
+        c => c.email === 'Enemigo (NPC)' && c.character?.name === monster.name + ' x1'
+      );
+      // already named x1 — nothing to change
+    }
+
     const newEnemy = {
       uid: tempId,
       characterId: tempId,
@@ -186,7 +203,7 @@ export class DmCombat implements OnInit, OnDestroy {
       inCombat: false,
       initiative: 0,
       character: {
-        name: monster.name,
+        name: instanceName,
         race: monster.race || 'Monstruo',
         life: monster.life,
         maxLife: monster.maxLife,
