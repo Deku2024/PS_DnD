@@ -62,6 +62,15 @@ export class CharacterService {
     await updateDoc(ref, { ...data, updatedAt: new Date().toISOString() });
   }
 
+  async applyDamage(characterId: string, damage: number): Promise<void> {
+    const ref = doc(this.firebase.db, this.col, characterId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+    const current = snap.data() as CharacterData;
+    const newLife = Math.max(0, current.life - damage);
+    await updateDoc(ref, { life: newLife, updatedAt: new Date().toISOString() });
+  }
+
   calculateBonus(characteristicValue: number): number {
     return Math.floor((characteristicValue - 10) / 2);
   }

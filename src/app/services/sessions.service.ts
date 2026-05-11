@@ -31,6 +31,7 @@ export interface Session {
   playersUsernames: { [uid: string]: string };
   selectedCharacters?: { [uid: string]: string | null };
   combatOrder?: string[];
+  activeTurnIndex?: number;
   sharedImageUrl?: string | null;
   status: 'waiting' | 'active' | 'paused' | 'closed' | 'in-battle';
   password?: string;
@@ -215,6 +216,11 @@ export class SessionService {
   async updateSharedImage(sessionId: string, imageUrl: string | null): Promise<void> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     await updateDoc(ref, { sharedImageUrl: imageUrl });
+  }
+
+  async updateActiveTurn(sessionId: string, index: number): Promise<void> {
+    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
+    await updateDoc(ref, { activeTurnIndex: index });
   }
 
   async setSelectedCharacter(sessionId: string, userId: string, characterId: string | null): Promise<void> {

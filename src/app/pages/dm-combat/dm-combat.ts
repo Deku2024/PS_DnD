@@ -1,14 +1,16 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BattleService, Combatant } from '../../services/battle.service';
 import { SessionService } from '../../services/sessions.service';
 import { AuthService } from '../../services/auth.service';
+import { CharacterService } from '../../services/character.service';
 import { MonsterSearchComponent } from '../../components/monster-search.component/monster-search.component';
 
 @Component({
   selector: 'app-dm-combat',
-  imports: [CommonModule, MonsterSearchComponent],
+  imports: [CommonModule, FormsModule, MonsterSearchComponent],
   templateUrl: './dm-combat.html',
   styleUrl: './dm-combat.css',
 })
@@ -19,12 +21,23 @@ export class DmCombat implements OnInit, OnDestroy {
 
   showAddMenu = false;
 
+  // Turn tracking
+  activeTurnIndex = 0;
+
+  // Damage modal
+  showDamageModal = false;
+  damageTarget: Combatant | null = null;
+  damageAmount = 0;
+  damageError = '';
+  isApplyingDamage = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private battleService: BattleService,
     private sessionService: SessionService,
     private authService: AuthService,
+    private characterService: CharacterService,
     private cd: ChangeDetectorRef
   ) {}
 
@@ -43,6 +56,7 @@ export class DmCombat implements OnInit, OnDestroy {
     if (session?.combatOrder?.length) {
       this.battleService.applySavedOrder(session.combatOrder);
     }
+    this.activeTurnIndex = session?.activeTurnIndex ?? 0;
 
     this.unsubSession = this.sessionService.listenSession(id, (s) => {
       if (!s) {
@@ -57,8 +71,14 @@ export class DmCombat implements OnInit, OnDestroy {
 
       if (s.combatOrder?.length) {
         this.battleService.applySavedOrder(s.combatOrder);
-        this.cd.detectChanges();
       }
+
+      const incoming = s.activeTurnIndex ?? 0;
+      if (incoming !== this.activeTurnIndex) {
+        this.activeTurnIndex = incoming;
+      }
+
+      this.cd.detectChanges();
     });
 
     this.loading = false;
@@ -77,6 +97,10 @@ export class DmCombat implements OnInit, OnDestroy {
     return this.combatants.filter(c => c.inCombat);
   }
 
+  get currentTurnCombatant(): Combatant | null {
+    return this.activeCombatants[this.activeTurnIndex] ?? null;
+  }
+
   toggleCombat(combatant: Combatant): void {
     this.battleService.toggleCombat(combatant);
     this.saveOrder();
@@ -90,6 +114,67 @@ export class DmCombat implements OnInit, OnDestroy {
   moveDown(index: number): void {
     this.battleService.moveDown(index);
     this.saveOrder();
+  }
+
+  async nextTurn(): Promise<void> {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id || !this.isMaster) return;
+    const total = this.activeCombatants.length;
+    if (total === 0) return;
+    const next = (this.activeTurnIndex + 1) % total;
+    this.activeTurnIndex = next;
+    await this.sessionService.updateActiveTurn(id, next);
+    this.cd.detectChanges();
+  }
+
+  openDamageModal(): void {
+    this.damageTarget = null;
+    this.damageAmount = 0;
+    this.damageError = '';
+    this.showDamageModal = true;
+  }
+
+  closeDamageModal(): void {
+    this.showDamageModal = false;
+    this.damageTarget = null;
+    this.damageAmount = 0;
+    this.damageError = '';
+  }
+
+  async confirmDamage(): Promise<void> {
+    if (!this.damageTarget || this.damageAmount <= 0) {
+      this.damageError = 'Selecciona un objetivo y un daño mayor que 0.';
+      return;
+    }
+    const charId = this.damageTarget.characterId;
+    // NPCs don't have a real Firestore character doc
+    if (this.damageTarget.email === 'Enemigo (NPC)') {
+      const target = this.battleService.combatants.find(c => c.characterId === charId);
+      if (target?.character) {
+        target.character.life = Math.max(0, (target.character.life ?? 0) - this.damageAmount);
+      }
+      this.closeDamageModal();
+      this.cd.detectChanges();
+      return;
+    }
+    this.isApplyingDamage = true;
+    this.damageError = '';
+    this.cd.detectChanges();
+    try {
+      await this.characterService.applyDamage(charId, this.damageAmount);
+      // Refresh local combatant life
+      const updated = await this.characterService.getCharacterById(charId);
+      if (updated) {
+        const local = this.battleService.combatants.find(c => c.characterId === charId);
+        if (local) local.character = updated;
+      }
+      this.closeDamageModal();
+    } catch (e: any) {
+      this.damageError = e.message || 'Error al aplicar el daño.';
+    } finally {
+      this.isApplyingDamage = false;
+      this.cd.detectChanges();
+    }
   }
 
   addMonsterToBattle(monster: any) {
@@ -123,6 +208,7 @@ export class DmCombat implements OnInit, OnDestroy {
   async closeCombat(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id || !this.isMaster) return;
+    await this.sessionService.updateActiveTurn(id, 0);
     await this.battleService.endCombat(id);
     this.router.navigate(['/session', id]);
   }

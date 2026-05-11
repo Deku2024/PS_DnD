@@ -31,20 +31,39 @@
       <h3>Orden de batalla</h3>
       <p class="card-hint">Jugadores activos ordenados por turno</p>
       <ol class="active-list">
-        <li *ngFor="let c of activeCombatants; let i = index" class="active-entry">
-          <span class="turn-badge">{{ i + 1 }}</span>
+        <li
+          *ngFor="let c of activeCombatants; let i = index"
+          class="active-entry"
+          [class.active-turn]="i === activeTurnIndex">
+          <span class="turn-badge" [class.turn-badge-active]="i === activeTurnIndex">
+            {{ i === activeTurnIndex ? '⚔' : i + 1 }}
+          </span>
           <div class="combatant-info">
             <span class="combatant-name">{{ c.character?.name || c.username }}</span>
-            <span class="combatant-meta" *ngIf="c.character">{{ c.character.race }}</span>
+            <span class="combatant-meta" *ngIf="c.character">
+              ❤ {{ c.character.life }}/{{ c.character.maxLife }}
+              &nbsp;·&nbsp; 🛡 {{ c.character.armourClass }}
+            </span>
             <span class="combatant-meta no-char" *ngIf="!c.character">Sin personaje</span>
           </div>
-<!--          <div class="combatant-stats" *ngIf="c.character">-->
-<!--            <span class="stat" title="Destreza">DES {{ c.character.attributes.dexterity }}</span>-->
-<!--            <span class="stat" title="Vida">❤ {{ c.character.life }}/{{ c.character.maxLife }}</span>-->
-<!--            <span class="stat" title="Armadura">🛡 {{ c.character.armourClass }}</span>-->
-<!--          </div>-->
+          <span class="your-turn-label" *ngIf="i === activeTurnIndex">SU TURNO</span>
         </li>
       </ol>
+
+      <!-- Turn controls (DM only) -->
+      <div class="turn-controls" *ngIf="isMaster && activeCombatants.length > 0">
+        <div class="current-turn-info" *ngIf="currentTurnCombatant">
+          <span>Turno actual: <strong>{{ currentTurnCombatant.character?.name || currentTurnCombatant.username }}</strong></span>
+        </div>
+        <div class="turn-buttons">
+          <button class="btn-next-turn" (click)="nextTurn()">
+            ➡ Siguiente turno
+          </button>
+          <button class="btn-deal-damage" (click)="openDamageModal()">
+            🗡 Aplicar daño
+          </button>
+        </div>
+      </div>
     </div>
 
     <hr class="divider" *ngIf="activeCombatants.length > 0 && combatants.length > 0" />
@@ -87,5 +106,54 @@
     </div>
 
   </ng-container>
+</div>
+
+<!-- Damage modal -->
+<div class="modal-overlay" *ngIf="showDamageModal" (click)="closeDamageModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>🗡 Aplicar daño</h3>
+      <button class="modal-close" (click)="closeDamageModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-subtitle" *ngIf="currentTurnCombatant">
+        Turno de: <strong>{{ currentTurnCombatant.character?.name || currentTurnCombatant.username }}</strong>
+      </p>
+
+      <label class="modal-label">Objetivo que recibe el daño</label>
+      <div class="target-list">
+        <button
+          *ngFor="let c of activeCombatants"
+          class="target-btn"
+          [class.target-selected]="damageTarget === c"
+          (click)="damageTarget = c">
+          <span class="target-name">{{ c.character?.name || c.username }}</span>
+          <span class="target-life" *ngIf="c.character">❤ {{ c.character.life }}/{{ c.character.maxLife }}</span>
+        </button>
+      </div>
+
+      <label class="modal-label">Cantidad de daño</label>
+      <input
+        class="damage-input"
+        type="number"
+        min="1"
+        [(ngModel)]="damageAmount"
+        placeholder="0"
+        aria-label="Cantidad de daño" />
+
+      <p class="modal-error" *ngIf="damageError">{{ damageError }}</p>
+
+      <div class="modal-actions">
+        <button
+          class="btn-confirm-damage"
+          (click)="confirmDamage()"
+          [disabled]="isApplyingDamage">
+          <span *ngIf="isApplyingDamage">⏳ Aplicando...</span>
+          <span *ngIf="!isApplyingDamage">✔ Confirmar daño</span>
+        </button>
+        <button class="btn-cancel" (click)="closeDamageModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
 </div>
 
