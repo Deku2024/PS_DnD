@@ -1,18 +1,14 @@
 <div class="session-page">
-
-  <!-- Loading -->
   <div class="loading-state" *ngIf="loading">
     <span class="spinner">⏳</span>
     <p>Cargando la sesión...</p>
   </div>
 
-  <!-- Error -->
   <div class="error-state" *ngIf="!loading && errorMsg">
     <p class="error-msg">{{ errorMsg }}</p>
     <button class="btn-back" (click)="leaveSession()">← Volver al inicio</button>
   </div>
 
-  <!-- Sesión activa -->
   <div class="session-content" *ngIf="!loading && session">
     <div class="session-header">
       <div class="session-title-row">
@@ -29,7 +25,49 @@
 
     <hr class="divider" />
 
-    <!-- Master -->
+    <div class="card audio-card">
+      <h3>🎵 Música de ambiente</h3>
+
+      <ng-container *ngIf="isMaster">
+        <div class="audio-input-row" *ngIf="!session.audio">
+          <input [(ngModel)]="audioFileName" placeholder="Nombre (opcional)" />
+          <input [(ngModel)]="audioUrl" placeholder="URL de YouTube" />
+          <button class="btn-load-audio" (click)="onLoadAudio()">▶ Cargar</button>
+        </div>
+
+        <div class="audio-controls" *ngIf="session.audio">
+          <span class="audio-filename">🎵 {{ session.audio.fileName }}</span>
+          <div class="audio-buttons">
+            <button class="btn-play-pause" (click)="onTogglePlay()">
+              {{ session.audio.isPlaying ? '⏸ Pausar' : '▶ Reproducir' }}
+            </button>
+            <button class="btn-clear-audio" (click)="onClearAudio()">✖ Quitar</button>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="!isMaster">
+        <p class="audio-status" *ngIf="!session.audio">Sin música activa.</p>
+        <div class="audio-playing" *ngIf="session.audio">
+          <span class="audio-filename">🎵 {{ session.audio.fileName }}</span>
+          <span class="audio-badge" [class.playing]="session.audio.isPlaying">
+            {{ session.audio.isPlaying ? '▶ Reproduciendo' : '⏸ Pausado' }}
+          </span>
+        </div>
+      </ng-container>
+
+      <div style="position: absolute; top: -9999px; left: -9999px; width: 0; height: 0; overflow: hidden;" *ngIf="youtubeVideoId">
+        <youtube-player
+          #youtubePlayer
+          [videoId]="youtubeVideoId"
+          [playerVars]="{ autoplay: 1, controls: 0 }"
+          (ready)="onPlayerReady($event)">
+        </youtube-player>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
     <div class="card">
       <h3>Dungeon Master</h3>
       <p class="player master-player">
@@ -37,7 +75,6 @@
       </p>
     </div>
 
-    <!-- Jugadores -->
     <div class="card">
       <h3>Aventureros ({{ session.players.length }})</h3>
       <ul class="players-list">
@@ -49,7 +86,6 @@
           <span class="player-icon">{{ uid === session.masterId ? '👑' : '🗡' }}</span>
           <span class="player-email">{{ session.playerEmails[uid] || uid }}</span>
           <span class="you-badge" *ngIf="currentUser && uid === currentUser.uid">(tú)</span>
-
           <div class="player-actions">
             <button
               *ngIf="uid !== session.masterId"
@@ -68,7 +104,6 @@
       </ul>
     </div>
 
-    <!-- Acciones -->
     <div class="actions">
       <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
       <button *ngIf="isMaster" class="btn-notes" (click)="goToNotes()">📝 Notas DM</button>
@@ -82,7 +117,6 @@
     </div>
   </div>
 
-  <!-- Modal de personaje -->
   <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
     <div class="modal-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -134,5 +168,4 @@
       </ng-template>
     </div>
   </div>
-
 </div>
