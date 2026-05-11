@@ -113,12 +113,13 @@ export class PlayerSheet implements OnInit {
         pp:  [0, [Validators.min(0)]],
         pc:  [0, [Validators.min(0)]]
       }),
-      inventory: this.fb.array([]),
       abilities: this.fb.array([]),
       image: [this.defaultImage]
 
     }, { validators: this.validateLifeNotExceedMax() });
   }
+
+  //lógica inventario. PENDIENTE DE MODIFICACIÓN
 
   get inventoryFormArray() : FormArray {
     return this.playerSheetForm.get('inventory') as FormArray;
@@ -128,21 +129,11 @@ export class PlayerSheet implements OnInit {
     return this.inventoryFormArray.controls as FormGroup[];
   }
 
-  addItem(): void {
-    this.inventoryFormArray.push(
-      this.fb.group(
-        {
-          name: ['', Validators.required],
-          quantity: [1, [Validators.required, Validators.min(1)]],
-          description: ['']
-        }
-      )
-    );
-  }
-
   removeItem(index: number): void {
     this.inventoryFormArray.removeAt(index);
   }
+
+  //lógica habilidades
 
   get abilitiesFormArray() : FormArray {
     return this.playerSheetForm.get('abilities') as FormArray;
