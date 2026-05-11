@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService, Session } from '../../services/sessions.service';
@@ -7,6 +7,7 @@ import { CharacterService, CharacterWithId } from '../../services/character.serv
 import { PresenceService } from '../../services/presence.service';
 import { RollHistoryService } from '../../services/roll-history.service';
 import { HistoryButtonComponent} from '../../components/history.button.component/history.button.component';
+import { CloudinaryService } from '../../services/cloudinary.service';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
 import { BattleButtonComponent } from '../../components/battle.button.component/battle.button.component';
@@ -24,6 +25,10 @@ export class SessionPage implements OnInit, OnDestroy {
   loading = true;
   showHistory = false;
   errorMsg = '';
+  isUploadingImage = false;
+  imageUploadError = '';
+
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   characters: { [uid: string]: CharacterWithId | null } = {};
   showModal = false;
@@ -45,7 +50,8 @@ export class SessionPage implements OnInit, OnDestroy {
     private characterService: CharacterService,
     private cd: ChangeDetectorRef,
     private presenceService: PresenceService,
-    private rollHistoryService: RollHistoryService
+    private rollHistoryService: RollHistoryService,
+    private cloudinaryService: CloudinaryService
 ) {}
 
   ngOnInit(): void {
@@ -202,6 +208,38 @@ export class SessionPage implements OnInit, OnDestroy {
     this.presenceUnsub?.();
     this.sessionService.setCurrentSessionId(null);
     this.router.navigate(['/home']);
+  }
+
+  triggerFileInput(): void {
+    this.fileInput.nativeElement.click();
+  }
+
+  async onFileSelected(event: Event): Promise<void> {
+    if (!this.session?.id || !this.isMaster) return;
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.isUploadingImage = true;
+    this.imageUploadError = '';
+    this.cd.detectChanges();
+
+    try {
+      const url = await this.cloudinaryService.uploadImage(file);
+      await this.sessionService.updateSharedImage(this.session.id, url);
+    } catch (e: any) {
+      this.imageUploadError = e.message || 'Error al subir la imagen';
+      this.cd.detectChanges();
+    } finally {
+      this.isUploadingImage = false;
+      input.value = '';
+      this.cd.detectChanges();
+    }
+  }
+
+  async removeSharedImage(): Promise<void> {
+    if (!this.session?.id || !this.isMaster) return;
+    await this.sessionService.updateSharedImage(this.session.id, null);
   }
 
   ngOnDestroy(): void {

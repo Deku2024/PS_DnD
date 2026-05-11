@@ -29,6 +29,54 @@
 
     <hr class="divider" />
 
+    <!-- Imagen compartida -->
+    <div class="card shared-image-card">
+      <h3>🖼 Imagen compartida</h3>
+
+      <!-- Muestra la imagen a todos cuando existe -->
+      <div class="shared-image-display" *ngIf="session.sharedImageUrl">
+        <img [src]="session.sharedImageUrl" alt="Imagen compartida por el DM" class="shared-image" />
+      </div>
+
+      <!-- Sin imagen -->
+      <p class="shared-image-empty" *ngIf="!session.sharedImageUrl && !isMaster">
+        El DM no ha compartido ninguna imagen aún.
+      </p>
+
+      <!-- Controles del DM -->
+      <div class="shared-image-controls" *ngIf="isMaster">
+        <input
+          #fileInput
+          type="file"
+          accept="image/*"
+          aria-label="Seleccionar imagen para compartir"
+          class="file-input-hidden"
+          (change)="onFileSelected($event)" />
+
+        <button
+          class="btn-upload-image"
+          (click)="triggerFileInput()"
+          [disabled]="isUploadingImage">
+          <span *ngIf="isUploadingImage">⏳ Subiendo...</span>
+          <span *ngIf="!isUploadingImage">
+            {{ session.sharedImageUrl ? '🔄 Cambiar imagen' : '📤 Subir imagen' }}
+          </span>
+        </button>
+
+        <button
+          class="btn-remove-image"
+          *ngIf="session.sharedImageUrl"
+          (click)="removeSharedImage()"
+          [disabled]="isUploadingImage">
+          🗑 Quitar imagen
+        </button>
+
+        <p class="image-upload-error" *ngIf="imageUploadError">{{ imageUploadError }}</p>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
     <!-- Master -->
     <div class="card">
       <h3>Dungeon Master</h3>
