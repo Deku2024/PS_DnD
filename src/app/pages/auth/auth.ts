@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { NgZone, ChangeDetectorRef } from '@angular/core';
+import {UsernameService} from '../../services/username.service';
 
 @Component({
   standalone: true,
@@ -16,15 +17,18 @@ export class Auth implements OnDestroy {
   isLogin = true;
   email = '';
   password = '';
+  username = '';
   confirmPassword = '';
   error = '';
   success = '';
   loading = false;
   showPassword = false;
   private messageTimer: any = null;
+  identification: string = '';
 
   constructor(
     private authService: AuthService,
+    private usernameService: UsernameService,
     private router: Router,
     private ngZone: NgZone,
     private cd: ChangeDetectorRef
@@ -89,7 +93,7 @@ export class Auth implements OnDestroy {
 
     try {
       if (this.isLogin) {
-        await this.authService.signIn(this.email, this.password);
+        await this.authService.signIn(this.identification, this.password);
             // navigate to home on successful login
             await this.router.navigate(['/home']);
         this.ngZone.run(() => {
@@ -120,10 +124,21 @@ export class Auth implements OnDestroy {
           return;
         }
 
+        if (await this.usernameService.existsUsername(this.username)) {
+          this.ngZone.run(() => {
+            this.error = 'Este nombre de usuario ya existe';
+            this.loading = false;
+            this.cd.detectChanges();
+            this.autoClearMessage(3000);
+          });
+          return;
+        }
+
         // use a timeout wrapper to avoid hanging if network/firebase stalls
         let userCredential: any = null;
         try {
-          userCredential = await this.withTimeout(this.authService.signUp(this.email, this.password), 12000);
+          userCredential = await this.withTimeout(this.authService.signUp(this.email, this.password, this.username), 12000);
+          await this.router.navigate(['/home']);
         } catch (e: any) {
           if (e?.message === 'timeout') {
             this.ngZone.run(() => {

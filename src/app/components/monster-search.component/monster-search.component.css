@@ -1,0 +1,138 @@
+.bestiary-sidebar {
+  background-color: #fff8f0;
+  border: 2px solid #8b7355;
+  border-radius: 12px;
+  padding: 15px;
+  height: calc(100vh - 50px);
+  position: sticky;
+  top: 20px;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  width: 320px;
+}
+
+.search-container h3 {
+  margin-top: 0;
+  color: #3a2518;
+  font-family: 'MedievalSharp', monospace;
+  border-bottom: 2px solid #c4a47a;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  background-color: #f5e6c8;
+  border: 2px solid #c4a47a;
+  border-radius: 8px;
+  font-family: 'Georgia', serif;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: #8b6914;
+  box-shadow: 0 0 0 3px rgba(139, 105, 20, 0.2);
+  background: #ffffff;
+}
+
+.extra-filters {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px dashed #c4a47a;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  width: 48%;
+}
+
+.filter-group label {
+  font-family: 'MedievalSharp', monospace;
+  font-size: 0.8rem;
+  color: #5c3d2e;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.filter-group input, .filter-group select {
+  background-color: #f5e6c8;
+  border: 2px solid #c4a47a;
+  border-radius: 6px;
+  padding: 6px;
+  font-family: 'Georgia', serif;
+  font-size: 0.9rem;
+  color: #3a2518;
+  outline: none;
+}
+
+.filter-group input:focus, .filter-group select:focus {
+  border-color: #8b6914;
+  background: #ffffff;
+}
+
+.monster-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.monster-card {
+  background: linear-gradient(135deg, #fff8f0 0%, #f0e4d0 100%);
+  border: 1px solid #c4a47a;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.monster-card:hover {
+  transform: translateY(-2px);
+  border-color: #8b6914;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.monster-info h4 {
+  margin: 0 0 5px 0;
+  color: #3a2518;
+  font-family: 'MedievalSharp', monospace;
+  font-size: 1.1rem;
+}
+
+.monster-race {
+  font-size: 0.85rem;
+  color: #8b7355;
+  font-style: italic;
+  font-family: 'Georgia', serif;
+}
+
+.monster-vd {
+  background-color: #3a2518;
+  color: #d4a056;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  font-family: 'MedievalSharp', monospace;
+  border: 1px solid #8b6914;
+}
+
+.empty-msg {
+  text-align: center;
+  color: #8b7355;
+  font-style: italic;
+  margin-top: 20px;
+  font-family: 'Georgia', serif;
+}

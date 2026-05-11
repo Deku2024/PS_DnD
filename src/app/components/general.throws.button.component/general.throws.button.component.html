@@ -36,7 +36,7 @@
     <input #customThrow placeholder="Tiradas custom (ej: 4d4 + 4)" (input)="clearError()">
 
     <div id="inputAndError">
-      <button type="button" id="throw-custom-button" (click)="throwCustom(customThrow.value)">Tirar tirada custom</button>
+      <button type="button" id="throw-custom-button" (click)="throwCustom(customThrow.value)">Tirada custom</button>
 
       @if (errorMessage() !== "") {
         <div class="error-message">

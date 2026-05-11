@@ -1,4 +1,4 @@
-import {CommonModule} from '@angular/common';
+import {CommonModule, Location, LocationChangeListener} from '@angular/common';
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {
   AbstractControl,
@@ -36,6 +36,10 @@ export class PlayerSheet implements OnInit {
   saving = false;
   saveError = '';
 
+  defaultImage: string = '/player-icon-example.png';
+  imagePreview: string | ArrayBuffer | null = null;
+  selectedFile: File | null = null;
+
   playerSheetForm: FormGroup;
 
   raceOptions = [
@@ -65,7 +69,7 @@ export class PlayerSheet implements OnInit {
     { value: 'CN', label: 'Caótico neutral' },
     { value: 'LC', label: 'Legal caótico' },
     { value: 'NC', label: 'Neutral caótico' },
-    { value: 'LG', label: 'Caótico caótico' },
+    { value: 'CC', label: 'Caótico caótico' },
   ];
 
 
@@ -76,7 +80,8 @@ export class PlayerSheet implements OnInit {
     private characterService: CharacterService,
     private authService: AuthService,
     private sessionService: SessionService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private location: Location
   ) {
     this.playerSheetForm = this.fb.group({
       name: ['Aragorn', [Validators.required, Validators.minLength(3)]],
@@ -109,7 +114,8 @@ export class PlayerSheet implements OnInit {
         pc:  [0, [Validators.min(0)]]
       }),
       inventory: this.fb.array([]),
-      abilities: this.fb.array([])
+      abilities: this.fb.array([]),
+      image: [this.defaultImage]
 
     }, { validators: this.validateLifeNotExceedMax() });
   }
@@ -243,12 +249,75 @@ export class PlayerSheet implements OnInit {
     }
   }
 
+  //preview de la imagen y guardado en bd
+  async resizeImage(base64: string): Promise<string> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = base64;
+
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const size = 200;
+
+        canvas.width = size;
+        canvas.height = size;
+
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, size, size);
+
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+    });
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+
+    console.log(input.files);
+
+    if (!input.files || input.files.length === 0) {
+      this.imagePreview = this.defaultImage;
+
+      this.playerSheetForm.patchValue({
+        image: this.defaultImage
+      });
+
+      this.cdr.markForCheck();
+      return;
+    }
+
+    const file = input.files[0];
+
+    if (!file.type.startsWith('image/')) {
+      console.error('El archivo no es una imagen');
+      return;
+    }
+
+    this.selectedFile = file;
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      console.log('preview generado');
+      const base64 = reader.result as string;
+
+      const compressed = await this.resizeImage(base64);
+
+      this.imagePreview = compressed;
+
+      this.playerSheetForm.patchValue({
+        image: compressed
+      });
+      this.cdr.markForCheck();
+    };
+
+    reader.readAsDataURL(file);
+  }
+
   getFormControl(controlName: string) {
     return this.playerSheetForm.get(controlName);
   }
 
-  getAttributesList() {
-    return [
+  private attributes_list = [
       { name: 'strength', label: 'Fuerza (STR)' },
       { name: 'dexterity', label: 'Destreza (DEX)' },
       { name: 'constitution', label: 'Constitución (CON)' },
@@ -256,7 +325,14 @@ export class PlayerSheet implements OnInit {
       { name: 'wisdom', label: 'Sabiduría (WIS)' },
       { name: 'charisma', label: 'Carisma (CHA)' }
     ];
+
+  getAttributesList() {
+    return this.attributes_list;
   }
 
-  protected readonly parseInt = parseInt; // ?? pa q sirve esto - Iván
+  goBack(): void {
+    this.location.back();
+  }
+
+  protected readonly parseInt = parseInt;
 }

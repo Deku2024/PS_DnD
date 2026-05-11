@@ -3,7 +3,7 @@
   <p class="subtitle">Dungeons &amp; Dragons</p>
 
   <p class="uid" *ngIf="currentUser">
-    Aventurero: <strong>{{ currentUser.email }}</strong>
+    Aventurero: <strong>{{ currentUser.displayName }}</strong>
   </p>
   <p class="uid error" *ngIf="!currentUser">
     ⚠️ No hay usuario autenticado.
@@ -60,5 +60,8 @@
 
   <!-- Mensaje -->
   <p class="message" *ngIf="message" [class.error]="isError">{{ message }}</p>
+
+  <!---Botón para acceder al bestiario-->
+  <button (click)="enterMonsterPage()" [disabled]="!currentUser">Ver mi bestiario</button>
 
 </div>

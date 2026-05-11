@@ -1,6 +1,21 @@
 <main>
-    <img id="player-image" src="/player-icon-example.png" alt="elf girl">
     <form [formGroup]="playerSheetForm" (ngSubmit)="onSubmit()" class="player-sheet-form">
+        <div>
+            <img
+              id="player-image"
+              [src]="imagePreview || playerSheetForm.value.image"
+              (click)="fileInput.click()"
+              alt="Character image"
+            >
+    
+            <input
+              #fileInput
+              type="file"
+              accept="image/*"
+              style="display: none"
+              (change)="onFileSelected($event)"
+            >
+        </div>
         <div id="basic-info" class="form-section">
             <div class="field">
                 <label for="name">Nombre:</label>
@@ -196,7 +211,7 @@
         </div>
         <div formArrayName="abilities" class="abilities-container">
           @if (abilitiesFormArray.controls.length === 0) {
-            <p class="empty-msg">No class abilities registered yet.</p>
+            <p class="empty-msg">No hay habilidades todavía</p>
           }
           @for (ability of abilities; track $index) {
             <ability [itemGroup]="ability" [index]="$index" (remove)="removeAbility($event)" />
@@ -209,6 +224,7 @@
           <button type="submit" class="btn-save" [disabled]="saving">
             {{ saving ? 'Guardando...' : '💾 Guardar personaje' }}
           </button>
+          <button type="button" class="btn-save" (click)="goBack()">Cancelar</button>
         </div>
     </form>
 

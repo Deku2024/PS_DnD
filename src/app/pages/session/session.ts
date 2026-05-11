@@ -6,14 +6,17 @@ import { SessionService, Session, AudioState } from '../../services/sessions.ser
 import { AuthService } from '../../services/auth.service';
 import { CharacterService, CharacterWithId } from '../../services/character.service';
 import { PresenceService } from '../../services/presence.service';
+import { RollHistoryService } from '../../services/roll-history.service';
+import { HistoryButtonComponent} from '../../components/history.button.component/history.button.component';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
 import { YouTubePlayer } from '@angular/youtube-player';
+import {BattleButtonComponent} from '../../components/battle.button.component/battle.button.component';
 
 @Component({
   selector: 'app-session',
   standalone: true,
-  imports: [CommonModule, FormsModule, YouTubePlayer],
+  imports: [CommonModule, FormsModule, YouTubePlayer, BattleButtonComponent, HistoryButtonComponent],
   templateUrl: './session.html',
   styleUrl: './session.css'
 })
@@ -21,6 +24,7 @@ export class SessionPage implements OnInit, OnDestroy {
   session: Session | null = null;
   currentUser: User | null = null;
   loading = true;
+  showHistory = false;
   errorMsg = '';
 
   @ViewChild('youtubePlayer') youtubePlayer?: YouTubePlayer;
@@ -49,8 +53,9 @@ export class SessionPage implements OnInit, OnDestroy {
     private authService: AuthService,
     private characterService: CharacterService,
     private cd: ChangeDetectorRef,
-    private presenceService: PresenceService
-  ) {}
+    private presenceService: PresenceService,
+    private rollHistoryService: RollHistoryService
+) {}
 
   ngOnInit(): void {
     if (!(window as any).YT) {
@@ -97,6 +102,7 @@ export class SessionPage implements OnInit, OnDestroy {
         this.errorMsg = 'La sesión no existe o ha sido cerrada.';
         this.session = null;
       } else {
+        // Usar this.currentUser para detectar expulsión en tiempo real
         if (this.currentUser && !session.players.includes(this.currentUser.uid)) {
           this.unsubscribe?.();
           this.presenceUnsub?.();
@@ -105,6 +111,8 @@ export class SessionPage implements OnInit, OnDestroy {
           return;
         }
         this.session = session;
+        this.rollHistoryService.setSessionStatus(session.status);
+        this.rollHistoryService.startListening(id);
         await this.loadCharacters(session);
         this.syncAudio(session.audio ?? null);
       }
@@ -262,7 +270,7 @@ export class SessionPage implements OnInit, OnDestroy {
     try {
       await this.sessionService.kickPlayer(this.session.id, uid);
     } catch (e: any) {
-      console.error(e.message);
+      console.error('Error al expulsar jugador:', e.message);
     }
   }
 
@@ -278,7 +286,13 @@ export class SessionPage implements OnInit, OnDestroy {
     this.router.navigate(['/dm-notes'], { queryParams: { sessionId: this.session.id } });
   }
 
+  goToCombat(): void {
+    if (!this.session?.id) return;
+    this.router.navigate(['/session', this.session.id, 'dm-combat']);
+  }
+
   async leaveSession(): Promise<void> {
+    await this.rollHistoryService.saveAndClear();
     this.unsubscribe?.();
     this.presenceUnsub?.();
     this.sessionService.setCurrentSessionId(null);

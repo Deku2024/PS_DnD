@@ -1,0 +1,32 @@
+<div class="finalize-overlay" (click)="cancel()"></div>
+
+<div class="finalize-modal">
+  <div class="finalize-header">
+    <span class="finalize-title">Finalizar sesión</span>
+    <button class="btn-close" (click)="cancel()">✕</button>
+  </div>
+
+  <div class="finalize-body">
+    <label class="field-label">Nombre de la sesión</label>
+    <input
+      class="field-input"
+      type="text"
+      [(ngModel)]="finalizeSessionName"
+      placeholder="Sesión N (fecha)">
+
+    <label class="field-label">Descripción</label>
+    <textarea
+      class="field-textarea"
+      [(ngModel)]="finalizeDescription"
+      placeholder="Añade un resumen de lo que ocurrió..."
+      rows="3">
+    </textarea>
+  </div>
+
+  <div class="finalize-actions">
+    <button class="btn-cancel" (click)="cancel()">Cancelar</button>
+    <button class="btn-confirm" (click)="confirm()" [disabled]="finalizing">
+      {{ finalizing ? 'Guardando...' : 'Finalizar' }}
+    </button>
+  </div>
+</div>

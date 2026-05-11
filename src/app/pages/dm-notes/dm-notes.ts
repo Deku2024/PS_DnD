@@ -106,13 +106,10 @@ export class DmNotes implements OnInit, OnDestroy {
       title: '',
       content: ''
     });
-    console.log('nota creada exitosamente');
   }
 
   async deleteNote(noteId: string) {
     await this.dmNotesService.deleteNote(this.sessionId, noteId);
-    console.log('nota borrada exitosamente');
-    console.log(noteId);
   }
 
   goToSession() {

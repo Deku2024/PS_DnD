@@ -1,0 +1,98 @@
+.roll-entry {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(198, 167, 71, 0.05);
+  border: 1px solid rgba(198, 167, 71, 0.2);
+  border-radius: 4px;
+  padding: 0.65rem 0.85rem;
+}
+
+.roll-entry.compact {
+  padding: 0.4rem 0.6rem;
+  background: rgba(198, 167, 71, 0.03);
+}
+
+.roll-result {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  background: rgba(198, 167, 71, 0.12);
+  border: 1px solid rgba(198, 167, 71, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #c6a747;
+  font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+}
+
+.compact .roll-result {
+  width: 30px;
+  height: 30px;
+  font-size: 0.85rem;
+}
+
+.roll-result.result-nat20 {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #f59e0b;
+}
+
+.roll-result.result-nat1 {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+}
+
+.roll-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.roll-label {
+  font-size: 0.85rem;
+  color: #c6a747;
+  font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compact .roll-label {
+  font-size: 0.78rem;
+}
+
+.roll-player {
+  font-size: 0.72rem;
+  color: #8a6e2f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.roll-throws {
+  font-size: 0.68rem;
+  color: #5a4a20;
+  font-family: monospace;
+}
+
+.roll-status {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  padding: 2px 7px;
+  border-radius: 3px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+
+.status-nat20  { background: rgba(245,158,11,0.12); color: #f59e0b; border-color: rgba(245,158,11,0.4); }
+.status-nat1   { background: rgba(239,68,68,0.1);   color: #ef4444; border-color: rgba(239,68,68,0.35); }
+.status-success { background: rgba(34,197,94,0.1);  color: #22c55e; border-color: rgba(34,197,94,0.35); }
+.status-fail   { background: rgba(226,83,48,0.1);   color: #e25330; border-color: rgba(226,83,48,0.35); }

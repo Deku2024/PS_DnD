@@ -1,24 +1,25 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {
-  collection,
   addDoc,
+  collection,
   doc,
   getDoc,
   getDocs,
-  updateDoc,
   arrayUnion,
   arrayRemove,
   onSnapshot,
   query,
-  where,
   serverTimestamp,
-  Unsubscribe
+  Unsubscribe,
+  updateDoc,
+  where
 } from 'firebase/firestore';
 import * as bcrypt from 'bcryptjs';
 import { FirebaseService } from './firebase.service';
 import { AuthService } from './auth.service';
 import { PresenceService } from './presence.service';
 import { Subscription } from 'rxjs';
+import {UsernameService} from './username.service';
 
 export interface AudioState {
   url: string;
@@ -30,12 +31,15 @@ export interface AudioState {
 
 export interface Session {
   id?: string;
+  code: string;
   name: string;
   masterId: string;
   players: string[];
   playerEmails: { [uid: string]: string };
+  playersUsernames: { [uid: string]: string };
   selectedCharacters?: { [uid: string]: string | null };
-  status: 'waiting' | 'active' | 'paused' | 'closed';
+  combatOrder?: string[];
+  status: 'waiting' | 'active' | 'paused' | 'closed' | 'in-battle';
   password?: string;
   audio?: AudioState | null;
   createdAt?: any;
@@ -51,7 +55,8 @@ export class SessionService {
   constructor(
     private firebase: FirebaseService,
     private authService: AuthService,
-    private presenceService: PresenceService
+    private presenceService: PresenceService,
+    private usernameService: UsernameService,
   ) {
     this.authSub = this.authService.onAuthState().subscribe((user) => {
       const uid = user ? user.uid : null;
@@ -76,20 +81,45 @@ export class SessionService {
     }
   }
 
-  getCurrentSessionId(): string | null {
+    getCurrentSessionId(): string | null {
     return this.currentSessionId;
+  }
+
+  private generateCode(): string {
+    const chars = '123456789';
+    return Array.from({ length: 6 }, () =>
+      chars[Math.floor(Math.random() * chars.length)]
+    ).join('');
+  }
+
+  private async isCodeTaken(code: string): Promise<boolean> {
+    const ref = collection(this.firebase.db, this.sessionsCol);
+    const q = query(ref, where('code', '==', code));
+    const snap = await getDocs(q);
+    return !snap.empty;
+  }
+
+  private async generateUniqueCode(): Promise<string> {
+    let code = this.generateCode();
+    while (await this.isCodeTaken(code)) {
+      code = this.generateCode();
+    }
+    return code;
   }
 
   async createSession(name: string, masterId: string, masterEmail: string, password: string): Promise<string> {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
-
+    const code = await this.generateUniqueCode();
     const ref = collection(this.firebase.db, this.sessionsCol);
+    const masterUsername = await this.usernameService.getUsernameFromEmail(masterEmail);
     const docRef = await addDoc(ref, {
+      code,
       name,
       masterId,
       players: [masterId],
       playerEmails: { [masterId]: masterEmail },
+      playersUsernames: { [masterId]: masterUsername },
       selectedCharacters: {},
       status: 'waiting',
       password: passwordHash,
@@ -109,13 +139,25 @@ export class SessionService {
     return { id: snap.id, ...sessionWithoutPassword } as Session;
   }
 
-  async joinSession(sessionId: string, userId: string, userEmail: string, password: string): Promise<void> {
-    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
-    const snap = await getDoc(ref);
+  async getSessionByCode(code: string): Promise<Session | null> {
+    const ref = collection(this.firebase.db, this.sessionsCol);
+    const q = query(ref, where('code', '==', code.toUpperCase()));
+    const snap = await getDocs(q);
+    if (snap.empty) return null;
+    const docSnap = snap.docs[0];
+    const { password, ...sessionWithoutPassword } = docSnap.data() as Session;
+    return { id: docSnap.id, ...sessionWithoutPassword } as Session;
+  }
 
-    if (!snap.exists()) throw new Error('La sesión no existe.');
+  async joinSession(code: string, userId: string, userEmail: string, password: string): Promise<void> {
+    const ref = collection(this.firebase.db, this.sessionsCol);
+    const q = query(ref, where('code', '==', code.toUpperCase()));
+    const snap = await getDocs(q);
 
-    const session = snap.data() as Session;
+    if (snap.empty) throw new Error('La sesión no existe.');
+
+    const docSnap = snap.docs[0];
+    const session = docSnap.data() as Session;
 
     if (session.status === 'closed') throw new Error('La sesión está cerrada.');
     if (session.players.includes(userId)) return;
@@ -123,10 +165,12 @@ export class SessionService {
     const passwordMatch = await bcrypt.compare(password, session.password || '');
     if (!passwordMatch) throw new Error('Contraseña incorrecta.');
 
-    await updateDoc(ref, {
+    await updateDoc(doc(this.firebase.db, this.sessionsCol, docSnap.id), {
       players: arrayUnion(userId),
+      [`playersUsernames.${userId}`]: await this.usernameService.getUsernameFromEmail(userEmail) || "",
       [`playerEmails.${userId}`]: userEmail
     });
+    this.setCurrentSessionId(docSnap.id);
   }
 
   async kickPlayer(sessionId: string, userId: string): Promise<void> {
@@ -152,7 +196,6 @@ export class SessionService {
     await this.presenceService.stopPresence(sessionId, userId).catch(() => {});
   }
 
-  /** Establece la URL del audio y lo pone en play */
   async setAudio(sessionId: string, url: string, fileName: string): Promise<void> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     await updateDoc(ref, {
@@ -166,7 +209,6 @@ export class SessionService {
     });
   }
 
-  /** Actualiza el estado de reproducción (play/pause y tiempo) */
   async updateAudioState(sessionId: string, isPlaying: boolean, currentTime: number): Promise<void> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     await updateDoc(ref, {
@@ -175,8 +217,7 @@ export class SessionService {
       'audio.updatedAt': Date.now()
     });
   }
-
-  /** Elimina el audio de la sesión */
+  
   async clearAudio(sessionId: string): Promise<void> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     await updateDoc(ref, { audio: null });
@@ -193,6 +234,11 @@ export class SessionService {
       const { password, ...sessionWithoutPassword } = snap.data() as Session;
       callback({ id: snap.id, ...sessionWithoutPassword } as Session);
     });
+  }
+
+  async updateCombatOrder(sessionId: string, order: string[]): Promise<void> {
+    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
+    await updateDoc(ref, { combatOrder: order });
   }
 
   async updateStatus(sessionId: string, status: Session['status']): Promise<void> {
@@ -214,4 +260,5 @@ export class SessionService {
       return { id: d.id, ...data } as Session;
     });
   }
+
 }

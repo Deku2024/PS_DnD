@@ -1,18 +1,33 @@
 <div class="auth-hero">
 	<div class="auth-card">
 		<header class="card-header">
-			<div class="brand">PS<span class="accent">_DnD</span></div>
+			<div class="brand">Sheets<span class="accent"> & Notes</span></div>
 			<h2>{{ isLogin ? 'Bienvenido' : 'Crea tu cuenta' }}</h2>
 			<p class="subtitle">{{ isLogin ? 'Inicia sesión para continuar' : 'Regístrate para empezar a jugar' }}</p>
 		</header>
 
 		<form class="card-form" (ngSubmit)="submit()" role="form" aria-label="Formulario de autenticación">
-			<label class="field">
+
+			<label *ngIf="!this.isLogin" class="field">
+				<span class="label-text">Nombre de Usuario</span>
+				<div class="input-row">
+					<input type="text" [(ngModel)]="username" name="username" required placeholder="tu nombre de usuario" aria-required="true" />
+				</div>
+			</label>
+
+      <label *ngIf="!this.isLogin" class="field">
 				<span class="label-text">Correo</span>
 				<div class="input-row">
 					<input type="email" [(ngModel)]="email" name="email" required placeholder="tu@correo.com" aria-required="true" />
 				</div>
 			</label>
+
+      <label *ngIf="this.isLogin" class="field">
+        <span class="label-text">Correo o nombre de usuario</span>
+        <div class="input-row">
+          <input type="text" [(ngModel)]="identification" name="email" required placeholder="tu@correo.com ó tu nombre de usuario" aria-required="true" />
+        </div>
+      </label>
 
 			<label class="field">
 				<span class="label-text">Contraseña</span>
