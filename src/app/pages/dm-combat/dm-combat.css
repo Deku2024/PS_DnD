@@ -421,6 +421,27 @@
   color: #c6a747;
 }
 
+/* ── Dead combatant ── */
+.active-entry.dead,
+.manage-entry.dead {
+  opacity: 0.45;
+  background: rgba(180, 30, 30, 0.08);
+  border-left: 3px solid #8b2020;
+  filter: grayscale(60%);
+}
+
+.active-entry.dead .combatant-name,
+.manage-entry.dead .combatant-name {
+  text-decoration: line-through;
+  color: #a05050;
+}
+
+.active-entry.dead.active-turn {
+  /* dead takes priority over active-turn glow */
+  animation: none;
+  box-shadow: 0 0 0 1px rgba(139, 32, 32, 0.5);
+}
+
 /* ── Active turn highlight ── */
 .active-entry.active-turn {
   background: rgba(198, 167, 71, 0.1);

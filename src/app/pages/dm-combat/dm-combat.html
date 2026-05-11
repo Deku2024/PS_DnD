@@ -34,7 +34,8 @@
         <li
           *ngFor="let c of activeCombatants; let i = index"
           class="active-entry"
-          [class.active-turn]="i === activeTurnIndex">
+          [class.active-turn]="i === activeTurnIndex"
+          [class.dead]="(c.character?.life ?? 1) <= 0">
           <span class="turn-badge" [class.turn-badge-active]="i === activeTurnIndex">
             {{ i === activeTurnIndex ? '⚔' : i + 1 }}
           </span>
@@ -77,6 +78,7 @@
         <div
           class="manage-entry"
           [class.excluded]="!c.inCombat"
+          [class.dead]="(c.character?.life ?? 1) <= 0"
           *ngFor="let c of combatants; let i = index; let last = last">
 
           <div class="reorder-btns">
