@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef, ViewChild, ElementRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService, Session } from '../../services/sessions.service';
@@ -27,6 +27,10 @@ export class SessionPage implements OnInit, OnDestroy {
   errorMsg = '';
   isUploadingImage = false;
   imageUploadError = '';
+  showErrorModal = false;
+  imagePreviewUrl: string | null = null;
+  private pendingFile: File | null = null;
+  private cloudinaryService = inject(CloudinaryService);
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -50,8 +54,7 @@ export class SessionPage implements OnInit, OnDestroy {
     private characterService: CharacterService,
     private cd: ChangeDetectorRef,
     private presenceService: PresenceService,
-    private rollHistoryService: RollHistoryService,
-    private cloudinaryService: CloudinaryService
+    private rollHistoryService: RollHistoryService
 ) {}
 
   ngOnInit(): void {
@@ -214,31 +217,60 @@ export class SessionPage implements OnInit, OnDestroy {
     this.fileInput.nativeElement.click();
   }
 
-  async onFileSelected(event: Event): Promise<void> {
-    if (!this.session?.id || !this.isMaster) return;
+  onFileSelected(event: Event): void {
+    if (!this.isMaster) return;
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
+
+    if (this.imagePreviewUrl) {
+      URL.revokeObjectURL(this.imagePreviewUrl);
+    }
+    this.pendingFile = file;
+    this.imagePreviewUrl = URL.createObjectURL(file);
+    input.value = '';
+    this.cd.detectChanges();
+  }
+
+  cancelPreview(): void {
+    if (this.imagePreviewUrl) {
+      URL.revokeObjectURL(this.imagePreviewUrl);
+    }
+    this.imagePreviewUrl = null;
+    this.pendingFile = null;
+    this.cd.detectChanges();
+  }
+
+  async confirmUpload(): Promise<void> {
+    if (!this.session?.id || !this.pendingFile || !this.isMaster) return;
 
     this.isUploadingImage = true;
     this.imageUploadError = '';
     this.cd.detectChanges();
 
     try {
-      const url = await this.cloudinaryService.uploadImage(file);
+      const url = await this.cloudinaryService.uploadImage(this.pendingFile);
       await this.sessionService.updateSharedImage(this.session.id, url);
+      if (this.imagePreviewUrl) URL.revokeObjectURL(this.imagePreviewUrl);
+      this.imagePreviewUrl = null;
+      this.pendingFile = null;
     } catch (e: any) {
       this.imageUploadError = e.message || 'Error al subir la imagen';
-      this.cd.detectChanges();
+      this.showErrorModal = true;
     } finally {
       this.isUploadingImage = false;
-      input.value = '';
       this.cd.detectChanges();
     }
   }
 
+  closeErrorModal(): void {
+    this.showErrorModal = false;
+    this.imageUploadError = '';
+  }
+
   async removeSharedImage(): Promise<void> {
     if (!this.session?.id || !this.isMaster) return;
+    this.cancelPreview();
     await this.sessionService.updateSharedImage(this.session.id, null);
   }
 
