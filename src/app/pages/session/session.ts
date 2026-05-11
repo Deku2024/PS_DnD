@@ -8,14 +8,16 @@ import { PresenceService } from '../../services/presence.service';
 import { RollHistoryService } from '../../services/roll-history.service';
 import { HistoryButtonComponent} from '../../components/history.button.component/history.button.component';
 import { CloudinaryService } from '../../services/cloudinary.service';
+import { HexMapComponent } from '../../components/hex-map.component/hex-map.component';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
 import { BattleButtonComponent } from '../../components/battle.button.component/battle.button.component';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-session',
   standalone: true,
-  imports: [CommonModule, BattleButtonComponent, HistoryButtonComponent],
+  imports: [CommonModule, FormsModule, BattleButtonComponent, HistoryButtonComponent, HexMapComponent],
   templateUrl: './session.html',
   styleUrl: './session.css'
 })
@@ -31,6 +33,11 @@ export class SessionPage implements OnInit, OnDestroy {
   imagePreviewUrl: string | null = null;
   private pendingFile: File | null = null;
   private cloudinaryService = inject(CloudinaryService);
+
+  // Map settings
+  pendingIsMap = false;
+  pendingHexSize = 40;
+  localHexSize = 40;
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -251,6 +258,11 @@ export class SessionPage implements OnInit, OnDestroy {
     try {
       const url = await this.cloudinaryService.uploadImage(this.pendingFile);
       await this.sessionService.updateSharedImage(this.session.id, url);
+      await this.sessionService.updateMapSettings(
+        this.session.id,
+        this.pendingIsMap,
+        this.pendingHexSize
+      );
       if (this.imagePreviewUrl) URL.revokeObjectURL(this.imagePreviewUrl);
       this.imagePreviewUrl = null;
       this.pendingFile = null;
@@ -263,6 +275,23 @@ export class SessionPage implements OnInit, OnDestroy {
     }
   }
 
+  async toggleIsMap(): Promise<void> {
+    if (!this.session?.id || !this.isMaster) return;
+    const newIsMap = !this.session.isMap;
+    await this.sessionService.updateMapSettings(
+      this.session.id,
+      newIsMap,
+      this.session.hexSize ?? 40
+    );
+  }
+
+  async applyHexSize(): Promise<void> {
+    if (!this.session?.id || !this.isMaster) return;
+    const size = Math.min(120, Math.max(20, this.localHexSize));
+    this.localHexSize = size;
+    await this.sessionService.updateMapSettings(this.session.id, true, size);
+  }
+
   closeErrorModal(): void {
     this.showErrorModal = false;
     this.imageUploadError = '';
@@ -272,6 +301,24 @@ export class SessionPage implements OnInit, OnDestroy {
     if (!this.session?.id || !this.isMaster) return;
     this.cancelPreview();
     await this.sessionService.updateSharedImage(this.session.id, null);
+    await this.sessionService.updateMapSettings(this.session.id, false, 40);
+  }
+
+  get nonMasterPlayers(): { uid: string; username: string }[] {
+    if (!this.session) return [];
+    return this.session.players
+      .filter(uid => uid !== this.session!.masterId)
+      .map(uid => ({
+        uid,
+        username: this.session!.playersUsernames[uid] || uid,
+      }));
+  }
+
+  async onTokenMoved(event: { uid: string; row: number; col: number }): Promise<void> {
+    if (!this.session?.id) return;
+    const canMove = this.isMaster || event.uid === this.currentUser?.uid;
+    if (!canMove) return;
+    await this.sessionService.updateTokenPosition(this.session.id, event.uid, event.row, event.col);
   }
 
   ngOnDestroy(): void {

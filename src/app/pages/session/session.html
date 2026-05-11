@@ -29,12 +29,25 @@
 
     <hr class="divider" />
 
-    <!-- Imagen compartida -->
-    <div class="card shared-image-card">
-      <h3>🖼 Imagen compartida</h3>
+    <!-- Imagen compartida / Mapa -->
+    <div class="card shared-image-card" [class.map-card]="session.isMap">
+      <h3>{{ session.isMap ? '🗺 Mapa de la sesión' : '🖼 Imagen compartida' }}</h3>
 
-      <!-- Muestra la imagen a todos cuando existe -->
-      <div class="shared-image-display" *ngIf="session.sharedImageUrl">
+      <!-- Mapa con cuadrícula hexagonal (visible para todos) -->
+      <div class="shared-image-display" *ngIf="session.sharedImageUrl && session.isMap">
+        <app-hex-map
+          [imageUrl]="session.sharedImageUrl"
+          [hexSize]="session.hexSize ?? 40"
+          [players]="nonMasterPlayers"
+          [tokenPositions]="session.tokenPositions ?? {}"
+          [currentUserId]="currentUser?.uid ?? null"
+          [isMaster]="isMaster"
+          (tokenMoved)="onTokenMoved($event)">
+        </app-hex-map>
+      </div>
+
+      <!-- Imagen normal (visible para todos) -->
+      <div class="shared-image-display" *ngIf="session.sharedImageUrl && !session.isMap">
         <img [src]="session.sharedImageUrl" alt="Imagen compartida por el DM" class="shared-image" />
       </div>
 
@@ -56,6 +69,28 @@
         <!-- Previsualización local antes de subir -->
         <div class="image-preview-container" *ngIf="imagePreviewUrl">
           <img [src]="imagePreviewUrl" alt="Previsualización" class="image-preview" />
+
+          <!-- Opciones de mapa en la preview -->
+          <div class="map-toggle-row">
+            <label class="map-toggle-label">
+              <input
+                type="checkbox"
+                [(ngModel)]="pendingIsMap"
+                class="map-toggle-check" />
+              <span>🗺 Es un mapa</span>
+            </label>
+            <div class="hex-size-row" *ngIf="pendingIsMap">
+              <label class="hex-size-label">Tamaño hex:</label>
+              <input
+                type="range"
+                min="20" max="120" step="5"
+                [(ngModel)]="pendingHexSize"
+                aria-label="Tamaño de celda hexagonal"
+                class="hex-size-slider" />
+              <span class="hex-size-value">{{ pendingHexSize }}px</span>
+            </div>
+          </div>
+
           <div class="image-preview-actions">
             <button
               class="btn-upload-image btn-confirm"
@@ -70,6 +105,31 @@
               [disabled]="isUploadingImage">
               ✕ Cancelar
             </button>
+          </div>
+        </div>
+
+        <!-- Controles tras subida: toggle mapa + tamaño hex -->
+        <div class="map-settings-controls" *ngIf="!imagePreviewUrl && session.sharedImageUrl">
+          <div class="map-toggle-row">
+            <label class="map-toggle-label">
+              <input
+                type="checkbox"
+                [checked]="session.isMap"
+                (change)="toggleIsMap()"
+                class="map-toggle-check" />
+              <span>🗺 Es un mapa</span>
+            </label>
+          </div>
+          <div class="hex-size-row" *ngIf="session.isMap">
+            <label class="hex-size-label">Tamaño hex:</label>
+            <input
+              type="range"
+              min="20" max="120" step="5"
+              [(ngModel)]="localHexSize"
+              aria-label="Tamaño de celda hexagonal"
+              class="hex-size-slider"
+              (change)="applyHexSize()" />
+            <span class="hex-size-value">{{ localHexSize }}px</span>
           </div>
         </div>
 

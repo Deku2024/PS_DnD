@@ -32,6 +32,9 @@ export interface Session {
   selectedCharacters?: { [uid: string]: string | null };
   combatOrder?: string[];
   sharedImageUrl?: string | null;
+  isMap?: boolean;
+  hexSize?: number;
+  tokenPositions?: { [uid: string]: { row: number; col: number } };
   status: 'waiting' | 'active' | 'paused' | 'closed' | 'in-battle';
   password?: string;
   createdAt?: any;
@@ -215,6 +218,16 @@ export class SessionService {
   async updateSharedImage(sessionId: string, imageUrl: string | null): Promise<void> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     await updateDoc(ref, { sharedImageUrl: imageUrl });
+  }
+
+  async updateMapSettings(sessionId: string, isMap: boolean, hexSize: number): Promise<void> {
+    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
+    await updateDoc(ref, { isMap, hexSize });
+  }
+
+  async updateTokenPosition(sessionId: string, uid: string, row: number, col: number): Promise<void> {
+    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
+    await updateDoc(ref, { [`tokenPositions.${uid}`]: { row, col } });
   }
 
   async setSelectedCharacter(sessionId: string, userId: string, characterId: string | null): Promise<void> {

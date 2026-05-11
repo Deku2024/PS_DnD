@@ -1,0 +1,74 @@
+<div class="hex-map-wrapper" [class.move-mode]="selectedTokenUid">
+  <img
+    class="hex-map-image"
+    [src]="imageUrl"
+    alt="Mapa de la sesión"
+    (load)="onImageLoad($event)"
+  />
+  <svg
+    *ngIf="imgWidth > 0 && imgHeight > 0"
+    class="hex-overlay"
+    [attr.viewBox]="'0 0 ' + imgWidth + ' ' + imgHeight"
+    preserveAspectRatio="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <polygon
+      *ngFor="let hex of hexes"
+      [attr.points]="hex.points"
+      [class.hex-cell]="true"
+      [class.hex-highlighted]="isHexHighlighted(hex)"
+      (click)="onHexClick(hex)"
+    />
+
+    <g
+      *ngFor="let token of playerTokens"
+      class="token-group"
+      [class.token-selected]="selectedTokenUid === token.uid"
+      [class.token-selectable]="canSelectToken(token.uid)"
+      (click)="onTokenClick(token.uid, $event)"
+    >
+      <!-- Shadow -->
+      <circle
+        [attr.cx]="token.cx + hexSize * 0.04"
+        [attr.cy]="token.cy + hexSize * 0.05"
+        [attr.r]="hexSize * 0.44"
+        fill="rgba(0,0,0,0.4)"
+      />
+      <!-- Body -->
+      <circle
+        [attr.cx]="token.cx"
+        [attr.cy]="token.cy"
+        [attr.r]="hexSize * 0.42"
+        [attr.fill]="getTokenColor(token.colorIndex)"
+        stroke="white"
+        [attr.stroke-width]="hexSize * 0.07"
+      />
+      <!-- Selection ring -->
+      <circle
+        *ngIf="selectedTokenUid === token.uid"
+        [attr.cx]="token.cx"
+        [attr.cy]="token.cy"
+        [attr.r]="hexSize * 0.48"
+        fill="none"
+        stroke="#ffe066"
+        [attr.stroke-width]="hexSize * 0.09"
+        stroke-dasharray="4 2"
+      />
+      <text
+        [attr.x]="token.cx"
+        [attr.y]="token.cy"
+        text-anchor="middle"
+        dominant-baseline="central"
+        [attr.font-size]="hexSize * 0.42"
+        fill="white"
+        font-weight="bold"
+        class="token-label"
+      >{{ token.initials }}</text>
+    </g>
+  </svg>
+
+  <!-- Hint overlay -->
+  <div class="move-hint" *ngIf="selectedTokenUid">
+    Selecciona un hexágono para mover la ficha
+  </div>
+</div>
