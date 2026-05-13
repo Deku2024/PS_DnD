@@ -99,7 +99,7 @@ export class DmCombat implements OnInit, OnDestroy {
     const characterData: MonsterData = {
       userId: tempId,
       name: monster.name,
-      life: 0,
+      life: monster.life,
       maxLife: monster.maxLife,
       tempLife: 0,
       armourClass: monster.armourClass,
