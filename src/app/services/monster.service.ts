@@ -6,7 +6,7 @@ import { SheetInterface } from '../interfaces/SheetInterface';
 export interface MonsterData extends SheetInterface {
   id?: string;
   challengeValue: number;
-  challengePX: number;
+  challengeXP: number;
 }
 
 @Injectable({
@@ -39,7 +39,7 @@ export class MonsterService {
       });
 
       callback(monsters);
-    });   
+    });
   }
 
   async deleteMonster(monsterId: string) {

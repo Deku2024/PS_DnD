@@ -5,6 +5,8 @@ import { BattleService, Combatant } from '../../services/battle.service';
 import { SessionService } from '../../services/sessions.service';
 import { AuthService } from '../../services/auth.service';
 import { MonsterSearchComponent } from '../../components/monster-search.component/monster-search.component';
+import {MonsterData} from '../../services/monster.service';
+import {SheetInterface} from '../../interfaces/SheetInterface';
 
 @Component({
   selector: 'app-dm-combat',
@@ -92,25 +94,46 @@ export class DmCombat implements OnInit, OnDestroy {
     this.saveOrder();
   }
 
-  addMonsterToBattle(monster: any) {
+  addMonsterToBattle(monster: MonsterData) {
     const tempId = 'npc_' + Date.now();
-    const newEnemy = {
-      uid: tempId,
-      characterId: tempId,
-      email: 'Enemigo (NPC)',
-      inCombat: false,
-      initiative: 0,
-      character: {
-        name: monster.name,
-        race: monster.race || 'Monstruo',
-        life: monster.life,
-        maxLife: monster.maxLife,
-        armourClass: monster.armourClass,
-        attributes: monster.attributes || { dexterity: 10 }
-      }
-    } as unknown as Combatant;
+    const characterData: MonsterData = {
+      userId: tempId,
+      name: monster.name,
+      life: 0,
+      maxLife: monster.maxLife,
+      tempLife: 0,
+      armourClass: monster.armourClass,
+      race: monster.race || 'Monstruo',
+      alignment: 'Monstruo',
+      attributes: monster.attributes || {
+        strength: 10,
+        dexterity: 10,
+        constitution: 10,
+        intelligence: 10,
+        wisdom: 10,
+        charisma: 10
+      },
+      inventory: [],
+      abilities: [],
+      image: monster.image || '',
+      id: tempId,
+      challengeValue: monster.challengeValue,
+      challengeXP: monster.challengeXP
+    };
 
-    this.battleService.combatants = [...this.battleService.combatants, newEnemy];
+    const newCombatant: Combatant = {
+      uid: tempId,
+      email: 'Enemigo (NPC)',
+      username: monster.name,
+      characterId: tempId,
+      character: characterData,
+      inCombat: true,
+      initiative: 0
+    };
+
+    this.battleService.addToCombat(characterData);
+    this.battleService.combatants.push(newCombatant);
+
     this.saveOrder();
     this.showAddMenu = false;
   }

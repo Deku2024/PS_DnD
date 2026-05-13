@@ -1,9 +1,10 @@
 import {Session, SessionService} from './sessions.service';
-import {CharacterService} from './character.service';
+import {CharacterService, CharacterWithId} from './character.service';
 import {SheetInterface} from '../interfaces/SheetInterface';
 import {inject, Injectable} from '@angular/core';
 import {DiceRollerService} from './roll-dice.service';
 import {UsernameService} from './username.service';
+import {MonsterData} from './monster.service';
 
 export interface Combatant {
   uid: string;
@@ -23,7 +24,7 @@ export class BattleService {
   combatants: Combatant[] = [];
 
   private combatOrder = new Map<string, number>();
-  private combatEntities: (SheetInterface | null)[] = []; // array para tener los datos de los objetos de manera centralizada para el combate
+  private combatEntities: SheetInterface[] = []; // array para tener los datos de los objetos de manera centralizada para el combate
 
   rollerService = inject(DiceRollerService);
   usernameService = inject(UsernameService);
@@ -102,12 +103,23 @@ export class BattleService {
   }
 
   public async endCombat(sessionId: string): Promise<void> {
+    this.startXPProcess();
     this.status = 'ended';
     this.combatOrder = new Map<string, number>();
     this.combatants = [];
     this.combatEntities = [];
     await this.sessionService.updateCombatOrder(sessionId, []);
     await this.sessionService.updateStatus(sessionId, 'active');
+  }
+
+  private startXPProcess() {
+    let players: CharacterWithId[] = [];
+    let monsters: MonsterData[] = [];
+    this.filterCombatants(monsters, players);
+    this.addXPToPlayers(
+      this.calculateTotalXP(monsters),
+      players
+    );
   }
 
   public applySavedOrder(savedOrder: string[]): void {
@@ -143,6 +155,7 @@ export class BattleService {
 
   public addToCombat(character: SheetInterface): void {
     this.combatOrder.set(character.name, this.rollerService.rollAD20(this.characterService.calculateBonus(character.attributes.dexterity)).result);
+    this.combatEntities.push(character);
   }
 
   private autoOrder(): void {
@@ -151,6 +164,37 @@ export class BattleService {
       const initiativeB = this.combatOrder.get(b.character?.name || '') || 0;
       return initiativeB - initiativeA;
     });
+  }
+
+  private addXPToPlayers(totalXP: number, players: CharacterWithId[]) {
+    let individualGain = totalXP / players.length;
+
+    for (const player of players) {
+      player.experience += individualGain;
+      this.characterService.updateCharacter(player.id, player);
+    }
+  }
+
+  private calculateTotalXP(monsters: MonsterData[]) : number {
+    let totalXP = 0;
+    for (const monster of monsters) {
+      if (monster.life == 0) {
+        console.log(monster.challengeXP)
+        totalXP += monster.challengeXP;
+      }
+    }
+    return totalXP;
+  }
+
+  private filterCombatants(monsters: MonsterData[], players: CharacterWithId[]) {
+    for (const character of this.combatEntities) {
+      if ('challengeValue' in character) {
+        console.log("Se ha añadido un monstruo: " + character)
+        monsters.push(character as MonsterData);
+      } else {
+        players.push(character as CharacterWithId);
+      }
+    }
   }
 }
 
