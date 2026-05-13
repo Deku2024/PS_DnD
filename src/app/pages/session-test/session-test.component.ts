@@ -31,13 +31,16 @@ export class SessionTestComponent implements OnInit, OnDestroy {
 
   authService = inject(AuthService);
 
+  showModal = false;
+
   private authSub?: Subscription;
   private unsubscribeFirestore?: Unsubscribe;
 
   constructor(
     private sessionService: SessionService,
     private router: Router,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    
   ) {}
 
   ngOnInit() {
@@ -174,6 +177,16 @@ export class SessionTestComponent implements OnInit, OnDestroy {
 
   enterMonsterPage() {
     this.router.navigate(['/bestiary']);
+  }
+
+  //modal para objetos
+
+  openObjectsModal() {
+    this.showModal = true;
+  }
+
+  closeModal() {
+    this.showModal = false;
   }
 
 

@@ -63,5 +63,29 @@
 
   <!---Botón para acceder al bestiario-->
   <button (click)="enterMonsterPage()" [disabled]="!currentUser">Ver mi bestiario</button>
+  <button (click)="openObjectsModal()">Mis Objetos</button>
 
+  <!--Modal para el manejo de objetos del usuario-->
+    <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📜 Tus objetos, {{ currentUser }}</h3>
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="user-objects"></div>
+
+        <hr class="modal-divider" />
+
+        <div class="object-actions"></div>
+      </div>
+
+      <ng-template #noChar>
+        <div class="modal-body">
+          <p class="no-char">Este jugador aún no tiene personaje creado.</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
 </div>
