@@ -705,3 +705,101 @@ h2 {
     font-size: 1.3rem;
   }
 }
+
+.dm-floating-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 1.5rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.dm-menu-card {
+  background: #1e1208;
+  border: 1px solid #c6a747;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  width: 200px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+  position: relative;
+  animation: fadeInImage 0.3s ease;
+}
+
+.dm-menu-card::before,
+.dm-menu-card::after {
+  content: '✦';
+  position: absolute;
+  color: #c6a747;
+  font-size: 0.6rem;
+  opacity: 0.6;
+}
+.dm-menu-card::before { top: 6px; left: 10px; }
+.dm-menu-card::after  { top: 6px; right: 10px; }
+
+.dm-menu-header h3 {
+  margin: 0 0 1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #c6a747;
+  text-align: center;
+  border-bottom: 1px solid rgba(198, 167, 71, 0.2);
+  padding-bottom: 0.5rem;
+}
+
+.btn-dm-action {
+  width: 100%;
+  background: rgba(198, 167, 71, 0.05);
+  border: 1px solid rgba(198, 167, 71, 0.3);
+  color: #a88a3a;
+  padding: 0.6rem;
+  margin-bottom: 0.4rem;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: all 0.2s;
+  border-radius: 2px;
+}
+
+.btn-dm-action:hover {
+  background: rgba(198, 167, 71, 0.15);
+  border-color: #c6a747;
+  color: #c6a747;
+  transform: translateX(-3px);
+}
+
+.dm-master-btn {
+  background: #1a1008;
+  border: 1px solid #c6a747;
+  color: #c6a747;
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  box-shadow: 0 0 15px rgba(198, 167, 71, 0.2);
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dm-master-btn:hover {
+  background: rgba(198, 167, 71, 0.1);
+  box-shadow: 0 0 20px rgba(198, 167, 71, 0.4);
+  transform: scale(1.05);
+}
+
+.dm-master-btn.btn-active {
+  background: #c6a747;
+  color: #1a1008;
+  font-weight: bold;
+}

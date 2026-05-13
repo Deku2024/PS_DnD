@@ -40,6 +40,8 @@ export class SessionPage implements OnInit, OnDestroy {
   modalPlayerEmail = '';
   modalUid = '';
   presenceMap: { [uid: string]: boolean } = {};
+  showDmMenu = false;
+
 
   private unsubscribe?: () => void;
   private authSub?: Subscription;
@@ -278,5 +280,31 @@ export class SessionPage implements OnInit, OnDestroy {
     this.unsubscribe?.();
     this.authSub?.unsubscribe();
     this.presenceUnsub?.();
+  }
+
+  toggleDmMenu(): void {
+    this.showDmMenu = !this.showDmMenu;
+    this.cd.detectChanges();
+  }
+// --- MÉTODOS DEL PANEL DE DM (PROVISIONALES) ---
+
+  modifyHealth(): void {
+    console.log('Invocando: Ajustar Puntos de Vida');
+    // Aquí programaremos el diálogo de vida en la siguiente tarea
+  }
+
+  modifyGold(): void {
+    console.log('Invocando: Repartir Tesoro');
+    // Aquí programaremos el reparto de oro
+  }
+
+  addItems(): void {
+    console.log('Invocando: Otorgar Objetos');
+    // Aquí programaremos la entrega de equipo
+  }
+
+  modifyExp(): void {
+    console.log('Invocando: Asignar Experiencia');
+    // Aquí programaremos la subida de nivel
   }
 }

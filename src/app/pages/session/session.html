@@ -254,5 +254,27 @@
       </div>
     </div>
   </div>
+  <div class="dm-floating-container" *ngIf="isMaster">
 
+    <div class="dm-menu-card" *ngIf="showDmMenu">
+      <div class="dm-menu-header">
+        <h3>Gestión de Partida</h3>
+      </div>
+
+      <div class="dm-menu-actions">
+        <button class="btn-dm-action" (click)="modifyHealth()">Ajustar Vitalidad</button>
+        <button class="btn-dm-action" (click)="modifyGold()">Repartir Oro</button>
+        <button class="btn-dm-action" (click)="addItems()">Gestionar Equipo</button>
+        <button class="btn-dm-action" (click)="modifyExp()">Asignar Experiencia</button>
+      </div>
+    </div>
+
+    <button
+      class="dm-master-btn"
+      (click)="toggleDmMenu()"
+      [class.btn-active]="showDmMenu">
+      {{ showDmMenu ? 'Cerrar' : 'Master' }}
+    </button>
+
+  </div>
 </div>
