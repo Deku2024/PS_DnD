@@ -316,3 +316,26 @@ html {
   color: #3a2518;
   font-family: 'Georgia', serif;
 }
+
+/* Mandamos fuera de pantalla ÚNICAMENTE al botón nativo de apertura */
+.dm-history-hidden-host ::ng-deep history-button-component > button,
+.dm-history-hidden-host ::ng-deep history-button-component > .btn,
+.dm-history-hidden-host ::ng-deep history-button-component > div:first-child > button {
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+}
+
+/* Contenedor raíz centrado que permite hacer clic a través de él */
+.dm-history-hidden-host {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* Devolvemos los clics al modal/cajón interno cuando emerja */
+.dm-history-hidden-host ::ng-deep * {
+  pointer-events: auto;
+}

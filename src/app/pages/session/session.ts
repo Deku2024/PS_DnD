@@ -6,16 +6,17 @@ import { AuthService } from '../../services/auth.service';
 import { CharacterService, CharacterWithId } from '../../services/character.service';
 import { PresenceService } from '../../services/presence.service';
 import { RollHistoryService } from '../../services/roll-history.service';
-import { HistoryButtonComponent} from '../../components/history.button.component/history.button.component';
+import { HistoryButtonComponent } from '../../components/history.button.component/history.button.component';
 import { CloudinaryService } from '../../services/cloudinary.service';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
 import { BattleButtonComponent } from '../../components/battle.button.component/battle.button.component';
+import { DmFloatingMenuComponent } from '../../components/dm-floating-menu.component/dm-floating-menu.component';
 
 @Component({
   selector: 'app-session',
   standalone: true,
-  imports: [CommonModule, BattleButtonComponent, HistoryButtonComponent],
+  imports: [CommonModule, BattleButtonComponent, HistoryButtonComponent, DmFloatingMenuComponent],
   templateUrl: './session.html',
   styleUrl: './session.css'
 })
@@ -55,7 +56,7 @@ export class SessionPage implements OnInit, OnDestroy {
     private cd: ChangeDetectorRef,
     private presenceService: PresenceService,
     private rollHistoryService: RollHistoryService
-) {}
+  ) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -96,7 +97,6 @@ export class SessionPage implements OnInit, OnDestroy {
         this.errorMsg = 'La sesión no existe o ha sido cerrada.';
         this.session = null;
       } else {
-        // Usar this.currentUser para detectar expulsión en tiempo real
         if (this.currentUser && !session.players.includes(this.currentUser.uid)) {
           this.unsubscribe?.();
           this.presenceUnsub?.();
@@ -278,5 +278,18 @@ export class SessionPage implements OnInit, OnDestroy {
     this.unsubscribe?.();
     this.authSub?.unsubscribe();
     this.presenceUnsub?.();
+  }
+
+  // 🟢 Dispara el panel inferior del historial
+  triggerHistoryDrawer(): void {
+    // Busca el botón que está dentro de tu componente de historial y lo pulsa
+    const historyNativeButton = document.querySelector('history-button-component button') as HTMLButtonElement;
+    if (historyNativeButton) {
+      historyNativeButton.click();
+    } else {
+      // Alternativa por si el componente controla su propia visibilidad con la variable
+      this.showHistory = !this.showHistory;
+      this.cd.detectChanges();
+    }
   }
 }

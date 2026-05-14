@@ -1,18 +1,15 @@
 <div class="session-page">
 
-  <!-- Loading -->
   <div class="loading-state" *ngIf="loading">
     <span class="spinner">⏳</span>
     <p>Cargando la sesión...</p>
   </div>
 
-  <!-- Error -->
   <div class="error-state" *ngIf="!loading && errorMsg">
     <p class="error-msg">{{ errorMsg }}</p>
     <button class="btn-back" (click)="leaveSession()">← Volver al inicio</button>
   </div>
 
-  <!-- Sesión activa -->
   <div class="session-content" *ngIf="!loading && session">
     <div class="session-header">
       <div class="session-title-row">
@@ -29,21 +26,17 @@
 
     <hr class="divider" />
 
-    <!-- Imagen compartida -->
     <div class="card shared-image-card">
       <h3>🖼 Imagen compartida</h3>
 
-      <!-- Muestra la imagen a todos cuando existe -->
       <div class="shared-image-display" *ngIf="session.sharedImageUrl">
         <img [src]="session.sharedImageUrl" alt="Imagen compartida por el DM" class="shared-image" />
       </div>
 
-      <!-- Sin imagen -->
       <p class="shared-image-empty" *ngIf="!session.sharedImageUrl && !isMaster">
         El DM no ha compartido ninguna imagen aún.
       </p>
 
-      <!-- Controles del DM -->
       <div class="shared-image-controls" *ngIf="isMaster">
         <input
           #fileInput
@@ -53,7 +46,6 @@
           class="file-input-hidden"
           (change)="onFileSelected($event)" />
 
-        <!-- Previsualización local antes de subir -->
         <div class="image-preview-container" *ngIf="imagePreviewUrl">
           <img [src]="imagePreviewUrl" alt="Previsualización" class="image-preview" />
           <div class="image-preview-actions">
@@ -73,7 +65,6 @@
           </div>
         </div>
 
-        <!-- Botones principales (solo cuando no hay preview) -->
         <div class="shared-image-main-actions" *ngIf="!imagePreviewUrl">
           <button
             class="btn-upload-image"
@@ -95,7 +86,6 @@
 
     <hr class="divider" />
 
-    <!-- Master -->
     <div class="card">
       <h3>Dungeon Master</h3>
       <p class="player master-player">
@@ -103,7 +93,6 @@
       </p>
     </div>
 
-    <!-- Jugadores -->
     <div class="card">
       <h3>Aventureros ({{ session.players.length - 1 }})</h3>
       <ul class="players-list">
@@ -135,7 +124,6 @@
 
     </div>
 
-    <!-- Acciones -->
     <div class="actions">
       <div *ngIf="!isMaster">
         <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
@@ -186,7 +174,6 @@
     </div>
   </div>
 
-  <!-- Modal de personaje -->
   <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
     <div class="modal-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -239,7 +226,6 @@
     </div>
   </div>
 
-  <!-- Modal de error al subir imagen -->
   <div class="modal-overlay" *ngIf="showErrorModal" (click)="closeErrorModal()">
     <div class="modal-card error-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -254,5 +240,13 @@
       </div>
     </div>
   </div>
+
+  <app-dm-floating-menu
+    *ngIf="isMaster"
+    [sessionId]="session?.id || ''"
+    [isBattleActive]="session?.status === 'in-battle'"
+    (mapClick)="triggerFileInput()"
+    (historyClick)="triggerHistoryDrawer()">
+  </app-dm-floating-menu>
 
 </div>

@@ -5,8 +5,12 @@ import { Note } from '../../components/note/note';
 import { DmnotesService } from '../../services/dmnotes.service';
 import { ResultThrowFrameComponent } from '../../components/result.throw.frame.component/result.throw.frame.component';
 import { GeneralThrowsButtonComponent } from '../../components/general.throws.button.component/general.throws.button.component';
-import { SessionService } from '../../services/sessions.service';
+import { SessionService, Session } from '../../services/sessions.service';
 import { FormsModule } from '@angular/forms';
+import { DmFloatingMenuComponent } from '../../components/dm-floating-menu.component/dm-floating-menu.component';
+import { HistoryButtonComponent } from '../../components/history.button.component/history.button.component';
+import { AuthService } from '../../services/auth.service';
+import { User } from 'firebase/auth';
 
 interface NoteItem {
   id?: string;
@@ -19,7 +23,7 @@ interface NoteItem {
 @Component({
   selector: 'app-dm-notes',
   standalone: true,
-  imports: [CommonModule, Note, FormsModule, ResultThrowFrameComponent, GeneralThrowsButtonComponent],
+  imports: [CommonModule, Note, FormsModule, ResultThrowFrameComponent, GeneralThrowsButtonComponent, DmFloatingMenuComponent, HistoryButtonComponent],
   templateUrl: './dm-notes.html',
   styleUrl: './dm-notes.css',
 })
@@ -28,10 +32,12 @@ export class DmNotes implements OnInit, OnDestroy {
   maxNotesExceeded: boolean = false;
   notes: NoteItem[] = [];
   sessionId: string = '';
-
-  // NUEVO: Variable para guardar el criterio de ordenación seleccionado
   sortCriteria: string = 'newest';
 
+  session: Session | null = null;
+  currentUser: User | null = null;
+  isMaster: boolean = false;
+  private unsubSession?: () => void;
   unsubscribe: (() => void) | undefined;
 
   constructor(
@@ -39,17 +45,15 @@ export class DmNotes implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private sessionsService: SessionService,
+    private authService: AuthService,
     private cd: ChangeDetectorRef
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     const paramId = this.route.snapshot.queryParamMap.get('sessionId');
     const id = paramId || this.sessionsService.getCurrentSessionId();
 
-    if (!id) {
-      console.error('No hay id de la sesión.');
-      return;
-    }
+    if (!id) return;
 
     if (paramId) {
       this.sessionsService.setCurrentSessionId(paramId);
@@ -57,22 +61,29 @@ export class DmNotes implements OnInit, OnDestroy {
 
     this.sessionId = id;
 
-    console.log(this.sessionId)
+    this.currentUser = await new Promise<any>(resolve =>
+      this.authService.onAuthState().subscribe(u => resolve(u))
+    );
+
+    this.unsubSession = this.sessionsService.listenSession(this.sessionId, (s) => {
+      if (s) {
+        this.session = s;
+        this.isMaster = s.masterId === this.currentUser?.uid;
+        this.cd.detectChanges();
+      }
+    });
 
     this.unsubscribe = this.dmNotesService.listenToNotes(
       this.sessionId,
       (notes) => {
         this.notes = notes;
-        // NUEVO: Ordenamos las notas automáticamente al recibirlas o al haber un cambio
         this.sortNotes();
         this.maxNotesExceeded = this.notes.length > this.maxNotes;
         this.cd.detectChanges();
       }
     );
-
   }
 
-  // NUEVO: Función para ordenar el array de notas según el criterio
   sortNotes() {
     if (!this.notes) return;
 
@@ -92,7 +103,6 @@ export class DmNotes implements OnInit, OnDestroy {
     });
   }
 
-  // NUEVO: Función auxiliar para extraer el tiempo de forma segura (sea Timestamp de Firebase o Date normal)
   private getTime(dateVal: any): number {
     if (!dateVal) return 0;
     if (typeof dateVal.toMillis === 'function') return dateVal.toMillis();
@@ -117,7 +127,18 @@ export class DmNotes implements OnInit, OnDestroy {
     this.router.navigate(['/session', this.sessionId]);
   }
 
+  triggerHistoryDrawer(): void {
+    const historyComp = document.querySelector('history-button-component');
+    if (historyComp) {
+      const triggerButton = historyComp.querySelector('button, .btn') || historyComp.firstElementChild;
+      if (triggerButton) {
+        (triggerButton as HTMLElement).click();
+      }
+    }
+  }
+
   ngOnDestroy() {
     if (this.unsubscribe) this.unsubscribe();
+    if (this.unsubSession) this.unsubSession();
   }
 }

@@ -1,0 +1,39 @@
+<div class="dm-speed-dial">
+  <div class="dial-actions" [class.open]="showMenu">
+
+    <div class="dial-item" *ngIf="!showLocalActions">
+      <span class="dial-label">MESA PRINCIPAL</span>
+      <button class="sub-fab" (click)="goToMainSession()" title="Volver a la partida">🎲</button>
+    </div>
+
+    <div class="dial-item" *ngIf="showLocalActions">
+      <span class="dial-label">COMPARTIR MAPA</span>
+      <button class="sub-fab" (click)="onMap()">🗺️</button>
+    </div>
+
+    <div class="dial-item">
+      <span class="dial-label">CRÓNICAS E HISTORIAL</span>
+      <button class="sub-fab" (click)="onHistory()">📜</button>
+    </div>
+
+    <div class="dial-item">
+      <span class="dial-label">{{ isBattleActive ? 'BATALLA EN CURSO' : 'EMPEZAR BATALLA' }}</span>
+      <button class="sub-fab" (click)="goToCombat()">⚔️</button>
+    </div>
+
+    <div class="dial-item">
+      <span class="dial-label">NOTAS SECRETAS</span>
+      <button class="sub-fab" (click)="goToNotes()">📝</button>
+    </div>
+
+    <div class="dial-item">
+      <span class="dial-label">ABANDONAR PARTIDA</span>
+      <button class="sub-fab" (click)="leave()">🚪</button>
+    </div>
+
+  </div>
+
+  <button class="dm-main-btn" (click)="toggleMenu()" [class.active]="showMenu">
+    <span class="btn-icon-centered">{{ showMenu ? '✕' : '👑' }}</span>
+  </button>
+</div>
