@@ -1,18 +1,15 @@
 <div class="session-page">
 
-  <!-- Loading -->
   <div class="loading-state" *ngIf="loading">
     <span class="spinner">⏳</span>
     <p>Cargando la sesión...</p>
   </div>
 
-  <!-- Error -->
   <div class="error-state" *ngIf="!loading && errorMsg">
     <p class="error-msg">{{ errorMsg }}</p>
     <button class="btn-back" (click)="leaveSession()">← Volver al inicio</button>
   </div>
 
-  <!-- Sesión activa -->
   <div class="session-content" *ngIf="!loading && session">
     <div class="session-header">
       <div class="session-title-row">
@@ -29,65 +26,111 @@
 
     <hr class="divider" />
 
-    <!-- Imagen compartida -->
     <div class="card shared-image-card">
       <h3>🖼 Imagen compartida</h3>
-
-      <!-- Muestra la imagen a todos cuando existe -->
       <div class="shared-image-display" *ngIf="session.sharedImageUrl">
-        <img [src]="session.sharedImageUrl" alt="Imagen compartida por el DM" class="shared-image" />
+        <img [src]="session.sharedImageUrl" alt="Imagen compartida" class="shared-image" />
       </div>
-
-      <!-- Sin imagen -->
       <p class="shared-image-empty" *ngIf="!session.sharedImageUrl && !isMaster">
         El DM no ha compartido ninguna imagen aún.
       </p>
 
-      <!-- Controles del DM -->
       <div class="shared-image-controls" *ngIf="isMaster">
-        <input
-          #fileInput
-          type="file"
-          accept="image/*"
-          aria-label="Seleccionar imagen para compartir"
-          class="file-input-hidden"
-          (change)="onFileSelected($event)" />
-
-        <!-- Previsualización local antes de subir -->
+        <input #fileInput type="file" accept="image/*" class="file-input-hidden" (change)="onFileSelected($event)" />
         <div class="image-preview-container" *ngIf="imagePreviewUrl">
           <img [src]="imagePreviewUrl" alt="Previsualización" class="image-preview" />
           <div class="image-preview-actions">
-            <button
-              class="btn-upload-image btn-confirm"
-              (click)="confirmUpload()"
-              [disabled]="isUploadingImage">
-              <span *ngIf="isUploadingImage">⏳ Subiendo...</span>
-              <span *ngIf="!isUploadingImage">✔ Confirmar</span>
+            <button class="btn-upload-image btn-confirm" (click)="confirmUpload()" [disabled]="isUploadingImage">
+              <span>{{ isUploadingImage ? '⏳ Subiendo...' : '✔ Confirmar' }}</span>
             </button>
-            <button
-              class="btn-remove-image"
-              (click)="cancelPreview()"
-              [disabled]="isUploadingImage">
-              ✕ Cancelar
-            </button>
+            <button class="btn-remove-image" (click)="cancelPreview()" [disabled]="isUploadingImage">✕ Cancelar</button>
           </div>
         </div>
-
-        <!-- Botones principales (solo cuando no hay preview) -->
         <div class="shared-image-main-actions" *ngIf="!imagePreviewUrl">
-          <button
-            class="btn-upload-image"
-            (click)="triggerFileInput()"
-            [disabled]="isUploadingImage">
+          <button class="btn-upload-image" (click)="triggerFileInput()">
             {{ session.sharedImageUrl ? '🔄 Cambiar imagen' : '📤 Subir imagen' }}
           </button>
+          <button class="btn-remove-image" *ngIf="session.sharedImageUrl" (click)="removeSharedImage()">🗑 Quitar imagen</button>
+        </div>
+      </div>
+    </div>
 
-          <button
-            class="btn-remove-image"
-            *ngIf="session.sharedImageUrl"
-            (click)="removeSharedImage()"
-            [disabled]="isUploadingImage">
-            🗑 Quitar imagen
+    <hr class="divider" />
+
+    <div class="card">
+      <h3>Dungeon Master</h3>
+      <p class="player master-player">👑 {{ session.playersUsernames[session.masterId] || session.masterId }}</p>
+    </div>
+
+    <div class="card">
+      <div class="players-header">
+        <h3>Aventureros ({{ session.players.length - 1 }})</h3>
+        <button *ngIf="isMaster" class="btn-select-all" (click)="selectAllPlayers()">
+          {{ selectedPlayerUids.size === session.players.length - 1 ? 'Desmarcar todos' : 'Marcar todos' }}
+        </button>
+      </div>
+
+      <ul class="players-list">
+        <li *ngFor="let uid of session.players" [class.is-master]="uid === session.masterId">
+          <ng-container *ngIf="uid !== session.masterId">
+            <input
+              *ngIf="isMaster"
+              type="checkbox"
+              class="dm-checkbox"
+              [checked]="selectedPlayerUids.has(uid)"
+              (change)="togglePlayerSelection(uid)" />
+
+            <span class="presence-dot" [class.online]="presenceMap[uid]" [class.offline]="!presenceMap[uid]"></span>
+            <span class="player-email">{{ session.playersUsernames[uid] || uid }}</span>
+            <span class="you-badge" *ngIf="currentUser && uid === currentUser.uid">(tú)</span>
+
+            <div class="player-actions">
+              <button class="btn-character" (click)="openModal(uid)" title="Ver ficha">📜</button>
+              <button *ngIf="isMaster" class="btn-kick" (click)="kickPlayer(uid)" title="Expulsar">✖</button>
+            </div>
+          </ng-container>
+        </li>
+      </ul>
+    </div>
+
+    <div class="card dm-actions-panel" *ngIf="isMaster">
+      <div class="panel-header">
+        <span class="crown-icon">👑</span>
+        <h3>CENTRO DE MANDO DEL MASTER</h3>
+      </div>
+
+      <p class="selection-info">Afectando a: <strong>{{ selectedPlayerUids.size }}</strong> seleccionados</p>
+
+      <div class="dm-flex-container">
+        <div class="dm-batch-section">
+          <div class="stat-input-row">
+            <label>❤️ Vida:</label>
+            <input type="number" [(ngModel)]="lifeAction" class="dm-input-step">
+          </div>
+          <div class="stat-input-row">
+            <label>💰 Oro:</label>
+            <input type="number" [(ngModel)]="goldAction" class="dm-input-step">
+          </div>
+          <div class="stat-input-row">
+            <label>✨ XP:</label>
+            <input type="number" [(ngModel)]="xpAction" class="dm-input-step">
+          </div>
+          <button (click)="applyBatchActions()"
+                  class="btn-apply-all"
+                  [disabled]="selectedPlayerUids.size === 0 || (lifeAction === 0 && goldAction === 0 && xpAction === 0)">
+            ✦ Aplicar cambios ✦
+          </button>
+        </div>
+
+        <div class="dm-object-section">
+          <label>ENTREGAR NUEVO OBJETO:</label>
+          <input type="text" [(ngModel)]="newItemName" class="dm-input-text" placeholder="Nombre...">
+          <div class="dm-input-row">
+            <input type="number" [(ngModel)]="newItemWeight" class="dm-input-step" placeholder="lb">
+            <input type="text" [(ngModel)]="newItemDesc" class="dm-input-text" placeholder="Desc...">
+          </div>
+          <button (click)="applyAddItem()" class="btn-gift" [disabled]="!newItemName || selectedPlayerUids.size === 0">
+            🎁 Entregar Objeto
           </button>
         </div>
       </div>
@@ -95,117 +138,42 @@
 
     <hr class="divider" />
 
-    <!-- Master -->
-    <div class="card">
-      <h3>Dungeon Master</h3>
-      <p class="player master-player">
-        👑 {{ session.playersUsernames[session.masterId] || session.masterId }}
-      </p>
-    </div>
-
-    <!-- Jugadores -->
-    <div class="card">
-      <h3>Aventureros ({{ session.players.length - 1 }})</h3>
-      <ul class="players-list">
-        <li *ngFor="let uid of session.players" [class.is-master]="uid === session.masterId">
-          @if (uid !== session.masterId) {
-            <span class="presence-dot"
-                  [class.online]="presenceMap[uid]"
-                  [class.offline]="!presenceMap[uid]">
-            </span>
-            <span class="player-email">{{ session.playersUsernames[uid] || uid }}</span>
-            <span class="you-badge" *ngIf="currentUser && uid === currentUser.uid">(tú)</span>
-
-            <div class="player-actions">
-              <button
-                class="btn-character"
-                (click)="openModal(uid)"
-                title="Ver ficha del personaje">📜
-              </button>
-              <button
-                *ngIf="isMaster"
-                class="btn-kick"
-                (click)="kickPlayer(uid)"
-                title="Expulsar jugador">✖
-              </button>
-            </div>
-          }
-        </li>
-      </ul>
-
-    </div>
-
-    <!-- Acciones -->
     <div class="actions">
       <div *ngIf="!isMaster">
         <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
-      </div>
-
-      <div *ngIf="!isMaster">
-        <button
-          *ngIf="session.status === 'in-battle'"
-          class="btn-notes"
-          (click)="goToCombat()">⚔ Batalla en curso
-        </button>
+        <button *ngIf="session.status === 'in-battle'" class="btn-notes" (click)="goToCombat()">⚔ Batalla en curso</button>
       </div>
 
       <div class="btn-grp" *ngIf="isMaster">
         <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
-        <button *ngIf="isMaster" class="btn-notes" (click)="goToNotes()">📝 Notas DM</button>
-        <button
-          *ngIf="session.status === 'in-battle'"
-          class="btn-notes"
-          (click)="goToCombat()">⚔ Batalla en curso
-        </button>
+        <button class="btn-notes" (click)="goToNotes()">📝 Notas DM</button>
+        <button *ngIf="session.status === 'in-battle'" class="btn-notes" (click)="goToCombat()">⚔ Batalla en curso</button>
       </div>
 
       <div class="btn-grp" *ngIf="isMaster">
-        <button
-          *ngIf="isMaster"
-          class="btn-toggle"
-          [ngClass]="session.status === 'paused' || session.status === 'waiting' ? 'btn-resume' : 'btn-pause'"
-          (click)="toggleSessionStatus()">
-          {{ session.status === 'paused' || session.status === 'waiting' ? '▶️ REANUDAR PARTIDA' : '⏸️ PAUSAR PARTIDA' }}
+        <button class="btn-toggle" [ngClass]="session.status === 'paused' || session.status === 'waiting' ? 'btn-resume' : 'btn-pause'" (click)="toggleSessionStatus()">
+          {{ (session.status === 'paused' || session.status === 'waiting') ? '▶️ REANUDAR' : '⏸️ PAUSAR' }}
         </button>
-        <battle-button-component
-          *ngIf="isMaster"
-          [hasActiveBattle]="session.status === 'in-battle'"/>
-        <history-button-component
-          *ngIf="currentUser"
-          [isMaster]="isMaster"
-          [currentUserId]="currentUser.uid"
-          [sessionId]="session.id || ''"
-          [sessionName]="session.name"
-          [masterId]="session.masterId"
-          [masterName]="session.playersUsernames[session.masterId] || session.masterId"
-          [players]="session.players"
-          [playerEmails]="session.playerEmails"
-          [playerUsernames]="session.playersUsernames">
+        <battle-button-component [hasActiveBattle]="session.status === 'in-battle'"/>
+        <history-button-component *ngIf="currentUser" [isMaster]="isMaster" [currentUserId]="currentUser.uid" [sessionId]="session.id || ''" [sessionName]="session.name" [masterId]="session.masterId" [masterName]="session.playersUsernames[session.masterId] || session.masterId" [players]="session.players" [playerEmails]="session.playerEmails" [playerUsernames]="session.playersUsernames">
         </history-button-component>
       </div>
     </div>
   </div>
 
-  <!-- Modal de personaje -->
   <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
     <div class="modal-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>📜 {{ modalPlayerEmail }}</h3>
         <button class="modal-close" (click)="closeModal()">✕</button>
       </div>
-
       <div class="modal-body" *ngIf="modalCharacter; else noChar">
         <div class="char-row"><span>Nombre</span><strong>{{ modalCharacter.name }}</strong></div>
         <div class="char-row"><span>Raza</span><strong>{{ modalCharacter.race }}</strong></div>
         <div class="char-row"><span>Clase</span><strong>{{ modalCharacter.class }}</strong></div>
-        <div class="char-row"><span>Alineamiento</span><strong>{{ modalCharacter.alignment }}</strong></div>
-        <div class="char-row"><span>Experiencia</span><strong>{{ modalCharacter.experience }}</strong></div>
         <div class="char-row"><span>Vida</span><strong>{{ modalCharacter.life }} / {{ modalCharacter.maxLife }}</strong></div>
-        <div class="char-row"><span>Armadura</span><strong>{{ modalCharacter.armourClass }}</strong></div>
-        <div class="char-row"><span>Oro</span><strong>{{ modalCharacter.money }}</strong></div>
-
+        <div class="char-row"><span>Oro</span><strong>{{ modalCharacter.money?.po || 0 }}</strong></div>
         <hr class="modal-divider" />
-        <h4 class="modal-section-title">Atributos</h4>
         <div class="attrs-grid">
           <div class="attr-item"><span>FUE</span><strong>{{ modalCharacter.attributes.strength }}</strong></div>
           <div class="attr-item"><span>DES</span><strong>{{ modalCharacter.attributes.dexterity }}</strong></div>
@@ -214,44 +182,19 @@
           <div class="attr-item"><span>SAB</span><strong>{{ modalCharacter.attributes.wisdom }}</strong></div>
           <div class="attr-item"><span>CAR</span><strong>{{ modalCharacter.attributes.charisma }}</strong></div>
         </div>
-
-        <ng-container *ngIf="modalCharacter.abilities && modalCharacter.abilities.length > 0">
-          <hr class="modal-divider" />
-          <h4 class="modal-section-title">Habilidades</h4>
-          <ul class="modal-list">
-            <li *ngFor="let a of modalCharacter.abilities">
-              <strong>{{ a.name }}</strong> — {{ a.description }}
-            </li>
-          </ul>
-        </ng-container>
-
         <div class="modal-actions" *ngIf="currentUser && modalUid === currentUser.uid">
-          <button class="btn-edit-char" (click)="editMyCharacter()">✏ Editar mi personaje</button>
-          <button class="btn-change-char" (click)="changeMyCharacter()">🔁 Cambiar personaje</button>
+          <button class="btn-edit-char" (click)="editMyCharacter()">✏ Editar</button>
+          <button class="btn-change-char" (click)="changeMyCharacter()">🔁 Cambiar</button>
         </div>
       </div>
-
-      <ng-template #noChar>
-        <div class="modal-body">
-          <p class="no-char">Este jugador aún no tiene personaje creado.</p>
-        </div>
-      </ng-template>
+      <ng-template #noChar><div class="modal-body"><p class="no-char">Sin personaje.</p></div></ng-template>
     </div>
   </div>
 
-  <!-- Modal de error al subir imagen -->
   <div class="modal-overlay" *ngIf="showErrorModal" (click)="closeErrorModal()">
     <div class="modal-card error-modal" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>⚠ Error al subir imagen</h3>
-        <button class="modal-close" (click)="closeErrorModal()">✕</button>
-      </div>
-      <div class="modal-body">
-        <p class="error-modal-msg">{{ imageUploadError }}</p>
-        <div class="modal-actions">
-          <button class="btn-upload-image" (click)="closeErrorModal()">Cerrar</button>
-        </div>
-      </div>
+      <div class="modal-header"><h3>⚠ Error</h3><button class="modal-close" (click)="closeErrorModal()">✕</button></div>
+      <div class="modal-body"><p class="error-modal-msg">{{ imageUploadError }}</p></div>
     </div>
   </div>
 

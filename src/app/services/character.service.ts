@@ -1,15 +1,19 @@
 import { Injectable } from '@angular/core';
-import { collection, doc, getDoc, addDoc, query, where, getDocs, updateDoc, onSnapshot, deleteDoc } from 'firebase/firestore';
+import {
+  collection, doc, getDoc, addDoc, query, where,
+  getDocs, updateDoc, onSnapshot, deleteDoc,
+  increment
+} from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
-import {SheetInterface} from '../interfaces/SheetInterface';
+import { SheetInterface } from '../interfaces/SheetInterface';
 
-export interface CharacterData extends SheetInterface{
+export interface CharacterData extends SheetInterface {
   sessionId: string;
   age: number;
   experience: number;
   race: string;
   class: string;
-  money: number;
+  money: any;
   updatedAt: string;
 }
 
@@ -62,6 +66,19 @@ export class CharacterService {
     await updateDoc(ref, { ...data, updatedAt: new Date().toISOString() });
   }
 
+  async updateMultipleStats(characterId: string, stats: { [key: string]: number }): Promise<void> {
+    const ref = doc(this.firebase.db, this.col, characterId);
+    const updates: any = {
+      updatedAt: new Date().toISOString()
+    };
+
+    Object.keys(stats).forEach(key => {
+      updates[key] = increment(stats[key]);
+    });
+
+    await updateDoc(ref, updates);
+  }
+
   calculateBonus(characteristicValue: number): number {
     return Math.floor((characteristicValue - 10) / 2);
   }
@@ -70,5 +87,4 @@ export class CharacterService {
     const docRef = doc(this.firebase.db, `${this.col}/${characterId}`);
     return await deleteDoc(docRef);
   }
-
 }
