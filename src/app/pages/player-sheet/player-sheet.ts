@@ -1,5 +1,5 @@
-import {CommonModule, Location, LocationChangeListener} from '@angular/common';
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -9,37 +9,32 @@ import {
   ValidatorFn,
   Validators
 } from '@angular/forms';
-import {ActivatedRoute, Router} from '@angular/router';
-import {Dropdown} from "../../components/dropdown/dropdown";
-import {D20RollerButtonComponent} from '../../components/d20.roller.button.component/d20.roller.button.component';
-import {ResultThrowFrameComponent} from '../../components/result.throw.frame.component/result.throw.frame.component';
-import {
-  GeneralThrowsButtonComponent
-} from '../../components/general.throws.button.component/general.throws.button.component';
-import {CharacterService} from '../../services/character.service';
-import {AuthService} from '../../services/auth.service';
-import {SessionService} from '../../services/sessions.service';
-import {InventoryItemComponent} from '../../components/inventory.component/inventory.component';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Dropdown } from "../../components/dropdown/dropdown";
+import { D20RollerButtonComponent } from '../../components/d20.roller.button.component/d20.roller.button.component';
+import { ResultThrowFrameComponent } from '../../components/result.throw.frame.component/result.throw.frame.component';
+import { GeneralThrowsButtonComponent } from '../../components/general.throws.button.component/general.throws.button.component';
+import { CharacterService } from '../../services/character.service';
+import { AuthService } from '../../services/auth.service';
+import { SessionService } from '../../services/sessions.service';
 import { MoneyComponent } from '../../components/money.component/money.component';
-import {AbilityComponent} from '../../components/ability.component/ability.component';
+import { AbilityComponent } from '../../components/ability.component/ability.component';
 
 @Component({
   selector: 'app-player-sheet',
-  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, ResultThrowFrameComponent, GeneralThrowsButtonComponent, InventoryItemComponent, MoneyComponent, AbilityComponent],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, ResultThrowFrameComponent, GeneralThrowsButtonComponent, MoneyComponent, AbilityComponent],
   templateUrl: './player-sheet.html',
   styleUrl: './player-sheet.css',
 })
 export class PlayerSheet implements OnInit {
-  classHabilities: string = '';
   sessionId: string | null = null;
   characterId: string | null = null;
   saving = false;
   saveError = '';
-
   defaultImage: string = '/player-icon-example.png';
   imagePreview: string | ArrayBuffer | null = null;
   selectedFile: File | null = null;
-
   playerSheetForm: FormGroup;
 
   raceOptions = [
@@ -72,7 +67,6 @@ export class PlayerSheet implements OnInit {
     { value: 'CC', label: 'Caótico caótico' },
   ];
 
-
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -84,20 +78,16 @@ export class PlayerSheet implements OnInit {
     private location: Location
   ) {
     this.playerSheetForm = this.fb.group({
-      name: ['Aragorn', [Validators.required, Validators.minLength(3)]],
+      name: ['', [Validators.required, Validators.minLength(3)]],
       age: [18, [Validators.required, Validators.min(18), Validators.max(80)]],
-      experience: [5, [Validators.required, Validators.min(0), Validators.max(20)]],
-
-      life: [30, [Validators.required, Validators.min(0)]],
-      maxLife: [60, [Validators.required, Validators.min(0)]],
-      tempLife: [13, [Validators.min(0)]],
-
-      armourClass: [9, [Validators.required, Validators.min(1)]],
-
-      race: ['Elfo', Validators.required],
-      class: ['Bárbaro', Validators.required],
-      alignment: ['Legal Bueno', Validators.required],
-
+      experience: [0, [Validators.required, Validators.min(0), Validators.max(20)]],
+      life: [10, [Validators.required, Validators.min(0)]],
+      maxLife: [10, [Validators.required, Validators.min(0)]],
+      tempLife: [0, [Validators.min(0)]],
+      armourClass: [10, [Validators.required, Validators.min(1)]],
+      race: ['', Validators.required],
+      class: ['', Validators.required],
+      alignment: ['', Validators.required],
       attributes: this.fb.group({
         strength: [10, [Validators.required, Validators.min(1), Validators.max(20)]],
         dexterity: [10, [Validators.required, Validators.min(1), Validators.max(20)]],
@@ -116,11 +106,10 @@ export class PlayerSheet implements OnInit {
       inventory: this.fb.array([]),
       abilities: this.fb.array([]),
       image: [this.defaultImage]
-
     }, { validators: this.validateLifeNotExceedMax() });
   }
 
-  get inventoryFormArray() : FormArray {
+  get inventoryFormArray(): FormArray {
     return this.playerSheetForm.get('inventory') as FormArray;
   }
 
@@ -128,23 +117,7 @@ export class PlayerSheet implements OnInit {
     return this.inventoryFormArray.controls as FormGroup[];
   }
 
-  addItem(): void {
-    this.inventoryFormArray.push(
-      this.fb.group(
-        {
-          name: ['', Validators.required],
-          quantity: [1, [Validators.required, Validators.min(1)]],
-          description: ['']
-        }
-      )
-    );
-  }
-
-  removeItem(index: number): void {
-    this.inventoryFormArray.removeAt(index);
-  }
-
-  get abilitiesFormArray() : FormArray {
+  get abilitiesFormArray(): FormArray {
     return this.playerSheetForm.get('abilities') as FormArray;
   }
 
@@ -152,15 +125,32 @@ export class PlayerSheet implements OnInit {
     return this.abilitiesFormArray.controls as FormGroup[];
   }
 
+  get totalWeight(): number {
+    return this.inventoryItems.reduce((acc, item) => {
+      const q = item.get('quantity')?.value || 0;
+      const w = item.get('weight')?.value || 0;
+      return acc + (q * w);
+    }, 0);
+  }
+
+  get carryCapacity(): number {
+    const strength = this.playerSheetForm.get('attributes.strength')?.value || 10;
+    return strength * 15;
+  }
+
+  get encumbranceStatus() {
+    const strength = this.playerSheetForm.get('attributes.strength')?.value || 10;
+    const weight = this.totalWeight;
+    if (weight > strength * 10) return { label: 'Muy Cargado', class: 'overencumbered' };
+    if (weight > strength * 5) return { label: 'Cargado', class: 'encumbered' };
+    return { label: 'Carga Normal', class: 'normal' };
+  }
+
   addAbility(): void {
-    this.abilitiesFormArray.push(
-      this.fb.group(
-        {
-          name: ['', Validators.required],
-          description: ['', Validators.required]
-        }
-        )
-    );
+    this.abilitiesFormArray.push(this.fb.group({
+      name: ['', Validators.required],
+      description: ['', Validators.required]
+    }));
   }
 
   removeAbility(index: number): void {
@@ -171,7 +161,6 @@ export class PlayerSheet implements OnInit {
     return (group: AbstractControl): { [key: string]: any } | null => {
       const life = group.get('life')?.value;
       const maxLife = group.get('maxLife')?.value;
-
       if (life !== null && maxLife !== null && life > maxLife) {
         return { 'lifeExceedsMax': true };
       }
@@ -182,28 +171,33 @@ export class PlayerSheet implements OnInit {
   ngOnInit(): void {
     this.sessionId = this.route.snapshot.queryParamMap.get('sessionId');
     this.characterId = this.route.snapshot.queryParamMap.get('characterId');
-
     if (this.sessionId && this.characterId) {
-      // Edit mode: load the specific character by id
       this.characterService.getCharacterById(this.characterId).then(character => {
         if (character) this.patchFormWithCharacter(character);
       });
     }
-    // No characterId → create mode: blank form, do not pre-load
   }
 
   private patchFormWithCharacter(character: any): void {
-    console.log(character);
     const { userId, sessionId, updatedAt, inventory, abilities, money, ...basic } = character;
     this.playerSheetForm.patchValue(basic);
     this.playerSheetForm.get('money')?.patchValue(money ?? {ppt: 0, po: 0, pe: 0, pp: 0, pc: 0});
+
+    while (this.inventoryFormArray.length) {
+      this.inventoryFormArray.removeAt(0);
+    }
     (inventory ?? []).forEach((item: any) => {
       this.inventoryFormArray.push(this.fb.group({
         name: [item.name, Validators.required],
         quantity: [item.quantity, [Validators.required, Validators.min(1)]],
+        weight: [item.weight || 0],
         description: [item.description]
       }));
     });
+
+    while (this.abilitiesFormArray.length) {
+      this.abilitiesFormArray.removeAt(0);
+    }
     (abilities ?? []).forEach((ability: any) => {
       this.abilitiesFormArray.push(this.fb.group({
         name: [ability.name, Validators.required],
@@ -214,57 +208,39 @@ export class PlayerSheet implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    if (!this.playerSheetForm.valid) {
-      console.log('Formulario inválido');
-      return;
-    }
-
+    if (!this.playerSheetForm.valid) return;
     const user = this.authService.getCurrentUser();
-    if (!user || !this.sessionId) {
-      // No session context: just log (future: save globally)
-      console.log('Formulario enviado (sin sesión):', this.playerSheetForm.value);
-      return;
-    }
+    if (!user || !this.sessionId) return;
 
     this.saving = true;
-    this.saveError = '';
     try {
       let charId: string;
       if (this.characterId) {
-        // Edit mode: update existing character
         await this.characterService.updateCharacter(this.characterId, this.playerSheetForm.value);
         charId = this.characterId;
       } else {
-        // Create mode: always create a new character, never overwrite
         charId = await this.characterService.createCharacter(user.uid, this.sessionId, this.playerSheetForm.value);
       }
-      // Set selected character for this session
       await this.sessionService.setSelectedCharacter(this.sessionId, user.uid, charId);
       this.router.navigate(['/session', this.sessionId]);
-    } catch (e: any) {
-      this.saveError = 'Error al guardar el personaje. Inténtalo de nuevo.';
-      console.error(e);
+    } catch (e) {
+      this.saveError = 'Error al guardar el personaje.';
     } finally {
       this.saving = false;
     }
   }
 
-  //preview de la imagen y guardado en bd
   async resizeImage(base64: string): Promise<string> {
     return new Promise((resolve) => {
       const img = new Image();
       img.src = base64;
-
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const size = 200;
-
         canvas.width = size;
         canvas.height = size;
-
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(img, 0, 0, size, size);
-
         resolve(canvas.toDataURL('image/jpeg', 0.7));
       };
     });
@@ -272,52 +248,27 @@ export class PlayerSheet implements OnInit {
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-
-    console.log(input.files);
-
     if (!input.files || input.files.length === 0) {
       this.imagePreview = this.defaultImage;
-
-      this.playerSheetForm.patchValue({
-        image: this.defaultImage
-      });
-
+      this.playerSheetForm.patchValue({ image: this.defaultImage });
       this.cdr.markForCheck();
       return;
     }
-
     const file = input.files[0];
-
-    if (!file.type.startsWith('image/')) {
-      console.error('El archivo no es una imagen');
-      return;
-    }
-
-    this.selectedFile = file;
-
+    if (!file.type.startsWith('image/')) return;
     const reader = new FileReader();
     reader.onload = async () => {
-      console.log('preview generado');
       const base64 = reader.result as string;
-
       const compressed = await this.resizeImage(base64);
-
       this.imagePreview = compressed;
-
-      this.playerSheetForm.patchValue({
-        image: compressed
-      });
+      this.playerSheetForm.patchValue({ image: compressed });
       this.cdr.markForCheck();
     };
-
     reader.readAsDataURL(file);
   }
 
-  getFormControl(controlName: string) {
-    return this.playerSheetForm.get(controlName);
-  }
-
-  private attributes_list = [
+  getAttributesList() {
+    return [
       { name: 'strength', label: 'Fuerza (STR)' },
       { name: 'dexterity', label: 'Destreza (DEX)' },
       { name: 'constitution', label: 'Constitución (CON)' },
@@ -325,9 +276,6 @@ export class PlayerSheet implements OnInit {
       { name: 'wisdom', label: 'Sabiduría (WIS)' },
       { name: 'charisma', label: 'Carisma (CHA)' }
     ];
-
-  getAttributesList() {
-    return this.attributes_list;
   }
 
   goBack(): void {

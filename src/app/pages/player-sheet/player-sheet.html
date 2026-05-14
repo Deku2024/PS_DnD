@@ -1,233 +1,135 @@
 <main>
-    <form [formGroup]="playerSheetForm" (ngSubmit)="onSubmit()" class="player-sheet-form">
-        <div>
-            <img
-              id="player-image"
-              [src]="imagePreview || playerSheetForm.value.image"
-              (click)="fileInput.click()"
-              alt="Character image"
-            >
-    
-            <input
-              #fileInput
-              type="file"
-              accept="image/*"
-              style="display: none"
-              (change)="onFileSelected($event)"
-            >
-        </div>
-        <div id="basic-info" class="form-section">
-            <div class="field">
-                <label for="name">Nombre:</label>
-                <input type="text" id="name" formControlName="name" placeholder="Ej: Aragorn">
+  <form [formGroup]="playerSheetForm" (ngSubmit)="onSubmit()" class="player-sheet-form">
+    <div>
+      <img id="player-image" [src]="imagePreview || playerSheetForm.value.image" (click)="fileInput.click()" alt="Character image">
+      <input #fileInput type="file" accept="image/*" style="display: none" (change)="onFileSelected($event)">
+    </div>
 
-                @if (playerSheetForm.get('name')?.errors?.['required']) {
-                    <span class="error">El nombre es requerido</span>
-                }
+    <div id="basic-info" class="form-section">
+      <div class="field">
+        <label for="name">Nombre:</label>
+        <input type="text" id="name" formControlName="name">
+        <span class="error" *ngIf="playerSheetForm.get('name')?.errors?.['required']">El nombre es requerido</span>
+      </div>
+      <div class="field">
+        <label for="age">Edad:</label>
+        <input type="number" id="age" formControlName="age">
+      </div>
+      <div class="field">
+        <label for="experience">Experiencia:</label>
+        <input type="number" id="experience" formControlName="experience">
+      </div>
+    </div>
 
-                @if (playerSheetForm.get('name')?.errors?.['minlength']) {
-                    <span class="error">El nombre debe tener al menos 3 caracteres</span>
-                }
-            </div>
+    <div id="dropdowns">
+      <app-dropdown formControlName="race" label="Raza" [options]="raceOptions"></app-dropdown>
+      <app-dropdown formControlName="class" label="Clase" [options]="classOptions"></app-dropdown>
+      <app-dropdown formControlName="alignment" label="Alineamiento" [options]="alignmentOptions"></app-dropdown>
+    </div>
 
-            <div class="field">
-                <label for="age">Edad:</label>
-                <input type="number" id="age" formControlName="age" min="18" max="80">
-
-                @if(playerSheetForm.get('age')?.errors?.['required']) {
-                    <span class="error">La edad es requerida</span>
-                }
-
-                @if(playerSheetForm.get('age')?.errors?.['min']) {
-                    <span class="error">La edad mínima es 18</span>
-                }
-
-                @if(playerSheetForm.get('age')?.errors?.['max']) {
-                    <span class="error">La edad no debe superar los 80 años</span>
-                }
-            </div>
-
-            <div class="field">
-                <label for="experience">Experiencia:</label>
-                 <input type="number" id="experience" formControlName="experience" min="1" max="20">
-
-                @if(playerSheetForm.get('experience')?.errors?.['required']) {
-                    <span class="error">La experiencia es requerida</span>
-                }
-
-                @if (playerSheetForm.get('experience')?.errors?.['min']) {
-                    <span class="error">La experiencia mínima es 0</span>
-                }
-
-                @if (playerSheetForm.get('experience')?.errors?.['max']) {
-                    <span class="error">La experiencia máxima es 20</span>
-                }
-            </div>
-        </div>
-
-        <div id="dropdowns">
-            <app-dropdown
-                formControlName="race"
-                label="Raza"
-                [options]="raceOptions"
-                [placeholder]="'Selecciona una raza - Ej: Elfo'"
-            ></app-dropdown>
-
-            <app-dropdown
-                formControlName="class"
-                label="Clase"
-                [options]="classOptions"
-                [placeholder]="'Selecciona una clase - Ej: Bárbaro'"
-            ></app-dropdown>
-
-            <app-dropdown
-                formControlName="alignment"
-                label="Alineamiento"
-                [options]="alignmentOptions"
-                [placeholder]="'Selecciona una alineamiento - Ej: Legal Bueno'"
-            ></app-dropdown>
-        </div>
-
-
-
-        <div class="form-section">
-            <h2>Estadísticas</h2>
-            <div id="life-info">
-                <div class="field">
-                    <label for="life">Vida:</label>
-                    <input type="number" id="life" formControlName="life" min="0">
-
-                    @if (playerSheetForm.get('life')?.errors?.['required']) {
-                        <span class="error">La vida es requerida</span>
-                    }
-
-                    @if (playerSheetForm.get('life')?.errors?.['min']) {
-                        <span class="error">La vida mínima es 0</span>
-                    }
-
-                    @if (playerSheetForm.errors?.['lifeExceedsMax']) {
-                        <span class="error">La vida no puede ser mayor que la vida máxima</span>
-                    }
-
-                </div>
-
-                <div class="field">
-                    <label for="max-life">Vida máxima:</label>
-                    <input type="number" id="max-life" formControlName="maxLife" min="0">
-
-                    @if (playerSheetForm.get('maxLife')?.errors?.['required']) {
-                        <span class="error">La vida máxima es requerida</span>
-                    }
-
-                    @if (playerSheetForm.get('maxLife')?.errors?.['min']) {
-                        <span class="error">La vida máxima mínima es 0</span>
-                    }
-
-                </div>
-
-                <div class="field">
-                    <label for="temp-life">Vida temp:</label>
-                    <input type="number" id="temp-life" formControlName="tempLife" min="0">
-
-                    @if (playerSheetForm.get('tempLife')?.errors?.['min']) {
-                        <span class="error">La vida temporal mínima es 0</span>
-                    }
-
-                </div>
-            </div>
-        </div>
-
+    <div class="form-section">
+      <h2>Estadísticas</h2>
+      <div id="life-info">
         <div class="field">
-          <label for="armour-class">Clase de armadura (CA):</label>
-          <input type="number" id="armour-class" formControlName="armourClass" min="1">
-
-          @if (playerSheetForm.get('armourClass')?.errors?.['required']) {
-                <span class="error">La clase de armadura (CA) es requerida</span>
-          }
-
-          @if (playerSheetForm.get('armourClass')?.errors?.['min']) {
-                <span class="error">La clase de armadura (CA) mínima es 1</span>
-          }
+          <label for="life">Vida:</label>
+          <input type="number" id="life" formControlName="life">
+          <span class="error" *ngIf="playerSheetForm.errors?.['lifeExceedsMax']">Vida superior al máximo</span>
         </div>
+        <div class="field">
+          <label for="max-life">Vida máxima:</label>
+          <input type="number" id="max-life" formControlName="maxLife">
+        </div>
+        <div class="field">
+          <label for="temp-life">Vida temp:</label>
+          <input type="number" id="temp-life" formControlName="tempLife">
+        </div>
+      </div>
+    </div>
 
+    <div class="field">
+      <label for="armour-class">Clase de armadura (CA):</label>
+      <input type="number" id="armour-class" formControlName="armourClass">
+    </div>
 
-        <div class="form-section">
-            <h2>Características</h2>
-            <div formGroupName="attributes" class="attributes-grid">
-                @for (attr of getAttributesList(); track attr.name) {
-                    <div class="attribute-card">
-                        <label [for]="'attr-' + attr.name">{{ attr.label }}</label>
-                        <input
-                            type="number"
-                            [id]="'attr-' + attr.name"
-                            [formControlName]="attr.name"
-                            [title]="attr.label"
-                            min="1"
-                            max="20"
-                            #charValueInput
-                        >
-                        <d20-roller [rollingForCharacteristic]="true" [charValue]="parseInt(charValueInput.value)"></d20-roller>
-<!--                        <button class="tirada">Hacer tirada</button>-->
-                    </div>
-                }
+    <div class="form-section">
+      <h2>Características</h2>
+      <div formGroupName="attributes" class="attributes-grid">
+        @for (attr of getAttributesList(); track attr.name) {
+          <div class="attribute-card">
+            <label [for]="'attr-' + attr.name">{{ attr.label }}</label>
+            <input type="number" [id]="'attr-' + attr.name" [formControlName]="attr.name" #charValueInput>
+            <d20-roller [rollingForCharacteristic]="true" [charValue]="parseInt(charValueInput.value)"></d20-roller>
+          </div>
+        }
+      </div>
+      <general-throw-component />
+    </div>
+
+    <div class="form-section">
+      <div class="section-header">
+        <h2>Inventario y Carga</h2>
+      </div>
+
+      <div class="weight-status-card" [ngClass]="encumbranceStatus.class">
+        <div class="weight-info">
+          <span>Peso Total: <strong>{{ totalWeight | number:'1.1-2' }} lb</strong></span>
+          <span>Capacidad: <strong>{{ carryCapacity }} lb</strong></span>
+        </div>
+        <div class="weight-bar">
+          <div class="weight-fill" [style.width.%]="(totalWeight / carryCapacity) * 100"></div>
+        </div>
+        <p class="status-label">Estado: <strong>{{ encumbranceStatus.label }}</strong></p>
+        <p *ngIf="totalWeight > carryCapacity" class="weight-warning">⚠️ ¡Exceso de peso! Movimiento reducido.</p>
+      </div>
+
+      <div class="inventario-display">
+        @if (inventoryFormArray.controls.length === 0) {
+          <p class="empty-msg">Tu macuto está vacío.</p>
+        }
+        <div class="item-list">
+          @for (itemGroup of inventoryItems; track $index) {
+            <div class="item-display-row">
+              <div class="item-main">
+                <span class="item-qty">x{{ itemGroup.get('quantity')?.value }}</span>
+                <span class="item-name">{{ itemGroup.get('name')?.value }}</span>
+              </div>
+              <div class="item-details">
+                <span class="item-weight">{{ itemGroup.get('weight')?.value }} lb/u</span>
+                <span class="item-desc">{{ itemGroup.get('description')?.value }}</span>
+              </div>
             </div>
-            <general-throw-component />
-        </div>
-
-        <div class="form-section">
-          <div class="section-header">
-            <h2>Inventario</h2>
-            <button type="button" class="btn-add" (click)="addItem()">
-              Añadir objeto
-            </button>
-          </div>
-
-          <div formArrayName="inventory" class="inventario">
-            @if (inventoryFormArray.controls.length === 0) {
-              <p class="empty-msg">El inventario está vacío.</p>
-            }
-
-            @for (item of inventoryItems; track $index) {
-              <inventory-item
-                [itemGroup]="item"
-                [index]="$index"
-                (remove)="removeItem($event)"
-              />
-            }
-          </div>
-        </div>
-      <div class="form-section">
-        <div class="section-header">
-          <h2>Monedas</h2>
-        </div>
-        <money-section [moneyGroup]="$any(playerSheetForm.get('money'))" />
-      </div>
-      <div class="form-section">
-        <div class="section-header">
-          <h2>Habilidades</h2>
-          <button type="button" class="btn-add" (click)="addAbility()">
-            Añadir habilidad
-          </button>
-        </div>
-        <div formArrayName="abilities" class="abilities-container">
-          @if (abilitiesFormArray.controls.length === 0) {
-            <p class="empty-msg">No hay habilidades todavía</p>
-          }
-          @for (ability of abilities; track $index) {
-            <ability [itemGroup]="ability" [index]="$index" (remove)="removeAbility($event)" />
           }
         </div>
       </div>
+    </div>
 
-        <div class="save-section">
-          <p class="save-error" *ngIf="saveError">{{ saveError }}</p>
-          <button type="submit" class="btn-save" [disabled]="saving">
-            {{ saving ? 'Guardando...' : '💾 Guardar personaje' }}
-          </button>
-          <button type="button" class="btn-save" (click)="goBack()">Cancelar</button>
-        </div>
-    </form>
+    <div class="form-section">
+      <div class="section-header"><h2>Monedas</h2></div>
+      <money-section [moneyGroup]="$any(playerSheetForm.get('money'))" />
+    </div>
 
+    <div class="form-section">
+      <div class="section-header">
+        <h2>Habilidades</h2>
+        <button type="button" class="btn-add" (click)="addAbility()">Añadir habilidad</button>
+      </div>
+      <div formArrayName="abilities" class="abilities-container">
+        @if (abilitiesFormArray.controls.length === 0) {
+          <p class="empty-msg">No hay habilidades todavía</p>
+        }
+        @for (ability of abilities; track $index) {
+          <ability [itemGroup]="ability" [index]="$index" (remove)="removeAbility($event)" />
+        }
+      </div>
+    </div>
+
+    <div class="save-section">
+      <p class="save-error" *ngIf="saveError">{{ saveError }}</p>
+      <button type="submit" class="btn-save" [disabled]="saving">
+        {{ saving ? 'Guardando...' : '💾 Guardar personaje' }}
+      </button>
+      <button type="button" class="btn-save" (click)="goBack()">Cancelar</button>
+    </div>
+  </form>
   <result-frame />
 </main>
-
