@@ -52,6 +52,7 @@ export class InventoryItemComponent {
     };
 
     this.save.emit(item);
+    this.form.reset();
   }
 
   public removeItem() {
