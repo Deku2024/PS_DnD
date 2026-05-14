@@ -187,9 +187,6 @@
             @for (item of inventoryItems; track $index) {
               <inventory-item
                 [isInInventory]="isInInventory"
-                [itemGroup]="item"
-                [index]="$index"
-                (remove)="removeItem($event)"
               />
             }
           </div>

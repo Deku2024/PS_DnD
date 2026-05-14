@@ -189,13 +189,6 @@ export class PlayerSheet implements OnInit {
     const { userId, sessionId, updatedAt, inventory, abilities, money, ...basic } = character;
     this.playerSheetForm.patchValue(basic);
     this.playerSheetForm.get('money')?.patchValue(money ?? {ppt: 0, po: 0, pe: 0, pp: 0, pc: 0});
-    (inventory ?? []).forEach((item: any) => {
-      this.inventoryFormArray.push(this.fb.group({
-        name: [item.name, Validators.required],
-        quantity: [item.quantity, [Validators.required, Validators.min(1)]],
-        description: [item.description]
-      }));
-    });
     (abilities ?? []).forEach((ability: any) => {
       this.abilitiesFormArray.push(this.fb.group({
         name: [ability.name, Validators.required],
