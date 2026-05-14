@@ -9,11 +9,12 @@ import { Subscription } from 'rxjs';
 import { doc, onSnapshot, Unsubscribe, getFirestore } from 'firebase/firestore';
 import { ItemsService } from '../../services/items.service';
 import { Item } from './../../interfaces/Item';
+import { InventoryItemComponent } from "../../components/inventory.component/inventory.component";
 
 @Component({
   selector: 'app-session-test',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, InventoryItemComponent],
   templateUrl: './session-test.component.html',
   styleUrl: './session-test.component.css'
 })
@@ -36,6 +37,7 @@ export class SessionTestComponent implements OnInit, OnDestroy {
   showModal = false;
   unsubscribe: (() => void) | undefined;
   items: Item[] = [];
+  selectedItem: Item | null = null;
 
   private authSub?: Subscription;
   private unsubscribeFirestore?: Unsubscribe;
@@ -208,8 +210,21 @@ export class SessionTestComponent implements OnInit, OnDestroy {
       }
   }
 
-  saveItem() {
-    
+  saveItem(item: Item) {
+    if (this.currentUser) {
+      this.itemService.createItem(this.currentUser.uid, item);
+    }
+
+  }
+
+  deleteItem(item: Item) {
+    if (this.currentUser && item.id) {
+      this.itemService.deleteItem(item.id);
+    }
+  }
+
+  editItem(item: Item) {
+    this.selectedItem = item;
   }
 
 

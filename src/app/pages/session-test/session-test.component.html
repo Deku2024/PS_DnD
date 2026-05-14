@@ -74,16 +74,36 @@
       </div>
 
       <div class="modal-body">
-        <div class="user-objects"></div>
+        <div class="user-objects">
+            @for (item of items; track $index) {
+              <div class="object-card">
+                <p>{{item.name}}</p>
+                <p>{{item.description}}</p>
+                <p>{{item.weight}}</p>
+
+                <div class="object-actions">
+                  <button (click)="deleteItem(item)">Del</button>
+                  <button (click)="editItem(item)">Edit</button>
+                </div>
+              </div>
+            }
+
+        </div>
 
         <hr class="modal-divider" />
 
-        <div class="object-actions"></div>
+        <div class="object-input">
+          <inventory-item
+            [item]="selectedItem"
+            (save)="saveItem($event)"
+            (remove)="deleteItem($event)"
+          ></inventory-item>
+        </div>
       </div>
 
       <ng-template #noChar>
         <div class="modal-body">
-          <p class="no-char">Este jugador aún no tiene personaje creado.</p>
+          <p class="no-char">Este jugador aún no tiene objetos.</p>
         </div>
       </ng-template>
     </div>
