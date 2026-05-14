@@ -2,9 +2,9 @@
   @if (isInInventory()) {
     <input type="number" formControlName="quantity" class="qty-input" placeholder="Cant.">
   }
-  <input type="number" formControlName="Peso" class="qty-input" placeholder="Peso">
-  <input class="name-input" placeholder="Objeto...">
-  <input class="desc-input" placeholder="Descripción...">
+  <input type="number" formControlName="weight" class="qty-input" placeholder="Peso">
+  <input class="name-input" formControlName="name" placeholder="Objeto...">
+  <input class="desc-input" formControlName="description" placeholder="Descripción...">
 
   @if(isInInventory()) {
     <button type="button" class="btn-delete" (click)="removeItem()">
