@@ -66,10 +66,10 @@
   <button (click)="openObjectsModal()">Mis Objetos</button>
 
   <!--Modal para el manejo de objetos del usuario-->
-    <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
     <div class="modal-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>📜 Tus objetos, {{ currentUser }}</h3>
+        <h3>📜 Tus objetos, {{ currentUser?.displayName }}</h3>
         <button class="modal-close" (click)="closeModal()">✕</button>
       </div>
 
@@ -77,14 +77,31 @@
         <div class="user-objects">
             @for (item of items; track $index) {
               <div class="object-card">
-                <p>{{item.name}}</p>
-                <p>{{item.description}}</p>
-                <p>{{item.weight}}</p>
+
+                <div class="object-info">
+                  <p>{{item.name}}</p>
+                  <p>{{item.description}}</p>
+                  <p>Peso (en libras): {{item.weight}}</p>
+                </div>
 
                 <div class="object-actions">
-                  <button (click)="deleteItem(item)">Del</button>
-                  <button (click)="editItem(item)">Edit</button>
+                  <button
+                    class="btn-icon btn-edit"
+                    (click)="editItem(item)"
+                    title="Editar"
+                  >
+                    ✎
+                  </button>
+
+                  <button
+                    class="btn-icon btn-delete"
+                    (click)="deleteItem(item)"
+                    title="Eliminar"
+                  >
+                    ✕
+                  </button>
                 </div>
+
               </div>
             }
 
@@ -100,12 +117,6 @@
           ></inventory-item>
         </div>
       </div>
-
-      <ng-template #noChar>
-        <div class="modal-body">
-          <p class="no-char">Este jugador aún no tiene objetos.</p>
-        </div>
-      </ng-template>
     </div>
   </div>
 </div>
