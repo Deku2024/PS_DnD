@@ -7,6 +7,8 @@ import { AuthService } from '../../services/auth.service';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
 import { doc, onSnapshot, Unsubscribe, getFirestore } from 'firebase/firestore';
+import { ItemsService } from '../../services/items.service';
+import { Item } from './../../interfaces/Item';
 
 @Component({
   selector: 'app-session-test',
@@ -32,6 +34,8 @@ export class SessionTestComponent implements OnInit, OnDestroy {
   authService = inject(AuthService);
 
   showModal = false;
+  unsubscribe: (() => void) | undefined;
+  items: Item[] = [];
 
   private authSub?: Subscription;
   private unsubscribeFirestore?: Unsubscribe;
@@ -40,7 +44,8 @@ export class SessionTestComponent implements OnInit, OnDestroy {
     private sessionService: SessionService,
     private router: Router,
     private cd: ChangeDetectorRef,
-    
+    private itemService: ItemsService,
+    private ch: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -53,6 +58,8 @@ export class SessionTestComponent implements OnInit, OnDestroy {
         this.loadMySessions();
       }
     });
+
+    this.loadItems();
   }
 
   watchSessionAccess(sessionId: string, userId: string) {
@@ -179,7 +186,7 @@ export class SessionTestComponent implements OnInit, OnDestroy {
     this.router.navigate(['/bestiary']);
   }
 
-  //modal para objetos
+  //modal y objetos
 
   openObjectsModal() {
     this.showModal = true;
@@ -187,6 +194,22 @@ export class SessionTestComponent implements OnInit, OnDestroy {
 
   closeModal() {
     this.showModal = false;
+  }
+
+  loadItems() {
+      if (this.currentUser?.uid) {
+        this.unsubscribe = this.itemService.readItems(
+            this.currentUser.uid,
+            (monsters) => {
+              this.items = monsters;
+              this.ch.detectChanges();
+            }
+        )
+      }
+  }
+
+  saveItem() {
+    
   }
 
 

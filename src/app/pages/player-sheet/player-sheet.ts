@@ -35,6 +35,7 @@ export class PlayerSheet implements OnInit {
   characterId: string | null = null;
   saving = false;
   saveError = '';
+  isInInventory = true;
 
   defaultImage: string = '/player-icon-example.png';
   imagePreview: string | ArrayBuffer | null = null;

@@ -13,6 +13,8 @@ export class InventoryItemComponent {
   index = input.required<number>();
   remove = output<number>();
 
+  isInInventory = input<boolean>(false);
+
   public removeItem() {
     this.remove.emit(this.index());
   }
