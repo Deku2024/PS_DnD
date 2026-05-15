@@ -1,5 +1,5 @@
 import {Session, SessionService} from './sessions.service';
-import {CharacterService, CharacterWithId} from './character.service';
+import {CharacterService} from './character.service';
 import {SheetInterface} from '../interfaces/SheetInterface';
 import {inject, Injectable} from '@angular/core';
 import {DiceRollerService} from './roll-dice.service';
@@ -139,13 +139,23 @@ export class BattleService {
   }
 
   private startXPProcess() {
-    let players: CharacterWithId[] = [];
-    let monsters: MonsterData[] = [];
-    this.filterCombatants(monsters, players);
-    this.addXPToPlayers(
-      this.calculateTotalXP(monsters),
-      players
-    );
+    const monsters: MonsterData[] = this.combatants
+      .filter(c => c.character && 'challengeValue' in c.character)
+      .map(c => c.character as MonsterData);
+
+    const totalXP = this.calculateTotalXP(monsters);
+    if (totalXP <= 0) return;
+
+    const playerCombatants = this.combatants.filter(c => c.email !== 'Enemigo (NPC)');
+    if (playerCombatants.length === 0) return;
+
+    const individualGain = totalXP / playerCombatants.length;
+    for (const combatant of playerCombatants) {
+      if (!combatant.character) continue;
+      const char = combatant.character as any;
+      char.experience = (char.experience ?? 0) + individualGain;
+      this.characterService.updateCharacter(combatant.characterId, char);
+    }
   }
 
   public applySavedOrder(savedOrder: string[]): void {
@@ -202,35 +212,14 @@ export class BattleService {
     });
   }
 
-  private addXPToPlayers(totalXP: number, players: CharacterWithId[]) {
-    let individualGain = totalXP / players.length;
-
-    for (const player of players) {
-      player.experience += individualGain;
-      this.characterService.updateCharacter(player.id, player);
-    }
-  }
-
   private calculateTotalXP(monsters: MonsterData[]) : number {
     let totalXP = 0;
     for (const monster of monsters) {
       if (monster.life == 0) {
-        console.log(monster.challengeXP)
         totalXP += monster.challengeXP;
       }
     }
     return totalXP;
-  }
-
-  private filterCombatants(monsters: MonsterData[], players: CharacterWithId[]) {
-    for (const character of this.combatEntities) {
-      if ('challengeValue' in character) {
-        console.log("Se ha añadido un monstruo: " + character)
-        monsters.push(character as MonsterData);
-      } else {
-        players.push(character as CharacterWithId);
-      }
-    }
   }
 }
 
