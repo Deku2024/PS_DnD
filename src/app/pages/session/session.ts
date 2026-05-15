@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ChangeDetectorRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef, ViewChild, ElementRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,6 +8,7 @@ import { CharacterService, CharacterWithId } from '../../services/character.serv
 import { PresenceService } from '../../services/presence.service';
 import { RollHistoryService } from '../../services/roll-history.service';
 import { HistoryButtonComponent} from '../../components/history.button.component/history.button.component';
+import { CloudinaryService } from '../../services/cloudinary.service';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
 import { YouTubePlayer } from '@angular/youtube-player';
@@ -26,6 +27,14 @@ export class SessionPage implements OnInit, OnDestroy {
   loading = true;
   showHistory = false;
   errorMsg = '';
+  isUploadingImage = false;
+  imageUploadError = '';
+  showErrorModal = false;
+  imagePreviewUrl: string | null = null;
+  private pendingFile: File | null = null;
+  private cloudinaryService = inject(CloudinaryService);
+
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   @ViewChild('youtubePlayer') youtubePlayer?: YouTubePlayer;
   audioUrl = '';
@@ -297,6 +306,67 @@ export class SessionPage implements OnInit, OnDestroy {
     this.presenceUnsub?.();
     this.sessionService.setCurrentSessionId(null);
     this.router.navigate(['/home']);
+  }
+
+  triggerFileInput(): void {
+    this.fileInput.nativeElement.click();
+  }
+
+  onFileSelected(event: Event): void {
+    if (!this.isMaster) return;
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (this.imagePreviewUrl) {
+      URL.revokeObjectURL(this.imagePreviewUrl);
+    }
+    this.pendingFile = file;
+    this.imagePreviewUrl = URL.createObjectURL(file);
+    input.value = '';
+    this.cd.detectChanges();
+  }
+
+  cancelPreview(): void {
+    if (this.imagePreviewUrl) {
+      URL.revokeObjectURL(this.imagePreviewUrl);
+    }
+    this.imagePreviewUrl = null;
+    this.pendingFile = null;
+    this.cd.detectChanges();
+  }
+
+  async confirmUpload(): Promise<void> {
+    if (!this.session?.id || !this.pendingFile || !this.isMaster) return;
+
+    this.isUploadingImage = true;
+    this.imageUploadError = '';
+    this.cd.detectChanges();
+
+    try {
+      const url = await this.cloudinaryService.uploadImage(this.pendingFile);
+      await this.sessionService.updateSharedImage(this.session.id, url);
+      if (this.imagePreviewUrl) URL.revokeObjectURL(this.imagePreviewUrl);
+      this.imagePreviewUrl = null;
+      this.pendingFile = null;
+    } catch (e: any) {
+      this.imageUploadError = e.message || 'Error al subir la imagen';
+      this.showErrorModal = true;
+    } finally {
+      this.isUploadingImage = false;
+      this.cd.detectChanges();
+    }
+  }
+
+  closeErrorModal(): void {
+    this.showErrorModal = false;
+    this.imageUploadError = '';
+  }
+
+  async removeSharedImage(): Promise<void> {
+    if (!this.session?.id || !this.isMaster) return;
+    this.cancelPreview();
+    await this.sessionService.updateSharedImage(this.session.id, null);
   }
 
   ngOnDestroy(): void {
