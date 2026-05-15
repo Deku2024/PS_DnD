@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { collection, addDoc, getDocs, query, where, orderBy, serverTimestamp } from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
 import { RollHistoryEntry } from './roll-history.service';
+import { SheetInterface } from '../interfaces/SheetInterface';
 
 export interface SessionHistoryRecord {
   id?: string;
@@ -12,6 +13,7 @@ export interface SessionHistoryRecord {
   masterName: string;
   players: string[];
   playerUsernames: { [uid: string]: string };
+  playerSnapshots?: { [uid: string]: SheetInterface };
   rollCount: number;
   rolls: RollHistoryEntry[];
   finishedAt: any;
