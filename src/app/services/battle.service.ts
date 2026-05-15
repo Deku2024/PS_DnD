@@ -33,13 +33,20 @@ export class BattleService {
   }
 
   public async startPreparingCombat(): Promise<void> {
-    this.combatOrder = new Map<string, number>();
-    this.combatants = [];
-    const session = await this.sessionService.getSession(this.sessionService.getCurrentSessionId()!);
-    if (!session) {
-      console.error('No se encontró la sesión');
+    const sessionId = this.sessionService.getCurrentSessionId();
+    if (!sessionId) return;
+    if (this.combatants.length > 0) {
       return;
     }
+    const session = await this.sessionService.getSession(sessionId);
+    if (!session) return;
+    if (session.combatOrder && session.combatOrder.length > 0) {
+      this.applySavedOrder(session.combatOrder);
+      this.status = 'in-combat';
+      return;
+    }
+    this.combatOrder = new Map<string, number>();
+    this.combatants = [];
     await this.autoStartCombatOrder(session).then(() => this.autoOrder());
   }
 
@@ -58,7 +65,7 @@ export class BattleService {
     const email = session.playerEmails[uid] || uid;
     const username = await this.usernameService.getUsernameFromEmail(email);
     const character = await this.characterService.getCharacterById(<string>charId);
-    this.addToCombat(character as SheetInterface);
+    this.addToCombat(character as SheetInterface, uid);
     this.combatants.push(
       {
         uid,
@@ -141,8 +148,9 @@ export class BattleService {
     this.combatOrder.delete(name);
   }
 
-  public addToCombat(character: SheetInterface): void {
-    this.combatOrder.set(character.name, this.rollerService.rollAD20(this.characterService.calculateBonus(character.attributes.dexterity)).result);
+  public addToCombat(character: SheetInterface, playerUid?: string): void {
+    const result = this.rollerService.rollAD20(this.characterService.calculateBonus(character.attributes.dexterity),-1, playerUid);
+    this.combatOrder.set(character.name, result.result);
   }
 
   private autoOrder(): void {
