@@ -1,8 +1,19 @@
-<div class="inventory-item" [formGroup]="itemGroup()">
-  <input type="number" formControlName="quantity" class="qty-input" placeholder="Cant.">
-  <input type="text" formControlName="name" class="name-input" placeholder="Objeto...">
-  <input type="text" formControlName="description" class="desc-input" placeholder="Descripción...">
-  <button type="button" class="btn-delete" (click)="removeItem()">
-    Borrar objeto
-  </button>
-</div>
+<form class="inventory-item" [formGroup]="form">
+  @if (isInInventory()) {
+    <input type="number" formControlName="quantity" class="qty-input" placeholder="Cant.">
+  }
+  <input type="number" formControlName="weight" class="qty-input" placeholder="Peso">
+  <input class="name-input" formControlName="name" placeholder="Objeto...">
+  <input class="desc-input" formControlName="description" placeholder="Descripción...">
+
+  @if(isInInventory()) {
+    <button type="button" class="btn-delete" (click)="removeItem()">
+      Borrar objeto
+    </button>
+  } @else {
+    <button type="submit" class="btn-save" (click)="saveItem()">
+      Guardar objeto
+    </button>
+  }
+
+</form>

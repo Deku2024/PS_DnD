@@ -37,7 +37,7 @@
   font-family: 'Georgia', serif;
 }
 
-.btn-delete {
+.btn-delete, .btn-save {
   background: #3a2518;
   color: #d4a056;
   border: 1px solid #8b6914;
@@ -52,6 +52,12 @@
 
 .btn-delete:hover {
   background: #721c24;
+  color: #ffffff;
+  transform: scale(1.02);
+}
+
+.btn-save:hover {
+  background: #274713;
   color: #ffffff;
   transform: scale(1.02);
 }
