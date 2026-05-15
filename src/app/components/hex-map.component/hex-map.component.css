@@ -1,0 +1,74 @@
+.hex-map-wrapper {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.hex-map-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.hex-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hex-cell {
+  fill: var(--grid-fill-color, rgba(100, 180, 255, 0.04));
+  stroke: var(--grid-stroke-color, rgba(100, 200, 255, 0.45));
+  stroke-width: 1.5;
+  cursor: default;
+}
+
+/* When a token is selected, hoverable hexes show they're clickable */
+.move-mode .hex-highlighted {
+  fill: rgba(255, 224, 102, 0.14);
+  stroke: rgba(255, 224, 102, 0.7);
+  cursor: pointer;
+  transition: fill 0.1s;
+}
+
+.move-mode .hex-highlighted:hover {
+  fill: rgba(255, 224, 102, 0.30);
+}
+
+/* Token groups */
+.token-group {
+  cursor: default;
+}
+
+.token-selectable {
+  cursor: pointer;
+}
+
+.token-selected circle:first-child {
+  filter: drop-shadow(0 0 6px rgba(255, 224, 102, 0.8));
+}
+
+.token-label {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Move hint */
+.move-hint {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.72);
+  color: #ffe066;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 224, 102, 0.4);
+  white-space: nowrap;
+  pointer-events: none;
+}

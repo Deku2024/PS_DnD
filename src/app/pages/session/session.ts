@@ -9,15 +9,16 @@ import { PresenceService } from '../../services/presence.service';
 import { RollHistoryService } from '../../services/roll-history.service';
 import { HistoryButtonComponent} from '../../components/history.button.component/history.button.component';
 import { CloudinaryService } from '../../services/cloudinary.service';
+import { HexMapComponent } from '../../components/hex-map.component/hex-map.component';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
+import { BattleButtonComponent } from '../../components/battle.button.component/battle.button.component';
 import { YouTubePlayer } from '@angular/youtube-player';
-import {BattleButtonComponent} from '../../components/battle.button.component/battle.button.component';
 
 @Component({
   selector: 'app-session',
   standalone: true,
-  imports: [CommonModule, FormsModule, YouTubePlayer, BattleButtonComponent, HistoryButtonComponent],
+  imports: [CommonModule, FormsModule, YouTubePlayer, BattleButtonComponent, HistoryButtonComponent, HexMapComponent],
   templateUrl: './session.html',
   styleUrl: './session.css'
 })
@@ -33,6 +34,20 @@ export class SessionPage implements OnInit, OnDestroy {
   imagePreviewUrl: string | null = null;
   private pendingFile: File | null = null;
   private cloudinaryService = inject(CloudinaryService);
+
+  // Map settings
+  pendingIsMap = false;
+  pendingHexSize = 40;
+  pendingGridColor: string = 'blue';
+  pendingCustomColor: string = '#64c8ff';
+  localHexSize = 40;
+  localGridColor: string = 'blue';
+  localCustomColor: string = '#64c8ff';
+
+  /** Returns false when gridColor is one of the 3 named presets */
+  isPreset(color: string): boolean {
+    return color === 'blue' || color === 'white' || color === 'black';
+  }
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -120,7 +135,13 @@ export class SessionPage implements OnInit, OnDestroy {
           this.router.navigate(['/home']);
           return;
         }
+        const isFirstLoad = !this.session;
         this.session = session;
+        if (isFirstLoad && session.isMap) {
+          this.localHexSize = session.hexSize ?? 40;
+          this.localGridColor = session.gridColor ?? 'blue';
+          if (!this.isPreset(this.localGridColor)) this.localCustomColor = this.localGridColor;
+        }
         this.rollHistoryService.setSessionStatus(session.status);
         this.rollHistoryService.startListening(id);
         this.loadCharacters(session);
@@ -329,6 +350,10 @@ export class SessionPage implements OnInit, OnDestroy {
     }
     this.pendingFile = file;
     this.imagePreviewUrl = URL.createObjectURL(file);
+    this.pendingIsMap = this.session?.isMap ?? false;
+    this.pendingHexSize = this.session?.hexSize ?? 40;
+    this.pendingGridColor = this.session?.gridColor ?? 'blue';
+    if (!this.isPreset(this.pendingGridColor)) this.pendingCustomColor = this.pendingGridColor;
     input.value = '';
     this.cd.detectChanges();
   }
@@ -352,6 +377,17 @@ export class SessionPage implements OnInit, OnDestroy {
     try {
       const url = await this.cloudinaryService.uploadImage(this.pendingFile);
       await this.sessionService.updateSharedImage(this.session.id, url);
+      await this.sessionService.updateMapSettings(
+        this.session.id,
+        this.pendingIsMap,
+        this.pendingHexSize,
+        this.pendingGridColor
+      );
+      this.localHexSize = this.pendingHexSize;
+      this.localGridColor = this.pendingGridColor;
+      if (!this.isPreset(this.pendingGridColor)) {
+        this.localCustomColor = this.pendingGridColor;
+      }
       if (this.imagePreviewUrl) URL.revokeObjectURL(this.imagePreviewUrl);
       this.imagePreviewUrl = null;
       this.pendingFile = null;
@@ -364,6 +400,31 @@ export class SessionPage implements OnInit, OnDestroy {
     }
   }
 
+  async toggleIsMap(): Promise<void> {
+    if (!this.session?.id || !this.isMaster) return;
+    const newIsMap = !this.session.isMap;
+    await this.sessionService.updateMapSettings(
+      this.session.id,
+      newIsMap,
+      this.session.hexSize ?? 40,
+      this.session.gridColor ?? 'blue'
+    );
+  }
+
+  async applyHexSize(): Promise<void> {
+    if (!this.session?.id || !this.isMaster) return;
+    const size = Math.min(120, Math.max(20, this.localHexSize));
+    this.localHexSize = size;
+    await this.sessionService.updateMapSettings(this.session.id, true, size, this.localGridColor);
+  }
+
+  async applyGridColor(color: string): Promise<void> {
+    if (!this.session?.id || !this.isMaster) return;
+    this.localGridColor = color;
+    if (!this.isPreset(color)) this.localCustomColor = color;
+    await this.sessionService.updateMapSettings(this.session.id, true, this.localHexSize, color);
+  }
+
   closeErrorModal(): void {
     this.showErrorModal = false;
     this.imageUploadError = '';
@@ -373,6 +434,25 @@ export class SessionPage implements OnInit, OnDestroy {
     if (!this.session?.id || !this.isMaster) return;
     this.cancelPreview();
     await this.sessionService.updateSharedImage(this.session.id, null);
+    await this.sessionService.updateMapSettings(this.session.id, false, 40, 'blue');
+  }
+
+  get nonMasterPlayers(): { uid: string; username: string; avatarUrl?: string }[] {
+    if (!this.session) return [];
+    return this.session.players
+      .filter(uid => uid !== this.session!.masterId)
+      .map(uid => ({
+        uid,
+        username: this.session!.playersUsernames[uid] || uid,
+        avatarUrl: this.characters[uid]?.image || undefined,
+      }));
+  }
+
+  async onTokenMoved(event: { uid: string; row: number; col: number }): Promise<void> {
+    if (!this.session?.id) return;
+    const canMove = this.isMaster || event.uid === this.currentUser?.uid;
+    if (!canMove) return;
+    await this.sessionService.updateTokenPosition(this.session.id, event.uid, event.row, event.col);
   }
 
   ngOnDestroy(): void {

@@ -683,6 +683,137 @@ h2 {
   justify-content: center;
 }
 
+/* ─── Map card ─── */
+.map-card {
+  border-color: rgba(100, 200, 255, 0.35);
+}
+
+.map-card h3 {
+  color: #7ecfff;
+}
+
+.map-toggle-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.map-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: #c6a747;
+  user-select: none;
+}
+
+.map-toggle-check {
+  width: 16px;
+  height: 16px;
+  accent-color: #7ecfff;
+  cursor: pointer;
+}
+
+.hex-size-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.hex-size-label {
+  font-size: 0.78rem;
+  color: #8a6e2f;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.hex-size-slider {
+  flex: 1;
+  min-width: 100px;
+  accent-color: #7ecfff;
+  cursor: pointer;
+}
+
+.hex-size-value {
+  font-size: 0.78rem;
+  color: #7ecfff;
+  min-width: 38px;
+  text-align: right;
+  font-family: monospace;
+}
+
+.grid-color-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.color-picker-row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.color-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  transition: border-color 0.15s;
+}
+
+.color-btn.active {
+  border-color: #ffe066;
+}
+
+.color-btn:hover {
+  border-color: rgba(255, 224, 102, 0.55);
+}
+
+.color-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: block;
+}
+
+.color-dot-blue  { background: rgba(100, 200, 255, 0.8); border: 1px solid rgba(100, 200, 255, 0.5); }
+.color-dot-white { background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(180, 180, 180, 0.5); }
+.color-dot-black { background: rgba(30, 30, 30, 0.95);   border: 1px solid rgba(100, 100, 100, 0.5); }
+
+/* Custom color button (label wrapping a hidden input[type=color]) */
+.color-btn-custom {
+  position: relative;
+  cursor: pointer;
+}
+
+.color-input-hidden {
+  position: absolute;
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.map-settings-controls {
+  margin-bottom: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  background: rgba(100, 200, 255, 0.04);
+  border: 1px solid rgba(100, 200, 255, 0.15);
+  border-radius: 4px;
+}
+
 /* ─── Error modal ─── */
 .error-modal .modal-header h3 {
   color: #ef4444;

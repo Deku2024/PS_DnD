@@ -72,12 +72,26 @@
 
     <hr class="divider" />
 
-    <!-- Imagen compartida -->
-    <div class="card shared-image-card">
-      <h3>🖼 Imagen compartida</h3>
+    <!-- Imagen compartida / Mapa -->
+    <div class="card shared-image-card" [class.map-card]="session.isMap">
+      <h3>{{ session.isMap ? '🗺 Mapa de la sesión' : '🖼 Imagen compartida' }}</h3>
 
-      <!-- Muestra la imagen a todos cuando existe -->
-      <div class="shared-image-display" *ngIf="session.sharedImageUrl">
+      <!-- Mapa con cuadrícula hexagonal (visible para todos) -->
+      <div class="shared-image-display" *ngIf="session.sharedImageUrl && session.isMap">
+        <app-hex-map
+          [imageUrl]="session.sharedImageUrl"
+          [hexSize]="session.hexSize ?? 40"
+          [gridColor]="session.gridColor ?? 'blue'"
+          [players]="nonMasterPlayers"
+          [tokenPositions]="session.tokenPositions ?? {}"
+          [currentUserId]="currentUser?.uid ?? null"
+          [isMaster]="isMaster"
+          (tokenMoved)="onTokenMoved($event)">
+        </app-hex-map>
+      </div>
+
+      <!-- Imagen normal (visible para todos) -->
+      <div class="shared-image-display" *ngIf="session.sharedImageUrl && !session.isMap">
         <img [src]="session.sharedImageUrl" alt="Imagen compartida por el DM" class="shared-image" />
       </div>
 
@@ -98,7 +112,67 @@
 
         <!-- Previsualización local antes de subir -->
         <div class="image-preview-container" *ngIf="imagePreviewUrl">
-          <img [src]="imagePreviewUrl" alt="Previsualización" class="image-preview" />
+          <!-- Preview con grid hexagonal si es mapa -->
+          <app-hex-map
+            *ngIf="pendingIsMap"
+            [imageUrl]="imagePreviewUrl!"
+            [hexSize]="pendingHexSize"
+            [gridColor]="pendingGridColor"
+            [players]="[]"
+            [tokenPositions]="{}"
+            [currentUserId]="null"
+            [isMaster]="false">
+          </app-hex-map>
+          <img *ngIf="!pendingIsMap" [src]="imagePreviewUrl" alt="Previsualización" class="image-preview" />
+
+          <!-- Opciones de mapa en la preview -->
+          <div class="map-toggle-row">
+            <label class="map-toggle-label">
+              <input
+                type="checkbox"
+                [(ngModel)]="pendingIsMap"
+                class="map-toggle-check" />
+              <span>🗺 Es un mapa</span>
+            </label>
+            <div class="hex-size-row" *ngIf="pendingIsMap">
+              <label class="hex-size-label">Tamaño hex:</label>
+              <input
+                type="range"
+                min="20" max="120" step="5"
+                [(ngModel)]="pendingHexSize"
+                aria-label="Tamaño de celda hexagonal"
+                class="hex-size-slider" />
+              <span class="hex-size-value">{{ pendingHexSize }}px</span>
+            </div>
+            <div class="grid-color-row" *ngIf="pendingIsMap">
+              <label class="hex-size-label">Color grid:</label>
+              <div class="color-picker-row">
+                <button class="color-btn" [class.active]="pendingGridColor === 'blue'" (click)="pendingGridColor = 'blue'" title="Azul">
+                  <span class="color-dot color-dot-blue"></span>
+                </button>
+                <button class="color-btn" [class.active]="pendingGridColor === 'white'" (click)="pendingGridColor = 'white'" title="Blanco">
+                  <span class="color-dot color-dot-white"></span>
+                </button>
+                <button class="color-btn" [class.active]="pendingGridColor === 'black'" (click)="pendingGridColor = 'black'" title="Negro">
+                  <span class="color-dot color-dot-black"></span>
+                </button>
+                <!-- Personalizado -->
+                <label class="color-btn color-btn-custom"
+                       [class.active]="!isPreset(pendingGridColor)"
+                       title="Color personalizado">
+                  <input type="color"
+                         class="color-input-hidden"
+                         aria-label="Color personalizado del grid"
+                         [value]="pendingCustomColor"
+                         (input)="pendingGridColor = $any($event.target).value; pendingCustomColor = $any($event.target).value" />
+                  <span class="color-dot"
+                        [style.background]="pendingCustomColor"
+                        [style.border-color]="'rgba(180,180,180,0.4)'"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
           <div class="image-preview-actions">
             <button
               class="btn-upload-image btn-confirm"
@@ -113,6 +187,58 @@
               [disabled]="isUploadingImage">
               ✕ Cancelar
             </button>
+          </div>
+        </div>
+
+        <!-- Controles tras subida: toggle mapa + tamaño hex -->
+        <div class="map-settings-controls" *ngIf="!imagePreviewUrl && session.sharedImageUrl">
+          <div class="map-toggle-row">
+            <label class="map-toggle-label">
+              <input
+                type="checkbox"
+                [checked]="session.isMap"
+                (change)="toggleIsMap()"
+                class="map-toggle-check" />
+              <span>🗺 Es un mapa</span>
+            </label>
+          </div>
+          <div class="hex-size-row" *ngIf="session.isMap">
+            <label class="hex-size-label">Tamaño hex:</label>
+            <input
+              type="range"
+              min="20" max="120" step="5"
+              [(ngModel)]="localHexSize"
+              aria-label="Tamaño de celda hexagonal"
+              class="hex-size-slider"
+              (change)="applyHexSize()" />
+            <span class="hex-size-value">{{ localHexSize }}px</span>
+          </div>
+          <div class="grid-color-row" *ngIf="session.isMap">
+            <label class="hex-size-label">Color grid:</label>
+            <div class="color-picker-row">
+              <button class="color-btn" [class.active]="localGridColor === 'blue'" (click)="applyGridColor('blue')" title="Azul">
+                <span class="color-dot color-dot-blue"></span>
+              </button>
+              <button class="color-btn" [class.active]="localGridColor === 'white'" (click)="applyGridColor('white')" title="Blanco">
+                <span class="color-dot color-dot-white"></span>
+              </button>
+              <button class="color-btn" [class.active]="localGridColor === 'black'" (click)="applyGridColor('black')" title="Negro">
+                <span class="color-dot color-dot-black"></span>
+              </button>
+              <!-- Personalizado -->
+              <label class="color-btn color-btn-custom"
+                     [class.active]="!isPreset(localGridColor)"
+                     title="Color personalizado">
+                <input type="color"
+                       class="color-input-hidden"
+                       aria-label="Color personalizado del grid"
+                       [value]="localCustomColor"
+                       (change)="applyGridColor($any($event.target).value); localCustomColor = $any($event.target).value" />
+                <span class="color-dot"
+                      [style.background]="localCustomColor"
+                      [style.border-color]="'rgba(180,180,180,0.4)'"></span>
+              </label>
+            </div>
           </div>
         </div>
 
