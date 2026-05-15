@@ -4,6 +4,7 @@ import {SheetInterface} from '../interfaces/SheetInterface';
 import {inject, Injectable} from '@angular/core';
 import {DiceRollerService} from './roll-dice.service';
 import {UsernameService} from './username.service';
+import {MonsterData} from './monster.service';
 
 export interface Combatant {
   uid: string;
@@ -23,7 +24,7 @@ export class BattleService {
   combatants: Combatant[] = [];
 
   private combatOrder = new Map<string, number>();
-  private combatEntities: (SheetInterface | null)[] = []; // array para tener los datos de los objetos de manera centralizada para el combate
+  private combatEntities: SheetInterface[] = []; // array para tener los datos de los objetos de manera centralizada para el combate
 
   rollerService = inject(DiceRollerService);
   usernameService = inject(UsernameService);
@@ -128,12 +129,33 @@ export class BattleService {
   }
 
   public async endCombat(sessionId: string): Promise<void> {
+    this.startXPProcess();
     this.status = 'ended';
     this.combatOrder = new Map<string, number>();
     this.combatants = [];
     this.combatEntities = [];
     await this.sessionService.updateCombatOrder(sessionId, []);
     await this.sessionService.updateStatus(sessionId, 'active');
+  }
+
+  private startXPProcess() {
+    const monsters: MonsterData[] = this.combatants
+      .filter(c => c.character && 'challengeValue' in c.character)
+      .map(c => c.character as MonsterData);
+
+    const totalXP = this.calculateTotalXP(monsters);
+    if (totalXP <= 0) return;
+
+    const playerCombatants = this.combatants.filter(c => c.email !== 'Enemigo (NPC)');
+    if (playerCombatants.length === 0) return;
+
+    const individualGain = totalXP / playerCombatants.length;
+    for (const combatant of playerCombatants) {
+      if (!combatant.character) continue;
+      const char = combatant.character as any;
+      char.experience = (char.experience ?? 0) + individualGain;
+      this.characterService.updateCharacter(combatant.characterId, char);
+    }
   }
 
   public applySavedOrder(savedOrder: string[]): void {
@@ -179,6 +201,7 @@ export class BattleService {
 
   public addToCombat(character: SheetInterface): void {
     this.combatOrder.set(character.name, this.rollerService.rollAD20(this.characterService.calculateBonus(character.attributes.dexterity)).result);
+    this.combatEntities.push(character);
   }
 
   private autoOrder(): void {
@@ -187,6 +210,16 @@ export class BattleService {
       const initiativeB = this.combatOrder.get(b.character?.name || '') || 0;
       return initiativeB - initiativeA;
     });
+  }
+
+  private calculateTotalXP(monsters: MonsterData[]) : number {
+    let totalXP = 0;
+    for (const monster of monsters) {
+      if (monster.life == 0) {
+        totalXP += monster.challengeXP;
+      }
+    }
+    return totalXP;
   }
 }
 

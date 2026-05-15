@@ -64,9 +64,9 @@ export class MonsterSheet implements OnInit {
 
 
   constructor(
-    private fb: FormBuilder, 
-    private monsterService: MonsterService, 
-    private authService: AuthService, 
+    private fb: FormBuilder,
+    private monsterService: MonsterService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
     private router: Router)
@@ -115,7 +115,7 @@ export class MonsterSheet implements OnInit {
     this.monsterSheetForm.patchValue({
       name: monster.name,
       challengeValue: monster.challengeValue,
-      challengePX: monster.challengePX,
+      challengePX: monster.challengeXP,
       armourClass: monster.armourClass,
       race: monster.race,
       alignment: monster.alignment,
@@ -142,7 +142,7 @@ export class MonsterSheet implements OnInit {
         description: [ability.description, Validators.required]
       }));
     });
-    
+
   }
 
   async onSubmit() {
@@ -201,7 +201,7 @@ export class MonsterSheet implements OnInit {
       )
     );
   }
-  
+
 
   removeItem(index: number): void {
     this.inventoryFormArray.removeAt(index);
@@ -243,7 +243,7 @@ export class MonsterSheet implements OnInit {
       return null;
     };
   }
-  
+
 
   //preview de la imagen y guardado en bd
   async resizeImage(base64: string): Promise<string> {

@@ -7,6 +7,8 @@ import { SessionService } from '../../services/sessions.service';
 import { AuthService } from '../../services/auth.service';
 import { CharacterService } from '../../services/character.service';
 import { MonsterSearchComponent } from '../../components/monster-search.component/monster-search.component';
+import {MonsterData} from '../../services/monster.service';
+import {SheetInterface} from '../../interfaces/SheetInterface';
 
 @Component({
   selector: 'app-dm-combat',
@@ -184,7 +186,7 @@ export class DmCombat implements OnInit, OnDestroy {
     }
   }
 
-  addMonsterToBattle(monster: any) {
+  addMonsterToBattle(monster: MonsterData) {
     const tempId = 'npc_' + Date.now();
 
     // Count existing instances of this monster to assign numbered names
@@ -194,31 +196,44 @@ export class DmCombat implements OnInit, OnDestroy {
     const instanceName = existingCount === 0
       ? monster.name + ' x1'
       : monster.name + ' x' + (existingCount + 1);
-    // Rename x1 on the first existing instance if this is the second
-    if (existingCount === 1) {
-      const first = this.battleService.combatants.find(
-        c => c.email === 'Enemigo (NPC)' && c.character?.name === monster.name + ' x1'
-      );
-      // already named x1 — nothing to change
-    }
+    const characterData: MonsterData = {
+      userId: tempId,
+      name: instanceName,
+      life: monster.life,
+      maxLife: monster.maxLife,
+      tempLife: 0,
+      armourClass: monster.armourClass,
+      race: monster.race || 'Monstruo',
+      alignment: 'Monstruo',
+      attributes: monster.attributes || {
+        strength: 10,
+        dexterity: 10,
+        constitution: 10,
+        intelligence: 10,
+        wisdom: 10,
+        charisma: 10
+      },
+      inventory: [],
+      abilities: [],
+      image: monster.image || '',
+      id: tempId,
+      challengeValue: monster.challengeValue,
+      challengeXP: monster.challengeXP
+    };
 
-    const newEnemy = {
+    const newCombatant: Combatant = {
       uid: tempId,
       characterId: tempId,
       email: 'Enemigo (NPC)',
-      inCombat: false,
+      username: instanceName,
+      inCombat: true,
       initiative: 0,
-      character: {
-        name: instanceName,
-        race: monster.race || 'Monstruo',
-        life: monster.life,
-        maxLife: monster.maxLife,
-        armourClass: monster.armourClass,
-        attributes: monster.attributes || { dexterity: 10 }
-      }
-    } as unknown as Combatant;
+      character: characterData
+    };
 
-    this.battleService.combatants = [...this.battleService.combatants, newEnemy];
+    this.battleService.addToCombat(characterData);
+    this.battleService.combatants = [...this.battleService.combatants, newCombatant];
+
     this.saveOrder();
     this.showAddMenu = false;
   }
