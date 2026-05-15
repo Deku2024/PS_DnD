@@ -41,6 +41,7 @@ export class SessionPage implements OnInit, OnDestroy {
   modalPlayerEmail = '';
   modalUid = '';
   presenceMap: { [uid: string]: boolean } = {};
+  isSidebarOpen = true;
 
   private unsubscribe?: () => void;
   private authSub?: Subscription;
@@ -178,7 +179,9 @@ export class SessionPage implements OnInit, OnDestroy {
     this.closeModal();
     this.router.navigate(['/choose-character'], { queryParams: { sessionId: this.session.id } });
   }
-
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
   async kickPlayer(uid: string): Promise<void> {
     if (!this.session?.id || !this.isMaster) return;
     try {

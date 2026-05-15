@@ -705,3 +705,254 @@ h2 {
     font-size: 1.3rem;
   }
 }
+
+.horizontal-layout {
+  display: none;
+}
+
+@media screen and (orientation: landscape) {
+  .vertical-layout {
+    display: none;
+  }
+
+  .horizontal-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: #080502;
+    z-index: 100;
+  }
+
+  .session-page {
+    padding: 0;
+    max-width: none;
+  }
+
+  .landscape-header {
+    height: 40px;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    border-bottom: 2px solid #2a1f10;
+  }
+
+  .server-title {
+    color: #e8d5a0;
+    font-size: 1.1rem;
+    margin: 0;
+    font-family: 'Palatino Linotype', Georgia, serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: none;
+  }
+
+  .ornament {
+    color: #8a6e2f;
+    font-size: 1.2rem;
+  }
+
+  .landscape-content {
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .main-stage {
+    flex: 1;
+    overflow: hidden;
+    background: #0a0705;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-left: 0;
+    padding: 15px;
+  }
+
+  .shared-map {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border: 1px solid #2a1f10;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+  }
+
+  .no-image-msg {
+    text-align: center;
+    color: #c6a747;
+    opacity: 0.6;
+  }
+
+  .world-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    filter: grayscale(100%) brightness(200%);
+  }
+
+  .players-sidebar {
+    width: 320px;
+    background: #110a05;
+    border-left: 2px solid #2a1f10;
+    border-right: none;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 15px;
+  }
+
+  .sidebar-scroll {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .player-landscape-card {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #8a6e2f;
+    box-shadow: inset 0 0 0 1px #3a2a12;
+    padding: 10px 15px;
+    border-radius: 2px;
+    gap: 10px;
+  }
+
+  .card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+
+  .card-name {
+    color: #e8d5a0;
+    font-weight: bold;
+    font-size: 1rem;
+  }
+
+  .card-role {
+    font-size: 0.65rem;
+    color: #8a6e2f;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  .card-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* Botón de pergamino (sin fondo) */
+  .landscape-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 0;
+    filter: sepia(0.8) hue-rotate(-20deg) saturate(1.5);
+    transition: transform 0.1s;
+  }
+
+  .landscape-btn:hover {
+    transform: scale(1.15);
+  }
+
+  /* --- BOTÓN DE SALIDA (Abajo) --- */
+  .sidebar-footer {
+    margin-top: 15px;
+    padding-top: 15px;
+  }
+
+  .btn-exit-landscape {
+    width: 100%;
+    background: transparent;
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    padding: 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .btn-exit-landscape:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+  }
+  .sidebar-wrapper {
+    position: relative;
+    display: flex;
+    z-index: 100;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar-wrapper.is-closed {
+    transform: translateX(-320px);
+  }
+
+  .toggle-pull-button {
+    position: absolute;
+    right: -32px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 64px;
+    background: #c6a747;
+    border: 2px solid #1a1510;
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 101;
+  }
+
+  .arrow-icon {
+    color: #1a1510;
+    font-weight: bold;
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+
+  .players-sidebar {
+    width: 320px;
+    background: #110a05;
+    border-right: 2px solid #2a1f10;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 15px;
+    height: 100%;
+  }
+  .sidebar-wrapper.is-closed + .main-stage {
+    width: 100vw;
+    margin-left: -320px;
+  }
+  .shared-map {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border: 1px solid #2a1f10;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+  }
+  .toggle-pull-button {
+    z-index: 1000;
+  }
+}
