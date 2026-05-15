@@ -54,6 +54,7 @@ export class SessionPage implements OnInit, OnDestroy {
   private authSub?: Subscription;
   private initializing = false;
   private presenceUnsub?: () => void;
+  private charUnsubs: { [uid: string]: () => void } = {};
 
   constructor(
     private route: ActivatedRoute,
@@ -105,7 +106,7 @@ export class SessionPage implements OnInit, OnDestroy {
       }
     }
 
-    this.unsubscribe = this.sessionService.listenSession(id, async (session) => {
+    this.unsubscribe = this.sessionService.listenSession(id, (session) => {
       this.loading = false;
       if (!session) {
         this.errorMsg = 'La sesión no existe o ha sido cerrada.';
@@ -122,7 +123,7 @@ export class SessionPage implements OnInit, OnDestroy {
         this.session = session;
         this.rollHistoryService.setSessionStatus(session.status);
         this.rollHistoryService.startListening(id);
-        await this.loadCharacters(session);
+        this.loadCharacters(session);
         this.syncAudio(session.audio ?? null);
       }
       this.cd.detectChanges();
@@ -213,35 +214,40 @@ export class SessionPage implements OnInit, OnDestroy {
     await this.sessionService.clearAudio(this.session.id);
   }
 
-  private async loadCharacters(session: Session): Promise<void> {
+  private loadCharacters(session: Session): void {
     const players = session.players.filter(uid => uid !== session.masterId);
     for (const uid of players) {
       const selectedCharId = session.selectedCharacters?.[uid];
-      const current = this.characters[uid] ?? null;
 
       if (selectedCharId) {
-        if (!current || (current as CharacterWithId).id !== selectedCharId) {
-          const ch = await this.characterService.getCharacterById(selectedCharId);
-          this.characters[uid] = ch ?? null;
-          if (this.showModal && this.modalUid === uid) {
-            this.modalCharacter = this.characters[uid];
-          }
-          this.cd.detectChanges();
+        // Only set up a new listener if character ID changed or no listener exists yet
+        const existing = this.characters[uid] as CharacterWithId | null;
+        if (!existing || existing.id !== selectedCharId) {
+          this.charUnsubs[uid]?.(); // cancel previous listener for this player
+          this.charUnsubs[uid] = this.characterService.listenCharacter(selectedCharId, (ch) => {
+            this.characters[uid] = ch;
+            if (this.showModal && this.modalUid === uid) {
+              this.modalCharacter = ch;
+            }
+            this.cd.detectChanges();
+          });
         }
       } else {
-        const list = await this.characterService.listCharactersByUserAndSession(uid, session.id!);
-        const ch = list.length > 0 ? list[0] : null;
-        if (!current || (ch && (current as CharacterWithId).id !== ch.id)) {
-          this.characters[uid] = ch ?? null;
-          if (this.showModal && this.modalUid === uid) {
-            this.modalCharacter = this.characters[uid];
+        // No selected character — one-time load by session
+        this.characterService.listCharactersByUserAndSession(uid, session.id!).then(list => {
+          const ch = list.length > 0 ? list[0] : null;
+          const current = this.characters[uid] as CharacterWithId | null;
+          if (!current || (ch && current.id !== ch.id)) {
+            this.characters[uid] = ch ?? null;
+            if (this.showModal && this.modalUid === uid) {
+              this.modalCharacter = this.characters[uid];
+            }
+            this.cd.detectChanges();
           }
-          this.cd.detectChanges();
-        }
+        });
       }
     }
   }
-
   get isMaster(): boolean {
     return !!this.currentUser && !!this.session && this.session.masterId === this.currentUser.uid;
   }
@@ -373,5 +379,6 @@ export class SessionPage implements OnInit, OnDestroy {
     this.unsubscribe?.();
     this.authSub?.unsubscribe();
     this.presenceUnsub?.();
+    Object.values(this.charUnsubs).forEach(unsub => unsub());
   }
 }
