@@ -38,6 +38,8 @@ export class MonsterSheet implements OnInit {
   imagePreview: string | ArrayBuffer | null = null;
   selectedFile: File | null = null;
 
+  isInInventory = true;
+  
   raceOptions = [
     { value: "Aberration", label: "Aberración" },
     { value: "Monstrosity", label: "Monstruosidad" },
@@ -94,7 +96,6 @@ export class MonsterSheet implements OnInit {
         charisma: [10, [Validators.required, Validators.min(1), Validators.max(20)]]
       }),
 
-      inventory: this.fb.array([]),
       abilities: this.fb.array([]),
       image: [this.defaultImage]
     }, { validators: this.validateLifeNotExceedMax() });
@@ -124,15 +125,6 @@ export class MonsterSheet implements OnInit {
       tempLife: monster.tempLife,
       attributes: monster.attributes,
       image: monster.image
-    });
-
-    //load inventory
-    (monster.inventory ?? []).forEach((item: any) => {
-      this.inventoryFormArray.push(this.fb.group({
-        name: [item.name, Validators.required],
-        quantity: [item.quantity, [Validators.required, Validators.min(1)]],
-        description: [item.description]
-      }));
     });
 
     //load habilities
@@ -180,7 +172,7 @@ export class MonsterSheet implements OnInit {
     this.cdr.detectChanges();
   }
 
-  //inventory logic
+  //inventory logic - HAY QUE CAMBIARLO
 
   get inventoryFormArray() : FormArray {
     return this.monsterSheetForm.get('inventory') as FormArray;

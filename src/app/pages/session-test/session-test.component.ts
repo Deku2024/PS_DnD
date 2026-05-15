@@ -7,11 +7,14 @@ import { AuthService } from '../../services/auth.service';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
 import { doc, onSnapshot, Unsubscribe, getFirestore } from 'firebase/firestore';
+import { ItemsService } from '../../services/items.service';
+import { Item } from './../../interfaces/Item';
+import { InventoryItemComponent } from "../../components/inventory.component/inventory.component";
 
 @Component({
   selector: 'app-session-test',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, InventoryItemComponent],
   templateUrl: './session-test.component.html',
   styleUrl: './session-test.component.css'
 })
@@ -31,13 +34,20 @@ export class SessionTestComponent implements OnInit, OnDestroy {
 
   authService = inject(AuthService);
 
+  showModal = false;
+  unsubscribe: (() => void) | undefined;
+  items: Item[] = [];
+  selectedItem: Item | null = null;
+
   private authSub?: Subscription;
   private unsubscribeFirestore?: Unsubscribe;
 
   constructor(
     private sessionService: SessionService,
     private router: Router,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private itemService: ItemsService,
+    private ch: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -50,6 +60,8 @@ export class SessionTestComponent implements OnInit, OnDestroy {
         this.loadMySessions();
       }
     });
+
+    this.loadItems();
   }
 
   watchSessionAccess(sessionId: string, userId: string) {
@@ -174,6 +186,45 @@ export class SessionTestComponent implements OnInit, OnDestroy {
 
   enterMonsterPage() {
     this.router.navigate(['/bestiary']);
+  }
+
+  //modal y objetos
+
+  openObjectsModal() {
+    this.showModal = true;
+  }
+
+  closeModal() {
+    this.showModal = false;
+  }
+
+  loadItems() {
+      if (this.currentUser?.uid) {
+        this.unsubscribe = this.itemService.readItems(
+            this.currentUser.uid,
+            (monsters) => {
+              this.items = monsters;
+              this.ch.detectChanges();
+            }
+        )
+      }
+  }
+
+  saveItem(item: Item) {
+    if (this.currentUser) {
+      this.itemService.createItem(this.currentUser.uid, item);
+    }
+
+  }
+
+  deleteItem(item: Item) {
+    if (this.currentUser && item.id) {
+      this.itemService.deleteItem(item.id);
+    }
+  }
+
+  editItem(item: Item) {
+    this.selectedItem = item;
   }
 
 
