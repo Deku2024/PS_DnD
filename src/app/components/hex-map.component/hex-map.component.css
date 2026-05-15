@@ -20,8 +20,8 @@
 }
 
 .hex-cell {
-  fill: rgba(100, 180, 255, 0.04);
-  stroke: rgba(100, 200, 255, 0.45);
+  fill: var(--grid-fill-color, rgba(100, 180, 255, 0.04));
+  stroke: var(--grid-stroke-color, rgba(100, 200, 255, 0.45));
   stroke-width: 1.5;
   cursor: default;
 }

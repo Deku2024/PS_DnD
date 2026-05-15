@@ -34,6 +34,7 @@ export interface Session {
   sharedImageUrl?: string | null;
   isMap?: boolean;
   hexSize?: number;
+  gridColor?: string;
   tokenPositions?: { [uid: string]: { row: number; col: number } };
   status: 'waiting' | 'active' | 'paused' | 'closed' | 'in-battle';
   password?: string;
@@ -220,9 +221,9 @@ export class SessionService {
     await updateDoc(ref, { sharedImageUrl: imageUrl });
   }
 
-  async updateMapSettings(sessionId: string, isMap: boolean, hexSize: number): Promise<void> {
+  async updateMapSettings(sessionId: string, isMap: boolean, hexSize: number, gridColor: string = 'blue'): Promise<void> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
-    await updateDoc(ref, { isMap, hexSize });
+    await updateDoc(ref, { isMap, hexSize, gridColor });
   }
 
   async updateTokenPosition(sessionId: string, uid: string, row: number, col: number): Promise<void> {

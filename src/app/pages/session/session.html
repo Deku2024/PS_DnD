@@ -38,6 +38,7 @@
         <app-hex-map
           [imageUrl]="session.sharedImageUrl"
           [hexSize]="session.hexSize ?? 40"
+          [gridColor]="session.gridColor ?? 'blue'"
           [players]="nonMasterPlayers"
           [tokenPositions]="session.tokenPositions ?? {}"
           [currentUserId]="currentUser?.uid ?? null"
@@ -68,7 +69,18 @@
 
         <!-- Previsualización local antes de subir -->
         <div class="image-preview-container" *ngIf="imagePreviewUrl">
-          <img [src]="imagePreviewUrl" alt="Previsualización" class="image-preview" />
+          <!-- Preview con grid hexagonal si es mapa -->
+          <app-hex-map
+            *ngIf="pendingIsMap"
+            [imageUrl]="imagePreviewUrl!"
+            [hexSize]="pendingHexSize"
+            [gridColor]="pendingGridColor"
+            [players]="[]"
+            [tokenPositions]="{}"
+            [currentUserId]="null"
+            [isMaster]="false">
+          </app-hex-map>
+          <img *ngIf="!pendingIsMap" [src]="imagePreviewUrl" alt="Previsualización" class="image-preview" />
 
           <!-- Opciones de mapa en la preview -->
           <div class="map-toggle-row">
@@ -88,6 +100,20 @@
                 aria-label="Tamaño de celda hexagonal"
                 class="hex-size-slider" />
               <span class="hex-size-value">{{ pendingHexSize }}px</span>
+            </div>
+            <div class="grid-color-row" *ngIf="pendingIsMap">
+              <label class="hex-size-label">Color grid:</label>
+              <div class="color-picker-row">
+                <button class="color-btn" [class.active]="pendingGridColor === 'blue'" (click)="pendingGridColor = 'blue'" title="Azul">
+                  <span class="color-dot color-dot-blue"></span>
+                </button>
+                <button class="color-btn" [class.active]="pendingGridColor === 'white'" (click)="pendingGridColor = 'white'" title="Blanco">
+                  <span class="color-dot color-dot-white"></span>
+                </button>
+                <button class="color-btn" [class.active]="pendingGridColor === 'black'" (click)="pendingGridColor = 'black'" title="Negro">
+                  <span class="color-dot color-dot-black"></span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -130,6 +156,20 @@
               class="hex-size-slider"
               (change)="applyHexSize()" />
             <span class="hex-size-value">{{ localHexSize }}px</span>
+          </div>
+          <div class="grid-color-row" *ngIf="session.isMap">
+            <label class="hex-size-label">Color grid:</label>
+            <div class="color-picker-row">
+              <button class="color-btn" [class.active]="localGridColor === 'blue'" (click)="applyGridColor('blue')" title="Azul">
+                <span class="color-dot color-dot-blue"></span>
+              </button>
+              <button class="color-btn" [class.active]="localGridColor === 'white'" (click)="applyGridColor('white')" title="Blanco">
+                <span class="color-dot color-dot-white"></span>
+              </button>
+              <button class="color-btn" [class.active]="localGridColor === 'black'" (click)="applyGridColor('black')" title="Negro">
+                <span class="color-dot color-dot-black"></span>
+              </button>
+            </div>
           </div>
         </div>
 

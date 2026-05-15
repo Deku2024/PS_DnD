@@ -745,6 +745,51 @@ h2 {
   font-family: monospace;
 }
 
+.grid-color-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.color-picker-row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.color-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  transition: border-color 0.15s;
+}
+
+.color-btn.active {
+  border-color: #ffe066;
+}
+
+.color-btn:hover {
+  border-color: rgba(255, 224, 102, 0.55);
+}
+
+.color-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: block;
+}
+
+.color-dot-blue  { background: rgba(100, 200, 255, 0.8); border: 1px solid rgba(100, 200, 255, 0.5); }
+.color-dot-white { background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(180, 180, 180, 0.5); }
+.color-dot-black { background: rgba(30, 30, 30, 0.95);   border: 1px solid rgba(100, 100, 100, 0.5); }
+
 .map-settings-controls {
   margin-bottom: 0.75rem;
   padding: 0.65rem 0.75rem;

@@ -33,6 +33,7 @@ const TOKEN_COLORS = [
 export class HexMapComponent implements OnChanges {
   @Input() imageUrl!: string;
   @Input() hexSize: number = 40;
+  @Input() gridColor: string = 'blue';
   @Input() players: { uid: string; username: string; avatarUrl?: string }[] = [];
   @Input() tokenPositions: { [uid: string]: { row: number; col: number } } = {};
   @Input() currentUserId: string | null = null;
@@ -47,7 +48,12 @@ export class HexMapComponent implements OnChanges {
   selectedTokenUid: string | null = null;
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.imgWidth > 0) {
+    if (changes['imageUrl']) {
+      // Reset dimensions so the grid rebuilds when the image loads
+      this.imgWidth = 0;
+      this.imgHeight = 0;
+      this.hexes = [];
+    } else if (this.imgWidth > 0) {
       if (changes['hexSize'] || changes['players']) {
         this.buildGrid();
       } else if (changes['tokenPositions']) {
@@ -133,6 +139,18 @@ export class HexMapComponent implements OnChanges {
       pts.push(`${cx + size * Math.cos(angle)},${cy + size * Math.sin(angle)}`);
     }
     return pts.join(' ');
+  }
+
+  get hexStrokeColor(): string {
+    if (this.gridColor === 'white') return 'rgba(255,255,255,0.6)';
+    if (this.gridColor === 'black') return 'rgba(0,0,0,0.55)';
+    return 'rgba(100,200,255,0.45)';
+  }
+
+  get hexFillColor(): string {
+    if (this.gridColor === 'white') return 'rgba(255,255,255,0.04)';
+    if (this.gridColor === 'black') return 'rgba(0,0,0,0.04)';
+    return 'rgba(100,180,255,0.04)';
   }
 
   getTokenColor(colorIndex: number): string {

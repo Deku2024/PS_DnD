@@ -37,7 +37,9 @@ export class SessionPage implements OnInit, OnDestroy {
   // Map settings
   pendingIsMap = false;
   pendingHexSize = 40;
+  pendingGridColor: string = 'blue';
   localHexSize = 40;
+  localGridColor: string = 'blue';
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -111,7 +113,12 @@ export class SessionPage implements OnInit, OnDestroy {
           this.router.navigate(['/home']);
           return;
         }
+        const isFirstLoad = !this.session;
         this.session = session;
+        if (isFirstLoad && session.isMap) {
+          this.localHexSize = session.hexSize ?? 40;
+          this.localGridColor = session.gridColor ?? 'blue';
+        }
         this.rollHistoryService.setSessionStatus(session.status);
         this.rollHistoryService.startListening(id);
         await this.loadCharacters(session);
@@ -235,6 +242,9 @@ export class SessionPage implements OnInit, OnDestroy {
     }
     this.pendingFile = file;
     this.imagePreviewUrl = URL.createObjectURL(file);
+    this.pendingIsMap = this.session?.isMap ?? false;
+    this.pendingHexSize = this.session?.hexSize ?? 40;
+    this.pendingGridColor = this.session?.gridColor ?? 'blue';
     input.value = '';
     this.cd.detectChanges();
   }
@@ -261,8 +271,11 @@ export class SessionPage implements OnInit, OnDestroy {
       await this.sessionService.updateMapSettings(
         this.session.id,
         this.pendingIsMap,
-        this.pendingHexSize
+        this.pendingHexSize,
+        this.pendingGridColor
       );
+      this.localHexSize = this.pendingHexSize;
+      this.localGridColor = this.pendingGridColor;
       if (this.imagePreviewUrl) URL.revokeObjectURL(this.imagePreviewUrl);
       this.imagePreviewUrl = null;
       this.pendingFile = null;
@@ -281,7 +294,8 @@ export class SessionPage implements OnInit, OnDestroy {
     await this.sessionService.updateMapSettings(
       this.session.id,
       newIsMap,
-      this.session.hexSize ?? 40
+      this.session.hexSize ?? 40,
+      this.session.gridColor ?? 'blue'
     );
   }
 
@@ -289,7 +303,13 @@ export class SessionPage implements OnInit, OnDestroy {
     if (!this.session?.id || !this.isMaster) return;
     const size = Math.min(120, Math.max(20, this.localHexSize));
     this.localHexSize = size;
-    await this.sessionService.updateMapSettings(this.session.id, true, size);
+    await this.sessionService.updateMapSettings(this.session.id, true, size, this.localGridColor);
+  }
+
+  async applyGridColor(color: string): Promise<void> {
+    if (!this.session?.id || !this.isMaster) return;
+    this.localGridColor = color;
+    await this.sessionService.updateMapSettings(this.session.id, true, this.localHexSize, color);
   }
 
   closeErrorModal(): void {
@@ -301,7 +321,7 @@ export class SessionPage implements OnInit, OnDestroy {
     if (!this.session?.id || !this.isMaster) return;
     this.cancelPreview();
     await this.sessionService.updateSharedImage(this.session.id, null);
-    await this.sessionService.updateMapSettings(this.session.id, false, 40);
+    await this.sessionService.updateMapSettings(this.session.id, false, 40, 'blue');
   }
 
   get nonMasterPlayers(): { uid: string; username: string; avatarUrl?: string }[] {

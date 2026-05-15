@@ -1,4 +1,6 @@
-<div class="hex-map-wrapper" [class.move-mode]="selectedTokenUid">
+<div class="hex-map-wrapper" [class.move-mode]="selectedTokenUid"
+  [style.--grid-stroke-color]="hexStrokeColor"
+  [style.--grid-fill-color]="hexFillColor">
   <img
     class="hex-map-image"
     [src]="imageUrl"
