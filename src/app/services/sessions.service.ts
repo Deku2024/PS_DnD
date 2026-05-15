@@ -39,6 +39,7 @@ export interface Session {
   playersUsernames: { [uid: string]: string };
   selectedCharacters?: { [uid: string]: string | null };
   combatOrder?: string[];
+  activeTurnIndex?: number;
   sharedImageUrl?: string | null;
   isMap?: boolean;
   hexSize?: number;
@@ -264,6 +265,11 @@ export class SessionService {
   async updateTokenPosition(sessionId: string, uid: string, row: number, col: number): Promise<void> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     await updateDoc(ref, { [`tokenPositions.${uid}`]: { row, col } });
+  }
+
+  async updateActiveTurn(sessionId: string, index: number): Promise<void> {
+    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
+    await updateDoc(ref, { activeTurnIndex: index });
   }
 
   async setSelectedCharacter(sessionId: string, userId: string, characterId: string | null): Promise<void> {
