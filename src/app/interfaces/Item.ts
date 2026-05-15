@@ -4,3 +4,9 @@ export interface Item {
     description: string;
     weight: number;
 }
+
+export interface MerchantItemInfo {
+  itemId: string;
+  price: number;
+  quantity: number;
+}

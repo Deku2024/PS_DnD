@@ -29,6 +29,72 @@
 
     <hr class="divider" />
 
+    <!-- Imagen compartida -->
+    <div class="card shared-image-card">
+      <h3>🖼 Imagen compartida</h3>
+
+      <!-- Muestra la imagen a todos cuando existe -->
+      <div class="shared-image-display" *ngIf="session.sharedImageUrl">
+        <img [src]="session.sharedImageUrl" alt="Imagen compartida por el DM" class="shared-image" />
+      </div>
+
+      <!-- Sin imagen -->
+      <p class="shared-image-empty" *ngIf="!session.sharedImageUrl && !isMaster">
+        El DM no ha compartido ninguna imagen aún.
+      </p>
+
+      <!-- Controles del DM -->
+      <div class="shared-image-controls" *ngIf="isMaster">
+        <input
+          #fileInput
+          type="file"
+          accept="image/*"
+          aria-label="Seleccionar imagen para compartir"
+          class="file-input-hidden"
+          (change)="onFileSelected($event)" />
+
+        <!-- Previsualización local antes de subir -->
+        <div class="image-preview-container" *ngIf="imagePreviewUrl">
+          <img [src]="imagePreviewUrl" alt="Previsualización" class="image-preview" />
+          <div class="image-preview-actions">
+            <button
+              class="btn-upload-image btn-confirm"
+              (click)="confirmUpload()"
+              [disabled]="isUploadingImage">
+              <span *ngIf="isUploadingImage">⏳ Subiendo...</span>
+              <span *ngIf="!isUploadingImage">✔ Confirmar</span>
+            </button>
+            <button
+              class="btn-remove-image"
+              (click)="cancelPreview()"
+              [disabled]="isUploadingImage">
+              ✕ Cancelar
+            </button>
+          </div>
+        </div>
+
+        <!-- Botones principales (solo cuando no hay preview) -->
+        <div class="shared-image-main-actions" *ngIf="!imagePreviewUrl">
+          <button
+            class="btn-upload-image"
+            (click)="triggerFileInput()"
+            [disabled]="isUploadingImage">
+            {{ session.sharedImageUrl ? '🔄 Cambiar imagen' : '📤 Subir imagen' }}
+          </button>
+
+          <button
+            class="btn-remove-image"
+            *ngIf="session.sharedImageUrl"
+            (click)="removeSharedImage()"
+            [disabled]="isUploadingImage">
+            🗑 Quitar imagen
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
     <!-- Master -->
     <div class="card">
       <h3>Dungeon Master</h3>
@@ -170,6 +236,22 @@
           <p class="no-char">Este jugador aún no tiene personaje creado.</p>
         </div>
       </ng-template>
+    </div>
+  </div>
+
+  <!-- Modal de error al subir imagen -->
+  <div class="modal-overlay" *ngIf="showErrorModal" (click)="closeErrorModal()">
+    <div class="modal-card error-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>⚠ Error al subir imagen</h3>
+        <button class="modal-close" (click)="closeErrorModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="error-modal-msg">{{ imageUploadError }}</p>
+        <div class="modal-actions">
+          <button class="btn-upload-image" (click)="closeErrorModal()">Cerrar</button>
+        </div>
+      </div>
     </div>
   </div>
 
