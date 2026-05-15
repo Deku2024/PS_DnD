@@ -24,7 +24,50 @@
           {{ session.status }}
         </span>
       </div>
-      <p class="session-id">Código de sesión: <code>{{ session.code }}</code></p>
+      <p class="session-id">ID de sesión: <code>{{ session.code }}</code></p>
+    </div>
+
+    <hr class="divider" />
+
+    <div class="card audio-card">
+      <h3>🎵 Música de ambiente</h3>
+
+      <ng-container *ngIf="isMaster">
+        <div class="audio-input-row" *ngIf="!session.audio">
+          <input [(ngModel)]="audioFileName" placeholder="Nombre (opcional)" />
+          <input [(ngModel)]="audioUrl" placeholder="URL de YouTube" />
+          <button class="btn-load-audio" (click)="onLoadAudio()">▶ Cargar</button>
+        </div>
+
+        <div class="audio-controls" *ngIf="session.audio">
+          <span class="audio-filename">🎵 {{ session.audio.fileName }}</span>
+          <div class="audio-buttons">
+            <button class="btn-play-pause" (click)="onTogglePlay()">
+              {{ session.audio.isPlaying ? '⏸ Pausar' : '▶ Reproducir' }}
+            </button>
+            <button class="btn-clear-audio" (click)="onClearAudio()">✖ Quitar</button>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="!isMaster">
+        <p class="audio-status" *ngIf="!session.audio">Sin música activa.</p>
+        <div class="audio-playing" *ngIf="session.audio">
+          <span class="audio-filename">🎵 {{ session.audio.fileName }}</span>
+          <span class="audio-badge" [class.playing]="session.audio.isPlaying">
+            {{ session.audio.isPlaying ? '▶ Reproduciendo' : '⏸ Pausado' }}
+          </span>
+        </div>
+      </ng-container>
+
+      <div style="position: absolute; top: -9999px; left: -9999px; width: 0; height: 0; overflow: hidden;" *ngIf="youtubeVideoId">
+        <youtube-player
+          #youtubePlayer
+          [videoId]="youtubeVideoId"
+          [playerVars]="{ autoplay: 1, controls: 0 }"
+          (ready)="onPlayerReady($event)">
+        </youtube-player>
+      </div>
     </div>
 
     <hr class="divider" />
@@ -99,7 +142,7 @@
     <div class="card">
       <h3>Dungeon Master</h3>
       <p class="player master-player">
-        👑 {{ session.playersUsernames[session.masterId] || session.masterId }}
+        👑 {{ session.playerEmails[session.masterId] || session.masterId }}
       </p>
     </div>
 
@@ -132,7 +175,6 @@
           }
         </li>
       </ul>
-
     </div>
 
     <!-- Acciones -->
