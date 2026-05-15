@@ -44,6 +44,31 @@ export class BattleService {
     await this.autoStartCombatOrder(session).then(() => this.autoOrder());
   }
 
+  /** Load players into combatants WITHOUT rolling initiative. Use when a saved order already exists. */
+  public async prepareExistingCombat(): Promise<void> {
+    this.combatOrder = new Map<string, number>();
+    this.combatants = [];
+    const session = await this.sessionService.getSession(this.sessionService.getCurrentSessionId()!);
+    if (!session) return;
+    const players = session.players.filter((uid: string) => uid !== session.masterId);
+    for (const uid of players) {
+      const charId = session.selectedCharacters?.[uid];
+      if (!charId) continue;
+      const email = session.playerEmails[uid] || uid;
+      const username = await this.usernameService.getUsernameFromEmail(email);
+      const character = await this.characterService.getCharacterById(charId as string);
+      this.combatants.push({
+        uid,
+        email,
+        username,
+        characterId: charId,
+        character,
+        inCombat: false,
+        initiative: 0
+      } as Combatant);
+    }
+  }
+
   private async autoStartCombatOrder(session: Session) {
     const players = session.players.filter(uid => uid !== session.masterId);
     for (const uid of players) {
@@ -96,7 +121,8 @@ export class BattleService {
         if (c.email === 'Enemigo (NPC)') {
           return 'NPC::' + JSON.stringify(c);
         }
-        return c.characterId;
+        // Serialize players with current character data so HP propagates to all screens
+        return 'PLAYER::' + JSON.stringify(c);
       });
 
     await this.sessionService.updateCombatOrder(sessionId, activeItems);
@@ -131,7 +157,17 @@ export class BattleService {
         const npcData = JSON.parse(item.substring(5)) as Combatant;
         active.push({ ...npcData, inCombat: true });
         incomingNpcIds.push(npcData.characterId);
+      } else if (item.startsWith('PLAYER::')) {
+        const savedPlayer = JSON.parse(item.substring(8)) as Combatant;
+        // Merge: keep local player metadata but apply saved character (which has current HP)
+        const local = this.combatants.find(c => c.characterId === savedPlayer.characterId && c.email !== 'Enemigo (NPC)');
+        const merged = local
+          ? { ...local, character: savedPlayer.character, initiative: savedPlayer.initiative, inCombat: true }
+          : { ...savedPlayer, inCombat: true };
+        active.push(merged);
+        incomingPlayerIds.push(savedPlayer.characterId);
       } else {
+        // Legacy: bare characterId (backwards compat)
         const player = this.combatants.find(c => c.characterId === item && c.email !== 'Enemigo (NPC)');
         if (player) {
           active.push({ ...player, inCombat: true });

@@ -1,11 +1,11 @@
 import {Injectable} from '@angular/core';
 import {
   addDoc,
-  arrayUnion,
   collection,
   doc,
   getDoc,
   getDocs,
+  arrayUnion,
   arrayRemove,
   onSnapshot,
   query,
@@ -21,6 +21,14 @@ import { PresenceService } from './presence.service';
 import { Subscription } from 'rxjs';
 import {UsernameService} from './username.service';
 
+export interface AudioState {
+  url: string;
+  fileName: string;
+  isPlaying: boolean;
+  currentTime: number;
+  updatedAt: number;
+}
+
 export interface Session {
   id?: string;
   code: string;
@@ -31,9 +39,15 @@ export interface Session {
   playersUsernames: { [uid: string]: string };
   selectedCharacters?: { [uid: string]: string | null };
   combatOrder?: string[];
+  activeTurnIndex?: number;
   sharedImageUrl?: string | null;
+  isMap?: boolean;
+  hexSize?: number;
+  gridColor?: string;
+  tokenPositions?: { [uid: string]: { row: number; col: number } };
   status: 'waiting' | 'active' | 'paused' | 'closed' | 'in-battle';
   password?: string;
+  audio?: AudioState | null;
   createdAt?: any;
 }
 
@@ -115,6 +129,7 @@ export class SessionService {
       selectedCharacters: {},
       status: 'waiting',
       password: passwordHash,
+      audio: null,
       createdAt: serverTimestamp()
     });
     this.setCurrentSessionId(docRef.id);
@@ -151,10 +166,7 @@ export class SessionService {
     const session = docSnap.data() as Session;
 
     if (session.status === 'closed') throw new Error('La sesión está cerrada.');
-    if (session.players.includes(userId)) {
-      this.setCurrentSessionId(docSnap.id);
-      return;
-    }
+    if (session.players.includes(userId)) return;
 
     const passwordMatch = await bcrypt.compare(password, session.password || '');
     if (!passwordMatch) throw new Error('Contraseña incorrecta.');
@@ -190,6 +202,33 @@ export class SessionService {
     await this.presenceService.stopPresence(sessionId, userId).catch(() => {});
   }
 
+  async setAudio(sessionId: string, url: string, fileName: string): Promise<void> {
+    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
+    await updateDoc(ref, {
+      audio: {
+        url,
+        fileName,
+        isPlaying: true,
+        currentTime: 0,
+        updatedAt: Date.now()
+      }
+    });
+  }
+
+  async updateAudioState(sessionId: string, isPlaying: boolean, currentTime: number): Promise<void> {
+    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
+    await updateDoc(ref, {
+      'audio.isPlaying': isPlaying,
+      'audio.currentTime': currentTime,
+      'audio.updatedAt': Date.now()
+    });
+  }
+  
+  async clearAudio(sessionId: string): Promise<void> {
+    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
+    await updateDoc(ref, { audio: null });
+  }
+
   listenSession(sessionId: string, callback: (session: Session | null) => void): Unsubscribe {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     return onSnapshot(ref, (snap) => {
@@ -197,6 +236,7 @@ export class SessionService {
         callback(null);
         return;
       }
+      this.setCurrentSessionId(snap.id);
       const { password, ...sessionWithoutPassword } = snap.data() as Session;
       callback({ id: snap.id, ...sessionWithoutPassword } as Session);
     });
@@ -215,6 +255,21 @@ export class SessionService {
   async updateSharedImage(sessionId: string, imageUrl: string | null): Promise<void> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     await updateDoc(ref, { sharedImageUrl: imageUrl });
+  }
+
+  async updateMapSettings(sessionId: string, isMap: boolean, hexSize: number, gridColor: string = 'blue'): Promise<void> {
+    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
+    await updateDoc(ref, { isMap, hexSize, gridColor });
+  }
+
+  async updateTokenPosition(sessionId: string, uid: string, row: number, col: number): Promise<void> {
+    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
+    await updateDoc(ref, { [`tokenPositions.${uid}`]: { row, col } });
+  }
+
+  async updateActiveTurn(sessionId: string, index: number): Promise<void> {
+    const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
+    await updateDoc(ref, { activeTurnIndex: index });
   }
 
   async setSelectedCharacter(sessionId: string, userId: string, characterId: string | null): Promise<void> {
