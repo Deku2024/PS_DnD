@@ -36,26 +36,24 @@ export class DmCombat implements OnInit, OnDestroy {
     const user = await new Promise<any>(resolve =>
       this.authService.onAuthState().subscribe(u => resolve(u))
     );
+
     const session = await this.sessionService.getSession(id);
     this.isMaster = session?.masterId === user?.uid;
 
-    await this.battleService.startPreparingCombat();
-    if (session?.combatOrder?.length) {
+    if (session?.combatOrder && session.combatOrder.length > 0) {
       this.battleService.applySavedOrder(session.combatOrder);
+    } else {
+      await this.battleService.startPreparingCombat();
     }
 
     this.unsubSession = this.sessionService.listenSession(id, (s) => {
-      if (!s) {
-        this.router.navigate(['/home']);
-        return;
-      }
+      if (!s) { this.router.navigate(['/home']); return; }
 
       if (s.status !== 'in-battle') {
         this.router.navigate(['/session', id]);
         return;
       }
-
-      if (s.combatOrder) {
+      if (s.combatOrder && s.combatOrder.length > 0) {
         this.battleService.applySavedOrder(s.combatOrder);
         this.cd.detectChanges();
       }
