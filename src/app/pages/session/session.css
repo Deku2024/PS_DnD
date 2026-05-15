@@ -790,6 +790,22 @@ h2 {
 .color-dot-white { background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(180, 180, 180, 0.5); }
 .color-dot-black { background: rgba(30, 30, 30, 0.95);   border: 1px solid rgba(100, 100, 100, 0.5); }
 
+/* Custom color button (label wrapping a hidden input[type=color]) */
+.color-btn-custom {
+  position: relative;
+  cursor: pointer;
+}
+
+.color-input-hidden {
+  position: absolute;
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
 .map-settings-controls {
   margin-bottom: 0.75rem;
   padding: 0.65rem 0.75rem;

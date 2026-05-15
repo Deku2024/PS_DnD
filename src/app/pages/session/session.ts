@@ -38,8 +38,15 @@ export class SessionPage implements OnInit, OnDestroy {
   pendingIsMap = false;
   pendingHexSize = 40;
   pendingGridColor: string = 'blue';
+  pendingCustomColor: string = '#64c8ff';
   localHexSize = 40;
   localGridColor: string = 'blue';
+  localCustomColor: string = '#64c8ff';
+
+  /** Returns false when gridColor is one of the 3 named presets */
+  isPreset(color: string): boolean {
+    return color === 'blue' || color === 'white' || color === 'black';
+  }
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -118,6 +125,7 @@ export class SessionPage implements OnInit, OnDestroy {
         if (isFirstLoad && session.isMap) {
           this.localHexSize = session.hexSize ?? 40;
           this.localGridColor = session.gridColor ?? 'blue';
+          if (!this.isPreset(this.localGridColor)) this.localCustomColor = this.localGridColor;
         }
         this.rollHistoryService.setSessionStatus(session.status);
         this.rollHistoryService.startListening(id);
@@ -245,6 +253,7 @@ export class SessionPage implements OnInit, OnDestroy {
     this.pendingIsMap = this.session?.isMap ?? false;
     this.pendingHexSize = this.session?.hexSize ?? 40;
     this.pendingGridColor = this.session?.gridColor ?? 'blue';
+    if (!this.isPreset(this.pendingGridColor)) this.pendingCustomColor = this.pendingGridColor;
     input.value = '';
     this.cd.detectChanges();
   }
@@ -276,6 +285,9 @@ export class SessionPage implements OnInit, OnDestroy {
       );
       this.localHexSize = this.pendingHexSize;
       this.localGridColor = this.pendingGridColor;
+      if (!this.isPreset(this.pendingGridColor)) {
+        this.localCustomColor = this.pendingGridColor;
+      }
       if (this.imagePreviewUrl) URL.revokeObjectURL(this.imagePreviewUrl);
       this.imagePreviewUrl = null;
       this.pendingFile = null;
@@ -309,6 +321,7 @@ export class SessionPage implements OnInit, OnDestroy {
   async applyGridColor(color: string): Promise<void> {
     if (!this.session?.id || !this.isMaster) return;
     this.localGridColor = color;
+    if (!this.isPreset(color)) this.localCustomColor = color;
     await this.sessionService.updateMapSettings(this.session.id, true, this.localHexSize, color);
   }
 

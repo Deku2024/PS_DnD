@@ -113,6 +113,19 @@
                 <button class="color-btn" [class.active]="pendingGridColor === 'black'" (click)="pendingGridColor = 'black'" title="Negro">
                   <span class="color-dot color-dot-black"></span>
                 </button>
+                <!-- Personalizado -->
+                <label class="color-btn color-btn-custom"
+                       [class.active]="!isPreset(pendingGridColor)"
+                       title="Color personalizado">
+                  <input type="color"
+                         class="color-input-hidden"
+                         aria-label="Color personalizado del grid"
+                         [value]="pendingCustomColor"
+                         (input)="pendingGridColor = $any($event.target).value; pendingCustomColor = $any($event.target).value" />
+                  <span class="color-dot"
+                        [style.background]="pendingCustomColor"
+                        [style.border-color]="'rgba(180,180,180,0.4)'"></span>
+                </label>
               </div>
             </div>
           </div>
@@ -169,6 +182,19 @@
               <button class="color-btn" [class.active]="localGridColor === 'black'" (click)="applyGridColor('black')" title="Negro">
                 <span class="color-dot color-dot-black"></span>
               </button>
+              <!-- Personalizado -->
+              <label class="color-btn color-btn-custom"
+                     [class.active]="!isPreset(localGridColor)"
+                     title="Color personalizado">
+                <input type="color"
+                       class="color-input-hidden"
+                       aria-label="Color personalizado del grid"
+                       [value]="localCustomColor"
+                       (change)="applyGridColor($any($event.target).value); localCustomColor = $any($event.target).value" />
+                <span class="color-dot"
+                      [style.background]="localCustomColor"
+                      [style.border-color]="'rgba(180,180,180,0.4)'"></span>
+              </label>
             </div>
           </div>
         </div>

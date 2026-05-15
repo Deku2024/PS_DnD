@@ -144,13 +144,17 @@ export class HexMapComponent implements OnChanges {
   get hexStrokeColor(): string {
     if (this.gridColor === 'white') return 'rgba(255,255,255,0.6)';
     if (this.gridColor === 'black') return 'rgba(0,0,0,0.55)';
-    return 'rgba(100,200,255,0.45)';
+    if (this.gridColor === 'blue')  return 'rgba(100,200,255,0.45)';
+    // Custom hex color (#rrggbb): append 99 ≈ 60% opacity
+    return this.gridColor + '99';
   }
 
   get hexFillColor(): string {
     if (this.gridColor === 'white') return 'rgba(255,255,255,0.04)';
     if (this.gridColor === 'black') return 'rgba(0,0,0,0.04)';
-    return 'rgba(100,180,255,0.04)';
+    if (this.gridColor === 'blue')  return 'rgba(100,180,255,0.04)';
+    // Custom hex color: append 0D ≈ 5% opacity
+    return this.gridColor + '0D';
   }
 
   getTokenColor(colorIndex: number): string {
