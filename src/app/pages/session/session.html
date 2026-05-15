@@ -255,4 +255,25 @@
     </div>
   </div>
 
+  <!-- Modal de manejo de mercaderes -->
+  <div class="modal-overlay" *ngIf="showMerchantModal" (click)="closeMerchantModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Mercaderes</h3>
+        <button class="modal-close" (click)="closeMerchantModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+
+        <hr class="modal-divider" />
+
+        <div class="modal-actions" *ngIf="currentUser && modalUid === currentUser.uid">
+          <button class="btn-edit-char" (click)="editMyCharacter()">✏ Editar mi personaje</button>
+          <button class="btn-change-char" (click)="changeMyCharacter()">🔁 Cambiar personaje</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 </div>

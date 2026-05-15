@@ -41,6 +41,8 @@ export class SessionPage implements OnInit, OnDestroy {
   modalUid = '';
   presenceMap: { [uid: string]: boolean } = {};
 
+  showMerchantModal = false;
+
   private unsubscribe?: () => void;
   private authSub?: Subscription;
   private initializing = false;
@@ -272,6 +274,13 @@ export class SessionPage implements OnInit, OnDestroy {
     if (!this.session?.id || !this.isMaster) return;
     this.cancelPreview();
     await this.sessionService.updateSharedImage(this.session.id, null);
+  }
+
+
+  //Mercaderes
+
+  closeMerchantModal(): void {
+    this.showMerchantModal = false;
   }
 
   ngOnDestroy(): void {
