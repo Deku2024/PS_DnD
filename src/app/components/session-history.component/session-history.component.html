@@ -33,8 +33,19 @@
             <span class="player-name" [class.master-name]="uid === s.masterId">
               {{ getPlayerName(uid, s) }}
             </span>
+
             <span class="badge-master" *ngIf="uid === s.masterId">👑 Master</span>
+
             <div class="player-stats">
+              <button
+                *ngIf="s.playerSnapshots && s.playerSnapshots[uid]"
+                class="btn-snapshot-stats"
+                (click)="$event.stopPropagation(); togglePlayerStats(s.id!, uid)">
+                📜
+              </button>
+            </div>
+
+            <div class="player-badges-container">
               <span class="badge-count">{{ getRollCountForPlayer(uid, s) }}</span>
               <span class="badge-crit" *ngIf="getCriticsForPlayer(uid, s) > 0">{{ getCriticsForPlayer(uid, s) }} crit</span>
               <span class="badge-pifia" *ngIf="getPifiasForPlayer(uid, s) > 0">{{ getPifiasForPlayer(uid, s) }} pifia</span>
@@ -42,15 +53,67 @@
             <span class="player-chevron" [class.open]="expandedPlayerId[s.id!] === uid">▾</span>
           </div>
 
+          <div class="player-snapshot-panel" *ngIf="expandedPlayerStats[s.id! + uid] && s.playerSnapshots && s.playerSnapshots[uid]">
+            <div class="snapshot-content" *ngIf="getSnap(s, uid) as snap">
+
+              <div class="snapshot-header-stats">
+                <div class="stat-pill">
+                  <span class="pill-label">Vida</span>
+                  <span class="pill-value">{{ snap.life }} / {{ snap.maxLife }}</span>
+                </div>
+                <div class="stat-pill">
+                  <span class="pill-label">CA</span>
+                  <span class="pill-value">{{ snap.armourClass }}</span>
+                </div>
+                <div class="stat-pill">
+                  <span class="pill-label">Raza</span>
+                  <span class="pill-value">{{ snap.race }}</span>
+                </div>
+
+                <div class="stat-pill money-group" *ngIf="snap.money">
+                  <span class="pill-label">Monedas</span>
+                  <div class="coins-row">
+                    <div class="coin-item ppt" title="Platino"><span>{{ snap.money.ppt || 0 }}</span><small>ppt</small></div>
+                    <div class="coin-item po" title="Oro"><span>{{ snap.money.po || 0 }}</span><small>po</small></div>
+                    <div class="coin-item pe" title="Electrum"><span>{{ snap.money.pe || 0 }}</span><small>pe</small></div>
+                    <div class="coin-item pp" title="Plata"><span>{{ snap.money.pp || 0 }}</span><small>pp</small></div>
+                    <div class="coin-item pc" title="Cobre"><span>{{ snap.money.pc || 0 }}</span><small>pc</small></div>
+                  </div>
+                </div>
+
+                <div class="stat-pill">
+                  <span class="pill-label">Total (PO)</span>
+                  <span class="pill-value">
+          {{ (snap.money.ppt * 10) + snap.money.po + (snap.money.pe / 2) + (snap.money.pp / 10) + (snap.money.pc / 100) | number:'1.0-2' }}
+        </span>
+                </div>
+              </div>
+
+              <div class="snapshot-attributes-grid">
+                <div class="attr-card" *ngFor="let attr of [
+                  {n:'FUE', v: snap.attributes.strength},
+                  {n:'DES', v: snap.attributes.dexterity},
+                  {n:'CON', v: snap.attributes.constitution},
+                  {n:'INT', v: snap.attributes.intelligence},
+                  {n:'SAB', v: snap.attributes.wisdom},
+                  {n:'CAR', v: snap.attributes.charisma}
+                ]">
+                  <span class="attr-name">{{ attr.n }}</span>
+                  <span class="attr-val">{{ attr.v }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="player-rolls" *ngIf="expandedPlayerId[s.id!] === uid">
             <div class="roll-item" *ngFor="let entry of getRollsForPlayer(uid, s)">
               <div class="roll-result-box" [ngClass]="getResultClass(entry)">
                 {{ entry.data.result }}
               </div>
-              <span class="roll-label">{{ getThrowLabel(entry) }}</span>
-              <span class="roll-status-badge" [ngClass]="getStatusClass(entry)" *ngIf="getStatusLabel(entry)">
-                {{ getStatusLabel(entry) }}
-              </span>
+              <div class="roll-info">
+                <span class="roll-label">{{ getThrowLabel(entry) }}</span>
+                <span class="player-name-tag">{{ getPlayerName(entry.userId, s) }}</span>
+              </div>
+              <span class="roll-status-badge" [ngClass]="getStatusClass(entry)" *ngIf="getStatusLabel(entry)">{{ getStatusLabel(entry) }}</span>
             </div>
             <div class="no-rolls" *ngIf="getRollsForPlayer(uid, s).length === 0">
               <span>Sin tiradas en esta sesión</span>

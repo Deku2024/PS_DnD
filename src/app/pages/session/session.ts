@@ -61,6 +61,7 @@ export class SessionPage implements OnInit, OnDestroy {
   characters: { [uid: string]: CharacterWithId | null } = {};
   showModal = false;
   modalCharacter: CharacterWithId | null = null;
+  modalPlayerName = '';
   modalPlayerEmail = '';
   modalUid = '';
   presenceMap: { [uid: string]: boolean } = {};
@@ -277,8 +278,7 @@ export class SessionPage implements OnInit, OnDestroy {
     if (!this.session) return;
     this.modalUid = uid;
     this.modalCharacter = this.characters[uid] ?? null;
-    this.modalPlayerEmail = this.session.playerEmails[uid] || uid;
-    this.showModal = true;
+    this.modalPlayerName = this.session.playersUsernames[uid] || this.session.playerEmails[uid] || 'Jugador';    this.showModal = true;
   }
 
   closeModal(): void {

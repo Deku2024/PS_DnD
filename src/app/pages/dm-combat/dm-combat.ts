@@ -51,6 +51,7 @@ export class DmCombat implements OnInit, OnDestroy {
     const user = await new Promise<any>(resolve =>
       this.authService.onAuthState().subscribe(u => resolve(u))
     );
+
     const session = await this.sessionService.getSession(id);
     this.isMaster = session?.masterId === user?.uid;
 
@@ -65,16 +66,12 @@ export class DmCombat implements OnInit, OnDestroy {
     this.activeTurnIndex = session?.activeTurnIndex ?? 0;
 
     this.unsubSession = this.sessionService.listenSession(id, (s) => {
-      if (!s) {
-        this.router.navigate(['/home']);
-        return;
-      }
+      if (!s) { this.router.navigate(['/home']); return; }
 
       if (s.status !== 'in-battle') {
         this.router.navigate(['/session', id]);
         return;
       }
-
       if (s.combatOrder?.length) {
         this.battleService.applySavedOrder(s.combatOrder);
       }
