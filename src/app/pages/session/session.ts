@@ -1,7 +1,8 @@
 import { Component, OnDestroy, OnInit, ChangeDetectorRef, ViewChild, ElementRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SessionService, Session } from '../../services/sessions.service';
+import { SessionService, Session, AudioState } from '../../services/sessions.service';
 import { AuthService } from '../../services/auth.service';
 import { CharacterService, CharacterWithId } from '../../services/character.service';
 import { PresenceService } from '../../services/presence.service';
@@ -12,12 +13,12 @@ import { HexMapComponent } from '../../components/hex-map.component/hex-map.comp
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
 import { BattleButtonComponent } from '../../components/battle.button.component/battle.button.component';
-import { FormsModule } from '@angular/forms';
+import { YouTubePlayer } from '@angular/youtube-player';
 
 @Component({
   selector: 'app-session',
   standalone: true,
-  imports: [CommonModule, FormsModule, BattleButtonComponent, HistoryButtonComponent, HexMapComponent],
+  imports: [CommonModule, FormsModule, YouTubePlayer, BattleButtonComponent, HistoryButtonComponent, HexMapComponent],
   templateUrl: './session.html',
   styleUrl: './session.css'
 })
@@ -50,6 +51,13 @@ export class SessionPage implements OnInit, OnDestroy {
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
+  @ViewChild('youtubePlayer') youtubePlayer?: YouTubePlayer;
+  audioUrl = '';
+  audioFileName = '';
+  youtubeVideoId: string | undefined;
+  private lastAudioState: AudioState | null = null;
+  private syncThreshold = 2;
+
   characters: { [uid: string]: CharacterWithId | null } = {};
   showModal = false;
   modalCharacter: CharacterWithId | null = null;
@@ -74,6 +82,12 @@ export class SessionPage implements OnInit, OnDestroy {
 ) {}
 
   ngOnInit(): void {
+    if (!(window as any).YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.body.appendChild(tag);
+    }
+
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.router.navigate(['/home']);
@@ -130,6 +144,7 @@ export class SessionPage implements OnInit, OnDestroy {
         this.rollHistoryService.setSessionStatus(session.status);
         this.rollHistoryService.startListening(id);
         await this.loadCharacters(session);
+        this.syncAudio(session.audio ?? null);
       }
       this.cd.detectChanges();
     });
@@ -138,6 +153,85 @@ export class SessionPage implements OnInit, OnDestroy {
       this.presenceMap = map;
       this.cd.detectChanges();
     });
+  }
+
+  private extractYouTubeId(url: string): string | undefined {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : undefined;
+  }
+
+  onPlayerReady(event: any): void {
+    event.target.unMute();
+    event.target.setVolume(100);
+
+    if (this.lastAudioState) {
+      setTimeout(() => this.syncExistingPlayer(this.lastAudioState!), 100);
+    }
+  }
+
+  private syncAudio(audio: AudioState | null): void {
+    if (!audio) {
+      this.youtubeVideoId = undefined;
+      if (this.youtubePlayer && this.youtubePlayer.pauseVideo) {
+        this.youtubePlayer.pauseVideo();
+      }
+      this.lastAudioState = null;
+      return;
+    }
+
+    const newVideoId = this.extractYouTubeId(audio.url);
+    const isNewVideo = !this.lastAudioState || this.lastAudioState.url !== audio.url;
+
+    this.lastAudioState = audio;
+
+    if (isNewVideo) {
+      this.youtubeVideoId = newVideoId;
+    } else {
+      this.syncExistingPlayer(audio);
+    }
+  }
+
+  private syncExistingPlayer(audio: AudioState): void {
+    if (this.youtubePlayer && this.youtubePlayer.getPlayerState) {
+      const elapsed = (Date.now() - audio.updatedAt) / 1000;
+      const expectedTime = audio.currentTime + (audio.isPlaying ? elapsed : 0);
+      const currentTime = this.youtubePlayer.getCurrentTime() || 0;
+
+      if (Math.abs(currentTime - expectedTime) > this.syncThreshold) {
+        this.youtubePlayer.seekTo(expectedTime, true);
+      }
+
+      const state = this.youtubePlayer.getPlayerState();
+      if (audio.isPlaying && state !== 1) {
+        this.youtubePlayer.playVideo();
+      } else if (!audio.isPlaying && state === 1) {
+        this.youtubePlayer.pauseVideo();
+      }
+    }
+  }
+
+  async onLoadAudio(): Promise<void> {
+    if (!this.session?.id || !this.audioUrl.trim()) return;
+    const fileName = this.audioFileName.trim() || 'YouTube Audio';
+    await this.sessionService.setAudio(this.session.id, this.audioUrl.trim(), fileName);
+    this.audioUrl = '';
+    this.audioFileName = '';
+  }
+
+  async onTogglePlay(): Promise<void> {
+    if (!this.session?.id || !this.session.audio) return;
+    const currentTime = this.youtubePlayer?.getCurrentTime() || this.session.audio.currentTime;
+    await this.sessionService.updateAudioState(
+      this.session.id,
+      !this.session.audio.isPlaying,
+      currentTime
+    );
+  }
+
+  async onClearAudio(): Promise<void> {
+    if (!this.session?.id) return;
+    await this.sessionService.clearAudio(this.session.id);
   }
 
   private async loadCharacters(session: Session): Promise<void> {
