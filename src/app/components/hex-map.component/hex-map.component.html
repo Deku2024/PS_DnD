@@ -12,6 +12,12 @@
     preserveAspectRatio="none"
     xmlns="http://www.w3.org/2000/svg"
   >
+    <defs>
+      <clipPath *ngFor="let token of playerTokens; let i = index" [attr.id]="'token-clip-' + i">
+        <circle [attr.cx]="token.cx" [attr.cy]="token.cy" [attr.r]="hexSize * 0.60" />
+      </clipPath>
+    </defs>
+
     <polygon
       *ngFor="let hex of hexes"
       [attr.points]="hex.points"
@@ -21,7 +27,7 @@
     />
 
     <g
-      *ngFor="let token of playerTokens"
+      *ngFor="let token of playerTokens; let i = index"
       class="token-group"
       [class.token-selected]="selectedTokenUid === token.uid"
       [class.token-selectable]="canSelectToken(token.uid)"
@@ -31,39 +37,62 @@
       <circle
         [attr.cx]="token.cx + hexSize * 0.04"
         [attr.cy]="token.cy + hexSize * 0.05"
-        [attr.r]="hexSize * 0.44"
+        [attr.r]="hexSize * 0.63"
         fill="rgba(0,0,0,0.4)"
       />
-      <!-- Body -->
+      <!-- Body (color de fondo, visible si no hay imagen) -->
       <circle
         [attr.cx]="token.cx"
         [attr.cy]="token.cy"
-        [attr.r]="hexSize * 0.42"
+        [attr.r]="hexSize * 0.60"
         [attr.fill]="getTokenColor(token.colorIndex)"
         stroke="white"
         [attr.stroke-width]="hexSize * 0.07"
       />
+      <!-- Avatar del personaje -->
+      <image
+        *ngIf="token.avatarUrl"
+        [attr.x]="token.cx - hexSize * 0.60"
+        [attr.y]="token.cy - hexSize * 0.60"
+        [attr.width]="hexSize * 1.20"
+        [attr.height]="hexSize * 1.20"
+        [attr.href]="token.avatarUrl"
+        [attr.clip-path]="'url(#token-clip-' + i + ')'"
+        preserveAspectRatio="xMidYMid slice"
+      />
+      <!-- Borde blanco encima de la imagen -->
+      <circle
+        *ngIf="token.avatarUrl"
+        [attr.cx]="token.cx"
+        [attr.cy]="token.cy"
+        [attr.r]="hexSize * 0.60"
+        fill="none"
+        stroke="white"
+        [attr.stroke-width]="hexSize * 0.07"
+      />
+      <!-- Inicial (fallback si no hay imagen) -->
+      <text
+        *ngIf="!token.avatarUrl"
+        [attr.x]="token.cx"
+        [attr.y]="token.cy"
+        text-anchor="middle"
+        dominant-baseline="central"
+        [attr.font-size]="hexSize * 0.60"
+        fill="white"
+        font-weight="bold"
+        class="token-label"
+      >{{ token.initials }}</text>
       <!-- Selection ring -->
       <circle
         *ngIf="selectedTokenUid === token.uid"
         [attr.cx]="token.cx"
         [attr.cy]="token.cy"
-        [attr.r]="hexSize * 0.48"
+        [attr.r]="hexSize * 0.67"
         fill="none"
         stroke="#ffe066"
         [attr.stroke-width]="hexSize * 0.09"
         stroke-dasharray="4 2"
       />
-      <text
-        [attr.x]="token.cx"
-        [attr.y]="token.cy"
-        text-anchor="middle"
-        dominant-baseline="central"
-        [attr.font-size]="hexSize * 0.42"
-        fill="white"
-        font-weight="bold"
-        class="token-label"
-      >{{ token.initials }}</text>
     </g>
   </svg>
 

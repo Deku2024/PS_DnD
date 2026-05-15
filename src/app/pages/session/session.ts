@@ -304,13 +304,14 @@ export class SessionPage implements OnInit, OnDestroy {
     await this.sessionService.updateMapSettings(this.session.id, false, 40);
   }
 
-  get nonMasterPlayers(): { uid: string; username: string }[] {
+  get nonMasterPlayers(): { uid: string; username: string; avatarUrl?: string }[] {
     if (!this.session) return [];
     return this.session.players
       .filter(uid => uid !== this.session!.masterId)
       .map(uid => ({
         uid,
         username: this.session!.playersUsernames[uid] || uid,
+        avatarUrl: this.characters[uid]?.image || undefined,
       }));
   }
 

@@ -15,6 +15,7 @@ interface PlayerToken {
   cy: number;
   initials: string;
   colorIndex: number;
+  avatarUrl?: string;
 }
 
 const TOKEN_COLORS = [
@@ -32,7 +33,7 @@ const TOKEN_COLORS = [
 export class HexMapComponent implements OnChanges {
   @Input() imageUrl!: string;
   @Input() hexSize: number = 40;
-  @Input() players: { uid: string; username: string }[] = [];
+  @Input() players: { uid: string; username: string; avatarUrl?: string }[] = [];
   @Input() tokenPositions: { [uid: string]: { row: number; col: number } } = {};
   @Input() currentUserId: string | null = null;
   @Input() isMaster: boolean = false;
@@ -111,6 +112,7 @@ export class HexMapComponent implements OnChanges {
         cy,
         initials: (p.username || '?').charAt(0).toUpperCase(),
         colorIndex: i,
+        avatarUrl: p.avatarUrl || undefined,
       };
     });
   }
