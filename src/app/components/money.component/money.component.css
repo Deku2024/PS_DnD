@@ -29,3 +29,33 @@
   font-weight: bold;
   text-align: center;
 }
+.conversions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.btn-convert {
+  background: #5c3d2e;
+  color: #f5e6c8;
+  border: 1px solid #d4a056;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  font-family: 'Georgia', serif;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  letter-spacing: 0.05em;
+}
+
+.btn-convert:hover:not(:disabled) {
+  background: #8b6914;
+  transform: scale(1.03);
+}
+
+.btn-convert.disabled,
+.btn-convert:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
