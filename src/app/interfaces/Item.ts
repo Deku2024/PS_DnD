@@ -5,8 +5,8 @@ export interface Item {
   weight: number;
 }
 
-export interface ItemInfo {
-  item: Item;
+export interface MerchantItemInfo {
+  itemId: string;
   price: number;
   quantity: number;
 }
