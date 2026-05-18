@@ -1,6 +1,8 @@
-<div class="form-section">
-  <div [formGroup]="moneyGroup()" class="money-grid">
-    @for (coin of getMoneyList(); track coin.name) {
+<div class="form-section" [formGroup]="moneyGroup()">
+
+  <!-- Monedas -->
+  <div class="money-grid">
+    @for (coin of coinList; track coin.name) {
       <div class="coin-field">
         <label [for]="'coin-' + coin.name">{{ coin.label }}</label>
         <input
@@ -13,4 +15,20 @@
       </div>
     }
   </div>
+
+  <!-- Conversiones -->
+  <div class="conversions-grid">
+    @for (conv of conversions; track conv.label) {
+      <button
+        type="button"
+        class="btn-convert"
+        [class.disabled]="!canConvert(conv.from, conv.cost)"
+        [disabled]="!canConvert(conv.from, conv.cost)"
+        (click)="convert(conv.from, conv.to, conv.cost, conv.gain)"
+        [title]="conv.cost + ' ' + conv.from + ' → ' + conv.gain + ' ' + conv.to">
+        {{ conv.label }}
+      </button>
+    }
+  </div>
+
 </div>
