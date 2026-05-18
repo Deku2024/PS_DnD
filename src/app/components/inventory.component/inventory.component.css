@@ -1,133 +1,125 @@
+/* CONTENEDOR PRINCIPAL */
 .inventory-item {
   display: flex;
   gap: 10px;
   margin-bottom: 10px;
   align-items: center;
-  padding: 8px;
-  background: rgba(255, 254, 240, 0.5);
+  width: 100%;
+}
+
+.read-only-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid #c4a47a;
   border-radius: 8px;
-  border-bottom: 1px dashed #c4a47a;
+  padding: 12px;
 }
 
-.qty-input {
-  width: 65px;
-  text-align: center;
-  background: #fff8f0;
-  border: 2px solid #c4a47a;
+.qty-badge {
+  background: #5c3d2e;
+  color: #f5e6c8;
+  padding: 6px 12px;
   border-radius: 6px;
-  padding: 8px;
+  font-weight: bold;
+  font-family: 'Georgia', serif;
+  border: 1px solid #d4a056;
+  white-space: nowrap;
+}
+
+.item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.item-name {
+  font-weight: bold;
+  color: #5c3d2e;
+  font-size: 1.1rem;
+}
+
+.plain-text-weight {
+  font-style: italic;
+  color: #8b6914;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.item-desc {
+  color: #3a2518;
+  font-size: 0.95rem;
   font-family: 'Georgia', serif;
 }
 
-.name-input {
-  flex: 2;
-  background: #fff8f0;
-  border: 2px solid #c4a47a;
-  border-radius: 6px;
-  padding: 8px;
-  font-family: 'Georgia', serif;
-}
-
-.desc-input {
-  flex: 3;
-  background: #fff8f0;
-  border: 2px solid #c4a47a;
-  border-radius: 6px;
-  padding: 8px;
-  font-family: 'Georgia', serif;
-}
-
-.btn-delete, .btn-save {
+.btn-delete {
   background: #3a2518;
   color: #d4a056;
   border: 1px solid #8b6914;
-  border-radius: 4px;
-  padding: 8px 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 0.85rem;
-  font-family: 'MedievalSharp', monospace;
-  transition: all 0.2s ease;
+  font-family: 'Georgia', serif;
+  font-weight: bold;
+  transition: background 0.2s;
   white-space: nowrap;
 }
 
 .btn-delete:hover {
   background: #721c24;
-  color: #ffffff;
-  transform: scale(1.02);
+  color: #fff;
+}
+
+.qty-input {
+  width: 70px;
+  text-align: center;
+  padding: 8px;
+  border: 1px solid rgba(198, 167, 71, 0.3);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  color: #f2f2f2;
+}
+
+.name-input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid rgba(198, 167, 71, 0.3);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  color: #f2f2f2;
+  font-weight: bold;
+}
+
+.desc-input {
+  flex: 2;
+  padding: 8px;
+  border: 1px solid rgba(198, 167, 71, 0.3);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  color: #f2f2f2;
+}
+
+.btn-save {
+  background: rgba(198, 167, 71, 0.2);
+  color: #c6a747;
+  border: 1px solid #c6a747;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  white-space: nowrap;
+  transition: background 0.2s;
 }
 
 .btn-save:hover {
-  background: #274713;
-  color: #ffffff;
-  transform: scale(1.02);
-}
-
-input:focus {
-  outline: none;
-  border-color: #8b6914;
-  box-shadow: 0 0 0 3px rgba(139, 105, 20, 0.2);
-  background: #ffffff;
-}
-
-/* 📱 Tablets (768px y menos) */
-@media (max-width: 768px) {
-  .inventory-item {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .qty-input {
-    width: calc(25% - 6px);
-    min-width: 60px;
-  }
-
-  .name-input {
-    flex: 1;
-    min-width: calc(40% - 6px);
-  }
-
-  .desc-input {
-    flex: 1;
-    min-width: calc(100% - 80px);
-    order: 3;
-  }
-
-  .btn-delete {
-    order: 2;
-    padding: 8px 10px;
-    font-size: 0.8rem;
-  }
-}
-
-/* 📱 Móviles (480px y menos) */
-@media (max-width: 480px) {
-  .inventory-item {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-
-  .qty-input {
-    width: 100%;
-    min-width: auto;
-  }
-
-  .name-input {
-    width: 100%;
-    min-width: auto;
-  }
-
-  .desc-input {
-    width: 100%;
-    min-width: auto;
-    order: 2;
-  }
-
-  .btn-delete {
-    width: 100%;
-    order: 3;
-    margin-top: 4px;
-    padding: 10px;
-    font-size: 0.9rem;
-  }
+  background: rgba(198, 167, 71, 0.4);
 }

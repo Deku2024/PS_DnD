@@ -7,11 +7,13 @@ import { AuthService } from '../../services/auth.service';
 import { CharacterService, CharacterWithId } from '../../services/character.service';
 import { PresenceService } from '../../services/presence.service';
 import { RollHistoryService } from '../../services/roll-history.service';
-import { HistoryButtonComponent} from '../../components/history.button.component/history.button.component';
+import { HistoryButtonComponent } from '../../components/history.button.component/history.button.component';
 import { CloudinaryService } from '../../services/cloudinary.service';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
 import { BattleButtonComponent } from '../../components/battle.button.component/battle.button.component';
+import { ItemsService } from '../../services/items.service';
+import { Item } from '../../interfaces/Item';
 
 @Component({
   selector: 'app-session',
@@ -46,14 +48,16 @@ export class SessionPage implements OnInit, OnDestroy {
   lifeAction: number = 0;
   goldAction: number = 0;
   xpAction: number = 0;
-  newItemName = '';
-  newItemWeight = 0;
-  newItemDesc = '';
+
+  dmItems: Item[] = [];
+  selectedItemId: string = '';
+  itemQuantityToGive: number = 1;
 
   private unsubscribe?: () => void;
   private authSub?: Subscription;
   private initializing = false;
   private presenceUnsub?: () => void;
+  private itemsUnsub?: () => void;
 
   constructor(
     private route: ActivatedRoute,
@@ -63,8 +67,10 @@ export class SessionPage implements OnInit, OnDestroy {
     private characterService: CharacterService,
     private cd: ChangeDetectorRef,
     private presenceService: PresenceService,
-    private rollHistoryService: RollHistoryService
-  ) {}
+    private rollHistoryService: RollHistoryService,
+    private itemsService: ItemsService
+  ) {
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -94,9 +100,14 @@ export class SessionPage implements OnInit, OnDestroy {
     if (!isDm) {
       const selected = snap?.selectedCharacters?.[user.uid];
       if (!selected) {
-        this.router.navigate(['/choose-character'], { queryParams: { sessionId: id } });
+        this.router.navigate(['/choose-character'], {queryParams: {sessionId: id}});
         return;
       }
+    } else {
+      this.itemsUnsub = this.itemsService.readItems(user.uid, (items) => {
+        this.dmItems = items;
+        this.cd.detectChanges();
+      });
     }
 
     this.unsubscribe = this.sessionService.listenSession(id, async (session) => {
@@ -182,12 +193,29 @@ export class SessionPage implements OnInit, OnDestroy {
     this.selectedPlayerUids.clear();
   }
 
-  applyAddItem(): void {
-    if (this.selectedPlayerUids.size === 0 || !this.newItemName) return;
-    console.log('Objeto simulado:', { name: this.newItemName, weight: this.newItemWeight, desc: this.newItemDesc });
-    this.newItemName = '';
-    this.newItemWeight = 0;
-    this.newItemDesc = '';
+  async applyAddItem(): Promise<void> {
+    if (this.selectedPlayerUids.size === 0 || !this.selectedItemId || this.itemQuantityToGive <= 0) return;
+
+    const selectedItem = this.dmItems.find(i => i.id === this.selectedItemId);
+    if (!selectedItem) return;
+
+    const itemToGive = {
+      name: selectedItem.name,
+      description: selectedItem.description,
+      weight: selectedItem.weight,
+      quantity: this.itemQuantityToGive
+    };
+
+    for (const uid of this.selectedPlayerUids) {
+      const char = this.characters[uid];
+      if (char) {
+        await this.characterService.addItemToInventory(char.id, itemToGive);
+      }
+    }
+
+    this.selectedItemId = '';
+    this.itemQuantityToGive = 1;
+    this.selectedPlayerUids.clear();
   }
 
   openModal(uid: string): void {
@@ -209,13 +237,13 @@ export class SessionPage implements OnInit, OnDestroy {
     this.closeModal();
     const myUid = this.currentUser.uid;
     const selected = this.session?.selectedCharacters?.[myUid];
-    this.router.navigate(['/player-sheet'], { queryParams: { sessionId: this.session.id, characterId: selected } });
+    this.router.navigate(['/player-sheet'], {queryParams: {sessionId: this.session.id, characterId: selected}});
   }
 
   changeMyCharacter(): void {
     if (!this.session?.id || !this.currentUser) return;
     this.closeModal();
-    this.router.navigate(['/choose-character'], { queryParams: { sessionId: this.session.id } });
+    this.router.navigate(['/choose-character'], {queryParams: {sessionId: this.session.id}});
   }
 
   async kickPlayer(uid: string): Promise<void> {
@@ -236,7 +264,7 @@ export class SessionPage implements OnInit, OnDestroy {
   goToNotes(): void {
     if (!this.session?.id) return;
     this.sessionService.setCurrentSessionId(this.session.id);
-    this.router.navigate(['/dm-notes'], { queryParams: { sessionId: this.session.id } });
+    this.router.navigate(['/dm-notes'], {queryParams: {sessionId: this.session.id}});
   }
 
   goToCombat(): void {
@@ -317,5 +345,8 @@ export class SessionPage implements OnInit, OnDestroy {
     this.unsubscribe?.();
     this.authSub?.unsubscribe();
     this.presenceUnsub?.();
+    this.itemsUnsub?.();
   }
 }
+
+

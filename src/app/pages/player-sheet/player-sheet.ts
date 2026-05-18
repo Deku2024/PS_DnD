@@ -1,4 +1,4 @@
-import {CommonModule, Location, LocationChangeListener} from '@angular/common';
+import {CommonModule, Location} from '@angular/common';
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {
   AbstractControl,
@@ -7,7 +7,8 @@ import {
   FormGroup,
   ReactiveFormsModule,
   ValidatorFn,
-  Validators
+  Validators,
+  FormsModule // 🟢 IMPORTANTE: Para usar ngModel en el input de cantidad del modal
 } from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Dropdown} from "../../components/dropdown/dropdown";
@@ -23,9 +24,13 @@ import {InventoryItemComponent} from '../../components/inventory.component/inven
 import { MoneyComponent } from '../../components/money.component/money.component';
 import {AbilityComponent} from '../../components/ability.component/ability.component';
 
+import { Item } from '../../interfaces/Item';
+
 @Component({
   selector: 'app-player-sheet',
-  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, ResultThrowFrameComponent, GeneralThrowsButtonComponent, InventoryItemComponent, MoneyComponent, AbilityComponent],
+  standalone: true,
+  // 🟢 Añadimos FormsModule a imports
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, Dropdown, D20RollerButtonComponent, ResultThrowFrameComponent, GeneralThrowsButtonComponent, InventoryItemComponent, MoneyComponent, AbilityComponent],
   templateUrl: './player-sheet.html',
   styleUrl: './player-sheet.css',
 })
@@ -42,6 +47,15 @@ export class PlayerSheet implements OnInit {
   selectedFile: File | null = null;
 
   playerSheetForm: FormGroup;
+
+  inventoryItems: Item[] = [];
+
+  // 🟢 VARIABLES PARA EL NUEVO MODAL CUSTOM
+  showActionModal: boolean = false;
+  itemToHandle: Item | null = null;
+  amountToSpend: number = 1; // Input del modal para restar
+  modalTitle: string = '';
+  isConfirmationOnly: boolean = false; // true si qty=1, false si qty>1
 
   raceOptions = [
     { value: "human", label: "Humano"},
@@ -72,7 +86,6 @@ export class PlayerSheet implements OnInit {
     { value: 'NC', label: 'Neutral caótico' },
     { value: 'CC', label: 'Caótico caótico' },
   ];
-
 
   constructor(
     private fb: FormBuilder,
@@ -120,22 +133,6 @@ export class PlayerSheet implements OnInit {
     }, { validators: this.validateLifeNotExceedMax() });
   }
 
-  //lógica inventario. PENDIENTE DE MODIFICACIÓN
-
-  get inventoryFormArray() : FormArray {
-    return this.playerSheetForm.get('inventory') as FormArray;
-  }
-
-  get inventoryItems(): FormGroup[] {
-    return this.inventoryFormArray.controls as FormGroup[];
-  }
-
-  removeItem(index: number): void {
-    this.inventoryFormArray.removeAt(index);
-  }
-
-  //lógica habilidades
-
   get abilitiesFormArray() : FormArray {
     return this.playerSheetForm.get('abilities') as FormArray;
   }
@@ -146,12 +143,10 @@ export class PlayerSheet implements OnInit {
 
   addAbility(): void {
     this.abilitiesFormArray.push(
-      this.fb.group(
-        {
-          name: ['', Validators.required],
-          description: ['', Validators.required]
-        }
-        )
+      this.fb.group({
+        name: ['', Validators.required],
+        description: ['', Validators.required]
+      })
     );
   }
 
@@ -163,7 +158,6 @@ export class PlayerSheet implements OnInit {
     return (group: AbstractControl): { [key: string]: any } | null => {
       const life = group.get('life')?.value;
       const maxLife = group.get('maxLife')?.value;
-
       if (life !== null && maxLife !== null && life > maxLife) {
         return { 'lifeExceedsMax': true };
       }
@@ -176,17 +170,18 @@ export class PlayerSheet implements OnInit {
     this.characterId = this.route.snapshot.queryParamMap.get('characterId');
 
     if (this.sessionId && this.characterId) {
-      // Edit mode: load the specific character by id
       this.characterService.getCharacterById(this.characterId).then(character => {
         if (character) this.patchFormWithCharacter(character);
       });
     }
-    // No characterId → create mode: blank form, do not pre-load
   }
 
   private patchFormWithCharacter(character: any): void {
     console.log(character);
     const { userId, sessionId, updatedAt, inventory, abilities, money, ...basic } = character;
+
+    this.inventoryItems = inventory || [];
+
     this.playerSheetForm.patchValue(basic);
     this.playerSheetForm.get('money')?.patchValue(money ?? {ppt: 0, po: 0, pe: 0, pp: 0, pc: 0});
     (abilities ?? []).forEach((ability: any) => {
@@ -198,6 +193,72 @@ export class PlayerSheet implements OnInit {
     this.cdr.detectChanges();
   }
 
+  onRemoveItem(itemToRemove: Item): void {
+    if (!this.characterId) return;
+    this.itemToHandle = itemToRemove;
+    const currentQty = itemToRemove.quantity || 1;
+    this.amountToSpend = 1; // Reseteamos el input del modal por defecto
+
+    if (currentQty > 1) {
+      this.modalTitle = `Consumir / Tirar: ${itemToRemove.name}`;
+      this.isConfirmationOnly = false;
+    } else {
+      this.modalTitle = `Confirmar acción`;
+      this.isConfirmationOnly = true;
+    }
+    this.showActionModal = true;
+    this.cdr.detectChanges();
+  }
+
+  async confirmModalAction(): Promise<void> {
+    if (!this.characterId || !this.itemToHandle) return;
+    const item = this.itemToHandle;
+    const currentQty = item.quantity || 1;
+
+    if (this.isConfirmationOnly) {
+      this.inventoryItems = this.inventoryItems.filter(i => i.name !== item.name);
+    } else {
+      let qtyToDelete = this.amountToSpend;
+      if (isNaN(qtyToDelete) || qtyToDelete <= 0) qtyToDelete = 1;
+      if (qtyToDelete > currentQty) qtyToDelete = currentQty;
+
+      if (qtyToDelete < currentQty) {
+        const itemIndex = this.inventoryItems.findIndex(i => i.name === item.name);
+        if (itemIndex > -1) {
+          this.inventoryItems[itemIndex].quantity = currentQty - qtyToDelete;
+        }
+      } else {
+        this.inventoryItems = this.inventoryItems.filter(i => i.name !== item.name);
+      }
+    }
+
+    await this.characterService.updateCharacter(this.characterId, { inventory: this.inventoryItems } as any);
+    this.closeActionModal();
+    this.cdr.detectChanges();
+  }
+
+  async deleteAllModalAction(): Promise<void> {
+    if (!this.characterId || !this.itemToHandle) return;
+
+    // Filtramos para eliminar por completo el objeto del array
+    this.inventoryItems = this.inventoryItems.filter(i => i.name !== this.itemToHandle!.name);
+
+    await this.characterService.updateCharacter(this.characterId, { inventory: this.inventoryItems } as any);
+    this.closeActionModal();
+    this.cdr.detectChanges();
+  }
+
+  cancelModalAction(): void {
+    this.closeActionModal();
+  }
+
+  private closeActionModal(): void {
+    this.showActionModal = false;
+    this.itemToHandle = null;
+    this.modalTitle = '';
+    this.amountToSpend = 1;
+  }
+
   async onSubmit(): Promise<void> {
     if (!this.playerSheetForm.valid) {
       console.log('Formulario inválido');
@@ -206,7 +267,6 @@ export class PlayerSheet implements OnInit {
 
     const user = this.authService.getCurrentUser();
     if (!user || !this.sessionId) {
-      // No session context: just log (future: save globally)
       console.log('Formulario enviado (sin sesión):', this.playerSheetForm.value);
       return;
     }
@@ -216,14 +276,11 @@ export class PlayerSheet implements OnInit {
     try {
       let charId: string;
       if (this.characterId) {
-        // Edit mode: update existing character
         await this.characterService.updateCharacter(this.characterId, this.playerSheetForm.value);
         charId = this.characterId;
       } else {
-        // Create mode: always create a new character, never overwrite
         charId = await this.characterService.createCharacter(user.uid, this.sessionId, this.playerSheetForm.value);
       }
-      // Set selected character for this session
       await this.sessionService.setSelectedCharacter(this.sessionId, user.uid, charId);
       this.router.navigate(['/session', this.sessionId]);
     } catch (e: any) {
@@ -234,22 +291,17 @@ export class PlayerSheet implements OnInit {
     }
   }
 
-  //preview de la imagen y guardado en bd
   async resizeImage(base64: string): Promise<string> {
     return new Promise((resolve) => {
       const img = new Image();
       img.src = base64;
-
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const size = 200;
-
         canvas.width = size;
         canvas.height = size;
-
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(img, 0, 0, size, size);
-
         resolve(canvas.toDataURL('image/jpeg', 0.7));
       };
     });
@@ -257,44 +309,28 @@ export class PlayerSheet implements OnInit {
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-
-    console.log(input.files);
-
     if (!input.files || input.files.length === 0) {
       this.imagePreview = this.defaultImage;
-
-      this.playerSheetForm.patchValue({
-        image: this.defaultImage
-      });
-
+      this.playerSheetForm.patchValue({ image: this.defaultImage });
       this.cdr.markForCheck();
       return;
     }
 
     const file = input.files[0];
-
     if (!file.type.startsWith('image/')) {
       console.error('El archivo no es una imagen');
       return;
     }
 
     this.selectedFile = file;
-
     const reader = new FileReader();
     reader.onload = async () => {
-      console.log('preview generado');
       const base64 = reader.result as string;
-
       const compressed = await this.resizeImage(base64);
-
       this.imagePreview = compressed;
-
-      this.playerSheetForm.patchValue({
-        image: compressed
-      });
+      this.playerSheetForm.patchValue({ image: compressed });
       this.cdr.markForCheck();
     };
-
     reader.readAsDataURL(file);
   }
 
@@ -303,13 +339,13 @@ export class PlayerSheet implements OnInit {
   }
 
   private attributes_list = [
-      { name: 'strength', label: 'Fuerza (STR)' },
-      { name: 'dexterity', label: 'Destreza (DEX)' },
-      { name: 'constitution', label: 'Constitución (CON)' },
-      { name: 'intelligence', label: 'Inteligencia (INT)' },
-      { name: 'wisdom', label: 'Sabiduría (WIS)' },
-      { name: 'charisma', label: 'Carisma (CHA)' }
-    ];
+    { name: 'strength', label: 'Fuerza (STR)' },
+    { name: 'dexterity', label: 'Destreza (DEX)' },
+    { name: 'constitution', label: 'Constitución (CON)' },
+    { name: 'intelligence', label: 'Inteligencia (INT)' },
+    { name: 'wisdom', label: 'Sabiduría (WIS)' },
+    { name: 'charisma', label: 'Carisma (CHA)' }
+  ];
 
   getAttributesList() {
     return this.attributes_list;

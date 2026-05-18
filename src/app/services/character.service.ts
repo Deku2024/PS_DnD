@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   collection, doc, getDoc, addDoc, query, where,
   getDocs, updateDoc, onSnapshot, deleteDoc,
-  increment
+  increment, arrayUnion
 } from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
 import { SheetInterface } from '../interfaces/SheetInterface';
@@ -77,6 +77,14 @@ export class CharacterService {
     });
 
     await updateDoc(ref, updates);
+  }
+
+  async addItemToInventory(characterId: string, item: { name: string, quantity: number, weight: number, description: string }): Promise<void> {
+    const ref = doc(this.firebase.db, this.col, characterId);
+    await updateDoc(ref, {
+      inventory: arrayUnion(item),
+      updatedAt: new Date().toISOString()
+    });
   }
 
   calculateBonus(characteristicValue: number): number {

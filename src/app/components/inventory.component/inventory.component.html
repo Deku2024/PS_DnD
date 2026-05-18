@@ -1,17 +1,27 @@
 <form class="inventory-item" [formGroup]="form">
-  @if (isInInventory()) {
-    <input type="number" formControlName="quantity" class="qty-input" placeholder="Cant.">
-  }
-  <input type="number" formControlName="weight" class="qty-input" placeholder="Peso">
-  <input class="name-input" formControlName="name" placeholder="Objeto...">
-  <input class="desc-input" formControlName="description" placeholder="Descripción...">
 
-  @if(isInInventory()) {
-    <button type="button" class="btn-delete" (click)="removeItem()">
-      Borrar objeto
-    </button>
+  @if (isInInventory()) {
+    <div class="read-only-item">
+      <span class="qty-badge">{{ item()?.quantity || 1 }}x</span>
+
+      <div class="item-info">
+        <div class="item-title-row">
+          <span class="item-name">{{ item()?.name }}</span>
+          <span class="plain-text-weight">{{ item()?.weight }} lb</span>
+        </div>
+        <div class="item-desc">{{ item()?.description }}</div>
+      </div>
+
+      <button type="button" class="btn-delete" (click)="removeItem()">
+        Borrar objeto
+      </button>
+    </div>
   } @else {
-    <button type="submit" class="btn-save" (click)="saveItem()">
+    <input type="number" formControlName="weight" class="qty-input" placeholder="Peso">
+    <input class="name-input" formControlName="name" placeholder="Objeto...">
+    <input class="desc-input" formControlName="description" placeholder="Descripción...">
+
+    <button type="button" class="btn-save" (click)="saveItem()">
       Guardar objeto
     </button>
   }

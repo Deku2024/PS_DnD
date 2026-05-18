@@ -26,7 +26,12 @@ export class InventoryItemComponent {
       description: [''],
     });
 
-  effect(() => {
+    effect(() => {
+      if (this.isInInventory()) {
+        this.form.disable();
+      } else {
+        this.form.enable();
+      }
 
       const currentItem = this.item();
 
@@ -36,6 +41,7 @@ export class InventoryItemComponent {
       }
 
       this.form.patchValue({
+        quantity: currentItem.quantity,
         weight: currentItem.weight,
         name: currentItem.name,
         description: currentItem.description,
@@ -45,23 +51,19 @@ export class InventoryItemComponent {
   }
 
   public saveItem() {
-
     const item: Item = {
       ...this.item(),
-      ...this.form.value,
+      ...this.form.getRawValue(),
     };
-
     this.save.emit(item);
     this.form.reset();
   }
 
   public removeItem() {
-
     const item: Item = {
       ...this.item(),
-      ...this.form.value,
+      ...this.form.getRawValue(),
     };
-
     this.remove.emit(item);
   }
 }

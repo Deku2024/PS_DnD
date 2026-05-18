@@ -911,3 +911,31 @@ h2 {
     padding-top: 1.5rem;
   }
 }
+
+.dm-select {
+  width: 100%;
+  cursor: pointer;
+}
+
+.dm-select option {
+  background: #1a1008;
+  color: #c6a747;
+}
+
+.dm-input-row-quantity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(198, 167, 71, 0.1);
+  margin-top: 0.5rem;
+}
+
+.dm-input-row-quantity label {
+  font-size: 0.75rem;
+  color: #8a6e2f;
+  text-transform: uppercase;
+  margin: 0;
+}

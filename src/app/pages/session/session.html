@@ -123,13 +123,22 @@
         </div>
 
         <div class="dm-object-section">
-          <label>ENTREGAR NUEVO OBJETO:</label>
-          <input type="text" [(ngModel)]="newItemName" class="dm-input-text" placeholder="Nombre...">
-          <div class="dm-input-row">
-            <input type="number" [(ngModel)]="newItemWeight" class="dm-input-step" placeholder="lb">
-            <input type="text" [(ngModel)]="newItemDesc" class="dm-input-text" placeholder="Desc...">
+          <label>ENTREGAR OBJETO DEL CATÁLOGO:</label>
+
+          <select [(ngModel)]="selectedItemId" class="dm-input-text dm-select">
+            <option value="" disabled selected>-- Selecciona un objeto --</option>
+            <option *ngFor="let item of dmItems" [value]="item.id">
+              {{ item.name }} ({{ item.weight }} lb)
+            </option>
+          </select>
+
+          <div class="dm-input-row-quantity">
+            <label>CANTIDAD:</label>
+            <input type="number" [(ngModel)]="itemQuantityToGive" class="dm-input-step" min="1">
           </div>
-          <button (click)="applyAddItem()" class="btn-gift" [disabled]="!newItemName || selectedPlayerUids.size === 0">
+
+          <button (click)="applyAddItem()" class="btn-gift"
+                  [disabled]="!selectedItemId || selectedPlayerUids.size === 0 || itemQuantityToGive <= 0">
             🎁 Entregar Objeto
           </button>
         </div>

@@ -3,6 +3,7 @@ export interface Item {
     name: string;
     description: string;
     weight: number;
+    quantity?: number;
 }
 
 export interface MerchantItemInfo {
