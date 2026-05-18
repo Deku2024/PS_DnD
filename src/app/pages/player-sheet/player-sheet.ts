@@ -35,6 +35,7 @@ export class PlayerSheet implements OnInit {
   characterId: string | null = null;
   saving = false;
   saveError = '';
+  isInInventory = true;
 
   defaultImage: string = '/player-icon-example.png';
   imagePreview: string | ArrayBuffer | null = null;
@@ -113,12 +114,13 @@ export class PlayerSheet implements OnInit {
         pp:  [0, [Validators.min(0)]],
         pc:  [0, [Validators.min(0)]]
       }),
-      inventory: this.fb.array([]),
       abilities: this.fb.array([]),
       image: [this.defaultImage]
 
     }, { validators: this.validateLifeNotExceedMax() });
   }
+
+  //lógica inventario. PENDIENTE DE MODIFICACIÓN
 
   get inventoryFormArray() : FormArray {
     return this.playerSheetForm.get('inventory') as FormArray;
@@ -128,21 +130,11 @@ export class PlayerSheet implements OnInit {
     return this.inventoryFormArray.controls as FormGroup[];
   }
 
-  addItem(): void {
-    this.inventoryFormArray.push(
-      this.fb.group(
-        {
-          name: ['', Validators.required],
-          quantity: [1, [Validators.required, Validators.min(1)]],
-          description: ['']
-        }
-      )
-    );
-  }
-
   removeItem(index: number): void {
     this.inventoryFormArray.removeAt(index);
   }
+
+  //lógica habilidades
 
   get abilitiesFormArray() : FormArray {
     return this.playerSheetForm.get('abilities') as FormArray;
@@ -197,13 +189,6 @@ export class PlayerSheet implements OnInit {
     const { userId, sessionId, updatedAt, inventory, abilities, money, ...basic } = character;
     this.playerSheetForm.patchValue(basic);
     this.playerSheetForm.get('money')?.patchValue(money ?? {ppt: 0, po: 0, pe: 0, pp: 0, pc: 0});
-    (inventory ?? []).forEach((item: any) => {
-      this.inventoryFormArray.push(this.fb.group({
-        name: [item.name, Validators.required],
-        quantity: [item.quantity, [Validators.required, Validators.min(1)]],
-        description: [item.description]
-      }));
-    });
     (abilities ?? []).forEach((ability: any) => {
       this.abilitiesFormArray.push(this.fb.group({
         name: [ability.name, Validators.required],
