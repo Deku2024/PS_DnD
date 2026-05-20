@@ -173,20 +173,19 @@
       </div>
 
       <div class="inventario">
-        @if (!inventoryItems || inventoryItems.length === 0) {
+        @if (inventoryFormArray.controls.length === 0) {
           <p class="empty-msg">El inventario está vacío.</p>
         }
 
-        @for (item of inventoryItems; track $index) {
+        @for (control of inventoryFormArray.controls; track $index) {
           <inventory-item
             [isInInventory]="true"
-            [item]="item"
+            [item]="control.value"
             (remove)="onRemoveItem($index)"
           />
         }
       </div>
       </div>
-    </div>
 
     <div class="form-section">
 <div class="section-header">

@@ -27,15 +27,15 @@ import { Item } from '../../interfaces/Item';
   selector: 'app-player-sheet',
   standalone: true,
 imports: [
-    CommonModule, 
-    ReactiveFormsModule, 
-    FormsModule, 
-    Dropdown, 
-    D20RollerButtonComponent, 
-    ResultThrowFrameComponent, 
-    GeneralThrowsButtonComponent, 
-    InventoryItemComponent, 
-    MoneyComponent, 
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    Dropdown,
+    D20RollerButtonComponent,
+    ResultThrowFrameComponent,
+    GeneralThrowsButtonComponent,
+    InventoryItemComponent,
+    MoneyComponent,
     AbilityComponent
   ],
   templateUrl: './player-sheet.html',
@@ -146,13 +146,14 @@ export class PlayerSheet implements OnInit {
     return this.abilitiesFormArray.controls as FormGroup[];
   }
 
-get totalWeight(): number {
-  return this.inventoryItems.reduce((acc, group) => {
-    const q = group.get('quantity')?.value || 0;
-    const w = group.get('weight')?.value || 0;
-    return acc + (q * w);
-  }, 0);
-}
+  get totalWeight(): number {
+    return this.inventoryFormArray.controls.reduce((acc, control) => {
+      const group = control as FormGroup;
+      const q = group.get('quantity')?.value || 0;
+      const w = group.get('weight')?.value || 0;
+      return acc + (q * w);
+    }, 0);
+  }
 
   get carryCapacity(): number {
     const strength = this.playerSheetForm.get('attributes.strength')?.value || 10;
@@ -204,8 +205,6 @@ this.abilitiesFormArray.push(
   private patchFormWithCharacter(character: any): void {
     const { userId, sessionId, updatedAt, inventory, abilities, money, ...basic } = character;
 
-    this.inventoryItems = inventory || [];
-
     this.playerSheetForm.patchValue(basic);
     this.playerSheetForm.get('money')?.patchValue(money ?? {ppt: 0, po: 0, pe: 0, pp: 0, pc: 0});
 while (this.inventoryFormArray.length) {
@@ -232,71 +231,66 @@ while (this.inventoryFormArray.length) {
     this.cdr.detectChanges();
   }
 
-  onRemoveItem(itemToRemove: Item): void {
+  onRemoveItem(index: number): void {
     if (!this.characterId) return;
-    this.itemToHandle = itemToRemove;
-    const currentQty = itemToRemove.quantity || 1;
-    this.amountToSpend = 1; // Reseteamos el input del modal por defecto
+    const group = this.inventoryFormArray.at(index) as FormGroup;
+    this.itemToHandle = group.value as Item;
 
-    if (currentQty > 1) {
-      this.modalTitle = `Consumir / Tirar: ${itemToRemove.name}`;
-      this.isConfirmationOnly = false;
-    } else {
-      this.modalTitle = `Confirmar acción`;
-      this.isConfirmationOnly = true;
-    }
+    this.amountToSpend = 1;
+    this.isConfirmationOnly = (group.get('quantity')?.value <= 1);
+    this.modalTitle = this.isConfirmationOnly ? 'Confirmar acción' : `Consumir: ${this.itemToHandle.name}`;
     this.showActionModal = true;
-    this.cdr.detectChanges();
   }
 
   async confirmModalAction(): Promise<void> {
     if (!this.characterId || !this.itemToHandle) return;
-    const item = this.itemToHandle;
-    const currentQty = item.quantity || 1;
 
-    if (this.isConfirmationOnly) {
-      this.inventoryItems = this.inventoryItems.filter(i => i.name !== item.name);
-    } else {
-      let qtyToDelete = this.amountToSpend;
-      if (isNaN(qtyToDelete) || qtyToDelete <= 0) qtyToDelete = 1;
-      if (qtyToDelete >= currentQty) {
-        this.inventoryItems = this.inventoryItems.filter(i => i.name !== item.name);
+    // Buscamos el índice en el FormArray
+    const index = this.inventoryFormArray.controls.findIndex(c =>
+      c.get('name')?.value === this.itemToHandle?.name
+    );
+
+    if (index > -1) {
+      const group = this.inventoryFormArray.at(index) as FormGroup;
+      const currentQty = group.get('quantity')?.value || 1;
+
+      if (this.isConfirmationOnly || this.amountToSpend >= currentQty) {
+        this.inventoryFormArray.removeAt(index);
       } else {
-        const itemIndex = this.inventoryItems.findIndex(i => i.name === item.name);
-        if (itemIndex > -1) {
-          this.inventoryItems[itemIndex].quantity = currentQty - qtyToDelete;
-        }
+        group.patchValue({ quantity: currentQty - this.amountToSpend });
       }
-    }
 
-    if (this.playerSheetForm.get('inventory')) {
-      this.playerSheetForm.patchValue({ inventory: this.inventoryItems });
-    }
-
-    try {
-      await this.characterService.updateCharacter(this.characterId, { inventory: this.inventoryItems } as any);
-      this.closeActionModal();
-      this.cdr.detectChanges();
-    } catch (error) {
-      console.error("Error consumiendo el objeto:", error);
+      // Guardar en Firebase
+      try {
+        await this.characterService.updateCharacter(this.characterId, {
+          inventory: this.inventoryFormArray.value
+        });
+        this.closeActionModal();
+        this.cdr.detectChanges();
+      } catch (error) {
+        console.error("Error actualizando inventario:", error);
+      }
     }
   }
 
   async deleteAllModalAction(): Promise<void> {
     if (!this.characterId || !this.itemToHandle) return;
 
-    this.inventoryItems = this.inventoryItems.filter(i => i.name !== this.itemToHandle!.name);
+    const index = this.inventoryFormArray.controls.findIndex(c =>
+      c.get('name')?.value === this.itemToHandle!.name
+    );
 
-    if (this.playerSheetForm.get('inventory')) {
-      this.playerSheetForm.patchValue({ inventory: this.inventoryItems });
-    }
-
-    try {
-      await this.characterService.updateCharacter(this.characterId, { inventory: this.inventoryItems } as any);
-      this.closeActionModal();
-      this.cdr.detectChanges();
-    } catch (error) {
-      console.error("Error borrando el objeto:", error);
+    if (index > -1) {
+      this.inventoryFormArray.removeAt(index);
+      try {
+        await this.characterService.updateCharacter(this.characterId, {
+          inventory: this.inventoryFormArray.value
+        });
+        this.closeActionModal();
+        this.cdr.detectChanges();
+      } catch (error) {
+        console.error("Error borrando objeto:", error);
+      }
     }
   }
 
