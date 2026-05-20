@@ -52,8 +52,6 @@ export class PlayerSheet implements OnInit {
   selectedFile: File | null = null;
   playerSheetForm: FormGroup;
 
-  inventoryItems: Item[] = [];
-
   // 🟢 VARIABLES PARA EL NUEVO MODAL CUSTOM
   showActionModal: boolean = false;
   itemToHandle: Item | null = null;
@@ -148,13 +146,13 @@ export class PlayerSheet implements OnInit {
     return this.abilitiesFormArray.controls as FormGroup[];
   }
 
-  get totalWeight(): number {
-    return this.inventoryItems.reduce((acc, item) => {
-      const q = item.get('quantity')?.value || 0;
-      const w = item.get('weight')?.value || 0;
-      return acc + (q * w);
-    }, 0);
-  }
+get totalWeight(): number {
+  return this.inventoryItems.reduce((acc, group) => {
+    const q = group.get('quantity')?.value || 0;
+    const w = group.get('weight')?.value || 0;
+    return acc + (q * w);
+  }, 0);
+}
 
   get carryCapacity(): number {
     const strength = this.playerSheetForm.get('attributes.strength')?.value || 10;
