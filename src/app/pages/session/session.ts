@@ -348,7 +348,7 @@ export class SessionPage implements OnInit, OnDestroy {
           }
           stats['money.po'] = newGold;
 
-          if (!char.money) char.money = { po: 0 };
+          if (!char.money) char.money = { ppt: 0, po: 0, pe: 0, pp: 0, pc: 0 };
           char.money.po = newGold;
         }
 

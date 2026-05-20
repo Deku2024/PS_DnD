@@ -51,7 +51,7 @@ export class MerchantService {
       try {
         const snap = await getDoc(docRef);
         return snap.exists()
-          ? { id: snap.id, ...(snap.data() as Merchant) } // fix build
+          ? { ...(snap.data() as Merchant), id: snap.id }
           : null;
       } catch (error) {
         console.error(error);
