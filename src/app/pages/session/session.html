@@ -137,9 +137,6 @@
 
     <!--Mercaderes-->
     @if (isMaster) {
-
-
-
       <div class="card">
         <h3>Mis mercaderes</h3>
         <button 
@@ -160,11 +157,13 @@
               }
   
               @for (merchant of myMerchants; track $index) {
-                <div class="merchant-info">
-                  <span class="merchant">{{merchant.name}}</span>
-                  <div class="merchant-options">
-                    <button (click)="deleteMerchant(merchant)">Eliminar</button>
-                    <button (click)="updateMerchant(merchant)">Actualizar</button>
+                <div class="merchant-row">
+                  <div class="merchant-info">
+                    <span class="merchant">{{merchant.name}}</span>
+                    <div class="merchant-options">
+                      <button (click)="deleteMerchant(merchant)">Eliminar</button>
+                      <button (click)="updateMerchant(merchant)">Actualizar</button>
+                    </div>
                   </div>
                 </div>
               }
@@ -192,6 +191,7 @@
       <div class="btn-grp" *ngIf="isMaster">
         <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
         <button *ngIf="isMaster" class="btn-notes" (click)="goToNotes()">📝 Notas DM</button>
+        <button class="btn-merchant" (click)="openMerchantModal()">Crear Mercader</button>
         <button
           *ngIf="session.status === 'in-battle'"
           class="btn-notes"
@@ -300,7 +300,6 @@
     <div class="modal-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>Mercaderes</h3>
-        <button class="modal-close" (click)="closeMerchantModal()">✕</button>
       </div>
 
       <div class="modal-body">
@@ -315,10 +314,6 @@
       </div>
     </div>
   </div>
-
-  @if (isMaster) {
-    <button (click)="openMerchantModal()">Crear Mercader</button>
-  }
 
 
 </div>
