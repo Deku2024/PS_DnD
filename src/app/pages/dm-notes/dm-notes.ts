@@ -5,12 +5,8 @@ import { Note } from '../../components/note/note';
 import { DmnotesService } from '../../services/dmnotes.service';
 import { ResultThrowFrameComponent } from '../../components/result.throw.frame.component/result.throw.frame.component';
 import { GeneralThrowsButtonComponent } from '../../components/general.throws.button.component/general.throws.button.component';
-import { SessionService, Session } from '../../services/sessions.service';
+import { SessionService } from '../../services/sessions.service';
 import { FormsModule } from '@angular/forms';
-import { DmFloatingMenuComponent } from '../../components/dm-floating-menu.component/dm-floating-menu.component';
-import { HistoryButtonComponent } from '../../components/history.button.component/history.button.component';
-import { AuthService } from '../../services/auth.service';
-import { User } from 'firebase/auth';
 
 interface NoteItem {
   id?: string;
@@ -23,7 +19,7 @@ interface NoteItem {
 @Component({
   selector: 'app-dm-notes',
   standalone: true,
-  imports: [CommonModule, Note, FormsModule, ResultThrowFrameComponent, GeneralThrowsButtonComponent, DmFloatingMenuComponent, HistoryButtonComponent],
+  imports: [CommonModule, Note, FormsModule, ResultThrowFrameComponent, GeneralThrowsButtonComponent],
   templateUrl: './dm-notes.html',
   styleUrl: './dm-notes.css',
 })
@@ -34,10 +30,6 @@ export class DmNotes implements OnInit, OnDestroy {
   sessionId: string = '';
   sortCriteria: string = 'newest';
 
-  session: Session | null = null;
-  currentUser: User | null = null;
-  isMaster: boolean = false;
-  private unsubSession?: () => void;
   unsubscribe: (() => void) | undefined;
 
   constructor(
@@ -45,7 +37,6 @@ export class DmNotes implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private sessionsService: SessionService,
-    private authService: AuthService,
     private cd: ChangeDetectorRef
   ) {}
 
@@ -60,18 +51,6 @@ export class DmNotes implements OnInit, OnDestroy {
     }
 
     this.sessionId = id;
-
-    this.currentUser = await new Promise<any>(resolve =>
-      this.authService.onAuthState().subscribe(u => resolve(u))
-    );
-
-    this.unsubSession = this.sessionsService.listenSession(this.sessionId, (s) => {
-      if (s) {
-        this.session = s;
-        this.isMaster = s.masterId === this.currentUser?.uid;
-        this.cd.detectChanges();
-      }
-    });
 
     this.unsubscribe = this.dmNotesService.listenToNotes(
       this.sessionId,
@@ -127,18 +106,7 @@ export class DmNotes implements OnInit, OnDestroy {
     this.router.navigate(['/session', this.sessionId]);
   }
 
-  triggerHistoryDrawer(): void {
-    const historyComp = document.querySelector('history-button-component');
-    if (historyComp) {
-      const triggerButton = historyComp.querySelector('button, .btn') || historyComp.firstElementChild;
-      if (triggerButton) {
-        (triggerButton as HTMLElement).click();
-      }
-    }
-  }
-
   ngOnDestroy() {
     if (this.unsubscribe) this.unsubscribe();
-    if (this.unsubSession) this.unsubSession();
   }
 }
