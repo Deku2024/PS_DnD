@@ -9,42 +9,11 @@
 
     <h3>Selecciona los objetos que quieres que venda.</h3>
 
-    <div class="sellingObjects">
-
-        @for (item of items; track item.id) {
-
-            <div class="item-card">
-
-                <p>{{ item.name }}</p>
-
-                <input
-                    #sellingPrice
-                    type="number"
-                    placeholder="Precio"
-                >
-
-                <input
-                    #sellingQuantity
-                    type="number"
-                    placeholder="Cantidad"
-                >
-
-                <button
-                    type="button"
-                    (click)="addItemToSellingList(
-                        item,
-                        +sellingPrice.value,
-                        +sellingQuantity.value
-                    )"
-                >
-                    Añadir
-                </button>
-
-            </div>
-
-        }
-
-    </div>
+    <app-item-search
+            [items]="items"
+            placeholder="Buscar objeto para vender..."
+            (itemSelected)="onSellingItemSelected($event)"
+    />
 
     <h2>Objetos que vende</h2>
 
@@ -83,6 +52,12 @@
     <hr class="modal-divider" />
 
     <h3>Selecciona los objetos que acepta comprar.</h3>
+
+    <app-item-search
+        [items]="items"
+        placeholder="Buscar objeto para comprar..."
+        (itemSelected)="onBuyingItemSelected($event)"
+    />
     
     <div class="buyingObjects">
         

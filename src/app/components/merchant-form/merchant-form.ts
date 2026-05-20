@@ -4,10 +4,11 @@ import { MerchantService } from '../../services/merchant.service';
 import { Item } from '../../interfaces/Item';
 import { ItemsService } from '../../services/items.service';
 import { Merchant } from '../../interfaces/Merchant';
+import { ItemSearch } from '../item-search/item-search';
 
 @Component({
   selector: 'app-merchant-form',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, ItemSearch],
   templateUrl: './merchant-form.html',
   styleUrl: './merchant-form.css',
 })
@@ -16,7 +17,9 @@ export class MerchantForm implements OnInit {
   merchant = input<Merchant | null>(null);
   merchantInfo = output<Merchant>();
   cancelEvent = output<boolean>();
+
   merchantForm: FormGroup;
+  
   items: Item[] = [];
   unsubscribe: (() => void) | undefined;
 
@@ -134,5 +137,29 @@ export class MerchantForm implements OnInit {
   cancel() {
     this.merchantForm.reset();
     this.cancelEvent.emit(false);
+  }
+
+  //barra de búsqueda
+
+  onSellingItemSelected(item: Item) {
+
+    const exists = this.sellingList.controls.some(
+      control => control.value.itemId === item.id
+    );
+
+    if (exists) return;
+
+    this.addItemToSellingList(item, 0, 1);
+  }
+
+  onBuyingItemSelected(item: Item) {
+
+    const exists = this.buyingList.controls.some(
+      control => control.value.itemId === item.id
+    );
+
+    if (exists) return;
+
+    this.addItemToBuyingList(item, 0, 1);
   }
 }
