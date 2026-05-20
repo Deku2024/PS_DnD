@@ -220,30 +220,6 @@
       <button type="button" class="btn-save" (click)="goBack()">Cancelar</button>
     </div>
   </form>
-
-    <div class="form-section">
-      <div class="section-header">
-        <h2>Habilidades</h2>
-        <button type="button" class="btn-add" (click)="addAbility()">Añadir habilidad</button>
-      </div>
-      <div formArrayName="abilities" class="abilities-container">
-        @if (abilitiesFormArray.controls.length === 0) {
-          <p class="empty-msg">No hay habilidades todavía</p>
-        }
-        @for (ability of abilities; track $index) {
-          <ability [itemGroup]="ability" [index]="$index" (remove)="removeAbility($event)" />
-        }
-      </div>
-    </div>
-
-    <div class="save-section">
-      <p class="save-error" *ngIf="saveError">{{ saveError }}</p>
-      <button type="submit" class="btn-save" [disabled]="saving">
-        {{ saving ? 'Guardando...' : '💾 Guardar personaje' }}
-      </button>
-      <button type="button" class="btn-save" (click)="goBack()">Cancelar</button>
-    </div>
-  </form>
   <result-frame />
 </main>
 
