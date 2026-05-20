@@ -32,9 +32,9 @@ export class SessionPage implements OnInit, OnDestroy {
   imageUploadError = '';
   showErrorModal = false;
   imagePreviewUrl: string | null = null;
+  activeTab: 'players' | 'map' | 'audio' = 'players';
   private pendingFile: File | null = null;
   private cloudinaryService = inject(CloudinaryService);
-
   // Map settings
   pendingIsMap = false;
   pendingHexSize = 40;
