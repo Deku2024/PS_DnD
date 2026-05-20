@@ -79,8 +79,7 @@ const session = await this.sessionService.getSession(id);
       // First time — roll initiative and sort
       await this.battleService.startPreparingCombat();
     }
-    
-    }
+  
     this.activeTurnIndex = session?.activeTurnIndex ?? 0;
 
     this.unsubSession = this.sessionService.listenSession(id, (s) => {
@@ -196,8 +195,8 @@ const session = await this.sessionService.getSession(id);
       // Persist updated HP in session so all screens see the change via listenSession
       this.saveOrder();
       this.closeDamageModal();
-    } catch (e: any) {
-      this.damageError = e.message || 'Error al aplicar el daño.';
+} catch (e: any) {
+      this.damageError = (e instanceof Error) ? e.message : 'Error al aplicar el daño.';
     } finally {
       this.isApplyingDamage = false;
       this.cd.detectChanges();
