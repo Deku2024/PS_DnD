@@ -1,0 +1,128 @@
+.dm-speed-dial {
+  position: fixed;
+  bottom: 2rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+}
+
+.dial-actions {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.dial-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  opacity: 0;
+  transform: translateY(20px) scale(0.8);
+  transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.dial-actions.open .dial-item {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* Cascada fluida de aparición */
+.dial-actions.open .dial-item:nth-child(1) { transition-delay: 0.03s; }
+.dial-actions.open .dial-item:nth-child(2) { transition-delay: 0.06s; }
+.dial-actions.open .dial-item:nth-child(3) { transition-delay: 0.09s; }
+.dial-actions.open .dial-item:nth-child(4) { transition-delay: 0.12s; }
+.dial-actions.open .dial-item:nth-child(5) { transition-delay: 0.15s; }
+
+/* Etiquetas: Más grandes, en negrita y en MAYÚSCULAS */
+.dial-label {
+  background: #1e1208;
+  color: #c6a747;
+  border: 1px solid rgba(198, 167, 71, 0.3);
+  padding: 0.4rem 0.85rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+}
+
+.sub-fab {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #1a1008;
+  border: 1px solid #c6a747;
+  color: #c6a747;
+  font-size: 1.3rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+
+.sub-fab:hover {
+  background: rgba(198, 167, 71, 0.15);
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(198, 167, 71, 0.4);
+}
+
+/* Botón Principal */
+.dm-main-btn {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  background: #1a1008;
+  border: 2px solid #c6a747;
+  color: #c6a747;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.9);
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Contenedor interno para forzar centrado estricto del icono/texto */
+.btn-icon-centered {
+  font-size: 1.8rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  /* Ligero ajuste óptico para compensar la forma visual de la corona */
+  transform: translateY(-1px);
+}
+
+.dm-main-btn:hover {
+  background: rgba(198, 167, 71, 0.1);
+  box-shadow: 0 0 25px rgba(198, 167, 71, 0.5);
+  transform: scale(1.05);
+}
+
+.dm-main-btn.active {
+  background: #c6a747;
+  color: #1a1008;
+}
+
+/* Ajuste del tamaño de la 'X' para que no se vea desproporcionada respecto a la corona */
+.dm-main-btn.active .btn-icon-centered {
+  font-size: 1.5rem;
+  transform: translateY(0);
+}

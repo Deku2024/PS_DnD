@@ -38,4 +38,26 @@
   </div>
 
   <result-frame />
+
+  <div class="dm-history-hidden-host" *ngIf="session && currentUser">
+    <history-button-component
+      [isMaster]="isMaster"
+      [currentUserId]="currentUser.uid"
+      [sessionId]="session.id || ''"
+      [sessionName]="session.name"
+      [masterId]="session.masterId"
+      [masterName]="session.playersUsernames[session.masterId] || session.masterId"
+      [players]="session.players"
+      [playerEmails]="session.playerEmails"
+      [playerUsernames]="session.playersUsernames">
+    </history-button-component>
+  </div>
+
+  <app-dm-floating-menu
+    [sessionId]="sessionId"
+    [isBattleActive]="true"
+    [showLocalActions]="false"
+    (historyClick)="triggerHistoryDrawer()">
+  </app-dm-floating-menu>
+
 </main>

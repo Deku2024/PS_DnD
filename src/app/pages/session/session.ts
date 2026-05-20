@@ -7,18 +7,29 @@ import { AuthService } from '../../services/auth.service';
 import { CharacterService, CharacterWithId } from '../../services/character.service';
 import { PresenceService } from '../../services/presence.service';
 import { RollHistoryService } from '../../services/roll-history.service';
-import { HistoryButtonComponent} from '../../components/history.button.component/history.button.component';
+import { HistoryButtonComponent } from '../../components/history.button.component/history.button.component';
 import { CloudinaryService } from '../../services/cloudinary.service';
 import { HexMapComponent } from '../../components/hex-map.component/hex-map.component';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
 import { BattleButtonComponent } from '../../components/battle.button.component/battle.button.component';
+import { DmFloatingMenuComponent } from '../../components/dm-floating-menu.component/dm-floating-menu.component';
+import { ItemsService } from '../../services/items.service';
+import { Item } from '../../interfaces/Item';
 import { YouTubePlayer } from '@angular/youtube-player';
 
 @Component({
   selector: 'app-session',
   standalone: true,
-  imports: [CommonModule, FormsModule, YouTubePlayer, BattleButtonComponent, HistoryButtonComponent, HexMapComponent],
+imports: [
+    CommonModule, 
+    FormsModule, 
+    YouTubePlayer, 
+    BattleButtonComponent, 
+    HistoryButtonComponent, 
+    DmFloatingMenuComponent, 
+    HexMapComponent
+  ],
   templateUrl: './session.html',
   styleUrl: './session.css'
 })
@@ -67,10 +78,23 @@ export class SessionPage implements OnInit, OnDestroy {
   presenceMap: { [uid: string]: boolean } = {};
   isSidebarOpen = true;
 
+  selectedPlayerUids = new Set<string>();
+  lifeAction: number = 0;
+  goldAction: number = 0;
+  xpAction: number = 0;
+
+  dmItems: Item[] = [];
+  selectedItemId: string = '';
+  itemQuantityToGive: number = 1;
+
+  // Listado de advertencias para que el Máster sepa si se alcanzaron umbrales
+  dmAlerts: string[] = [];
+
   private unsubscribe?: () => void;
   private authSub?: Subscription;
   private initializing = false;
   private presenceUnsub?: () => void;
+  private itemsUnsub?: () => void;
   private charUnsubs: { [uid: string]: () => void } = {};
 
   constructor(
@@ -81,8 +105,9 @@ export class SessionPage implements OnInit, OnDestroy {
     private characterService: CharacterService,
     private cd: ChangeDetectorRef,
     private presenceService: PresenceService,
-    private rollHistoryService: RollHistoryService
-) {}
+private rollHistoryService: RollHistoryService,
+    private itemsService: ItemsService
+  ) {}
 
   ngOnInit(): void {
     if (!(window as any).YT) {
@@ -118,9 +143,14 @@ export class SessionPage implements OnInit, OnDestroy {
     if (!isDm) {
       const selected = snap?.selectedCharacters?.[user.uid];
       if (!selected) {
-        this.router.navigate(['/choose-character'], { queryParams: { sessionId: id } });
+        this.router.navigate(['/choose-character'], {queryParams: {sessionId: id}});
         return;
       }
+    } else {
+      this.itemsUnsub = this.itemsService.readItems(user.uid, (items) => {
+        this.dmItems = items;
+        this.cd.detectChanges();
+      });
     }
 
     this.unsubscribe = this.sessionService.listenSession(id, (session) => {
@@ -129,7 +159,6 @@ export class SessionPage implements OnInit, OnDestroy {
         this.errorMsg = 'La sesión no existe o ha sido cerrada.';
         this.session = null;
       } else {
-        // Usar this.currentUser para detectar expulsión en tiempo real
         if (this.currentUser && !session.players.includes(this.currentUser.uid)) {
           this.unsubscribe?.();
           this.presenceUnsub?.();
@@ -243,10 +272,9 @@ export class SessionPage implements OnInit, OnDestroy {
       const selectedCharId = session.selectedCharacters?.[uid];
 
       if (selectedCharId) {
-        // Only set up a new listener if character ID changed or no listener exists yet
         const existing = this.characters[uid] as CharacterWithId | null;
         if (!existing || existing.id !== selectedCharId) {
-          this.charUnsubs[uid]?.(); // cancel previous listener for this player
+          this.charUnsubs[uid]?.();
           this.charUnsubs[uid] = this.characterService.listenCharacter(selectedCharId, (ch) => {
             this.characters[uid] = ch;
             if (this.showModal && this.modalUid === uid) {
@@ -256,7 +284,6 @@ export class SessionPage implements OnInit, OnDestroy {
           });
         }
       } else {
-        // No selected character — one-time load by session
         this.characterService.listCharactersByUserAndSession(uid, session.id!).then(list => {
           const ch = list.length > 0 ? list[0] : null;
           const current = this.characters[uid] as CharacterWithId | null;
@@ -271,15 +298,137 @@ export class SessionPage implements OnInit, OnDestroy {
       }
     }
   }
+
   get isMaster(): boolean {
     return !!this.currentUser && !!this.session && this.session.masterId === this.currentUser.uid;
+  }
+
+  togglePlayerSelection(uid: string): void {
+    if (this.selectedPlayerUids.has(uid)) {
+      this.selectedPlayerUids.delete(uid);
+    } else {
+      this.selectedPlayerUids.add(uid);
+    }
+  }
+
+  selectAllPlayers(): void {
+    if (!this.session) return;
+    const players = this.session.players.filter(uid => uid !== this.session?.masterId);
+    if (this.selectedPlayerUids.size === players.length) {
+      this.selectedPlayerUids.clear();
+    } else {
+      players.forEach(uid => this.selectedPlayerUids.add(uid));
+    }
+  }
+
+  async applyBatchActions(): Promise<void> {
+    if (this.selectedPlayerUids.size === 0) return;
+    if (this.lifeAction === 0 && this.goldAction === 0 && this.xpAction === 0) return;
+
+    const newAlerts: string[] = [];
+
+    for (const uid of this.selectedPlayerUids) {
+      const char = this.characters[uid];
+      if (char) {
+        const stats: { [key: string]: number } = {};
+
+        if (this.lifeAction !== 0) {
+          const currentLife = char.life ?? 0;
+          const maxLife = char.maxLife ?? currentLife;
+          let newLife = currentLife + this.lifeAction;
+
+          if (newLife > maxLife) {
+            newLife = maxLife;
+            newAlerts.push(`⚠️ ${char.name} ya alcanzó su Vida Máxima (${maxLife}).`);
+          } else if (newLife < 0) {
+            newLife = 0;
+            newAlerts.push(`💀 ${char.name} ha caído a 0 PV.`);
+          }
+          stats['life'] = newLife;
+          char.life = newLife;
+        }
+
+        if (this.goldAction !== 0) {
+          const currentGold = char.money?.po ?? 0;
+          let newGold = currentGold + this.goldAction;
+
+          if (newGold < 0) {
+            newGold = 0;
+            newAlerts.push(`🪙 El oro de ${char.name} se ajustó a 0 (No puede ser negativo).`);
+          }
+          stats['money.po'] = newGold;
+
+          if (!char.money) char.money = { ppt: 0, po: 0, pe: 0, pp: 0, pc: 0 };
+          char.money.po = newGold;
+        }
+
+        if (this.xpAction !== 0) {
+          const currentXp = char.experience ?? 0;
+          let newXp = currentXp + this.xpAction;
+
+          if (newXp < 0) {
+            newXp = 0;
+            newAlerts.push(`✨ La experiencia de ${char.name} se ajustó a 0.`);
+          }
+          stats['experience'] = newXp;
+          char.experience = newXp;
+        }
+
+        await this.characterService.updateMultipleStats(char.id, stats);
+      }
+    }
+
+    this.dmAlerts = newAlerts;
+    this.lifeAction = 0;
+    this.goldAction = 0;
+    this.xpAction = 0;
+    this.selectedPlayerUids.clear();
+    this.cd.detectChanges();
+  }
+
+  async applyAddItem(): Promise<void> {
+    if (!this.selectedItemId || this.selectedPlayerUids.size === 0 || this.itemQuantityToGive <= 0) return;
+
+    const itemToGive = this.dmItems.find(item => item.id === this.selectedItemId);
+    if (!itemToGive) return;
+
+    for (const uid of this.selectedPlayerUids) {
+      const char = this.characters[uid];
+      if (char) {
+        const freshChar = await this.characterService.getCharacterById(char.id);
+        let inventory = freshChar?.inventory ? [...freshChar.inventory] : (char.inventory ? [...char.inventory] : []);
+
+        const existingItemIndex = inventory.findIndex((i: any) =>
+          i.name?.trim().toLowerCase() === itemToGive.name?.trim().toLowerCase()
+        );
+
+        if (existingItemIndex > -1) {
+          const currentQty = inventory[existingItemIndex].quantity || 1;
+          inventory[existingItemIndex].quantity = currentQty + this.itemQuantityToGive;
+        } else {
+          inventory.push({
+            ...itemToGive,
+            quantity: this.itemQuantityToGive
+          });
+        }
+
+        await this.characterService.updateCharacter(char.id, { inventory: inventory } as any);
+        char.inventory = inventory;
+      }
+    }
+
+    this.selectedItemId = '';
+    this.itemQuantityToGive = 1;
+    this.selectedPlayerUids.clear();
+    this.cd.detectChanges();
   }
 
   openModal(uid: string): void {
     if (!this.session) return;
     this.modalUid = uid;
     this.modalCharacter = this.characters[uid] ?? null;
-    this.modalPlayerName = this.session.playersUsernames[uid] || this.session.playerEmails[uid] || 'Jugador';    this.showModal = true;
+    this.modalPlayerName = this.session.playersUsernames[uid] || this.session.playerEmails[uid] || 'Jugador';
+    this.showModal = true;
   }
 
   closeModal(): void {
@@ -293,13 +442,13 @@ export class SessionPage implements OnInit, OnDestroy {
     this.closeModal();
     const myUid = this.currentUser.uid;
     const selected = this.session?.selectedCharacters?.[myUid];
-    this.router.navigate(['/player-sheet'], { queryParams: { sessionId: this.session.id, characterId: selected } });
+    this.router.navigate(['/player-sheet'], {queryParams: {sessionId: this.session.id, characterId: selected}});
   }
 
   changeMyCharacter(): void {
     if (!this.session?.id || !this.currentUser) return;
     this.closeModal();
-    this.router.navigate(['/choose-character'], { queryParams: { sessionId: this.session.id } });
+    this.router.navigate(['/choose-character'], {queryParams: {sessionId: this.session.id}});
   }
   toggleSidebar() {
     this.isSidebarOpen = !this.isSidebarOpen;
@@ -322,7 +471,7 @@ export class SessionPage implements OnInit, OnDestroy {
   goToNotes(): void {
     if (!this.session?.id) return;
     this.sessionService.setCurrentSessionId(this.session.id);
-    this.router.navigate(['/dm-notes'], { queryParams: { sessionId: this.session.id } });
+    this.router.navigate(['/dm-notes'], {queryParams: {sessionId: this.session.id}});
   }
 
   goToCombat(): void {
@@ -462,6 +611,20 @@ export class SessionPage implements OnInit, OnDestroy {
     this.unsubscribe?.();
     this.authSub?.unsubscribe();
     this.presenceUnsub?.();
+    this.itemsUnsub?.();
     Object.values(this.charUnsubs).forEach(unsub => unsub());
+  }
+
+  // 🟢 Dispara el panel inferior del historial
+  triggerHistoryDrawer(): void {
+    // Busca el botón que está dentro de tu componente de historial y lo pulsa
+    const historyNativeButton = document.querySelector('history-button-component button') as HTMLButtonElement;
+    if (historyNativeButton) {
+      historyNativeButton.click();
+    } else {
+      // Alternativa por si el componente controla su propia visibilidad con la variable
+      this.showHistory = !this.showHistory;
+      this.cd.detectChanges();
+    }
   }
 }

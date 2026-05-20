@@ -15,7 +15,6 @@
 
     <div class="monster-search-wrapper card" *ngIf="showAddMenu">
       <h3>Bestiario del Tomo</h3>
-
       <app-monster-search (monsterSelected)="addMonsterToBattle($event)"></app-monster-search>
     </div>
   </div>
@@ -26,7 +25,6 @@
 
   <ng-container *ngIf="!loading">
 
-    <!-- Orden de combate activo -->
     <div class="card" *ngIf="activeCombatants.length > 0">
       <h3>Orden de batalla</h3>
       <p class="card-hint">Jugadores activos ordenados por turno</p>
@@ -69,7 +67,6 @@
 
     <hr class="divider" *ngIf="activeCombatants.length > 0 && combatants.length > 0" />
 
-    <!-- Gestión de jugadores (solo DM) -->
     <div class="card" *ngIf="isMaster">
       <h3>Jugadores en la sesión</h3>
       <p class="card-hint">Activa o desactiva y reordena manualmente</p>
@@ -108,9 +105,6 @@
     </div>
 
   </ng-container>
-</div>
-
-<!-- Damage modal -->
 <div class="modal-overlay" *ngIf="showDamageModal" (click)="closeDamageModal()">
   <div class="modal-card" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -159,3 +153,23 @@
   </div>
 </div>
 
+<div class="dm-history-hidden-host" *ngIf="session && currentUser">
+  <history-button-component
+    [isMaster]="isMaster"
+    [currentUserId]="currentUser.uid"
+    [sessionId]="session.id || ''"
+    [sessionName]="session.name"
+    [masterId]="session.masterId"
+    [masterName]="session.playersUsernames[session.masterId] || session.masterId"
+    [players]="session.players"
+    [playerEmails]="session.playerEmails"
+    [playerUsernames]="session.playersUsernames">
+  </history-button-component>
+</div>
+
+<app-dm-floating-menu
+  [sessionId]="sessionId"
+  [isBattleActive]="true"
+  [showLocalActions]="false"
+  (historyClick)="triggerHistoryDrawer()">
+</app-dm-floating-menu>
