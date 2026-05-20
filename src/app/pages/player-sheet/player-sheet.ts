@@ -220,32 +220,45 @@ export class PlayerSheet implements OnInit {
     } else {
       let qtyToDelete = this.amountToSpend;
       if (isNaN(qtyToDelete) || qtyToDelete <= 0) qtyToDelete = 1;
-      if (qtyToDelete > currentQty) qtyToDelete = currentQty;
-
-      if (qtyToDelete < currentQty) {
+      if (qtyToDelete >= currentQty) {
+        this.inventoryItems = this.inventoryItems.filter(i => i.name !== item.name);
+      } else {
         const itemIndex = this.inventoryItems.findIndex(i => i.name === item.name);
         if (itemIndex > -1) {
           this.inventoryItems[itemIndex].quantity = currentQty - qtyToDelete;
         }
-      } else {
-        this.inventoryItems = this.inventoryItems.filter(i => i.name !== item.name);
       }
     }
 
-    await this.characterService.updateCharacter(this.characterId, { inventory: this.inventoryItems } as any);
-    this.closeActionModal();
-    this.cdr.detectChanges();
+    if (this.playerSheetForm.get('inventory')) {
+      this.playerSheetForm.patchValue({ inventory: this.inventoryItems });
+    }
+
+    try {
+      await this.characterService.updateCharacter(this.characterId, { inventory: this.inventoryItems } as any);
+      this.closeActionModal();
+      this.cdr.detectChanges();
+    } catch (error) {
+      console.error("Error consumiendo el objeto:", error);
+    }
   }
 
   async deleteAllModalAction(): Promise<void> {
     if (!this.characterId || !this.itemToHandle) return;
 
-    // Filtramos para eliminar por completo el objeto del array
     this.inventoryItems = this.inventoryItems.filter(i => i.name !== this.itemToHandle!.name);
 
-    await this.characterService.updateCharacter(this.characterId, { inventory: this.inventoryItems } as any);
-    this.closeActionModal();
-    this.cdr.detectChanges();
+    if (this.playerSheetForm.get('inventory')) {
+      this.playerSheetForm.patchValue({ inventory: this.inventoryItems });
+    }
+
+    try {
+      await this.characterService.updateCharacter(this.characterId, { inventory: this.inventoryItems } as any);
+      this.closeActionModal();
+      this.cdr.detectChanges();
+    } catch (error) {
+      console.error("Error borrando el objeto:", error);
+    }
   }
 
   cancelModalAction(): void {

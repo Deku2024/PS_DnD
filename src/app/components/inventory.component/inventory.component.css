@@ -1,32 +1,37 @@
-/* CONTENEDOR PRINCIPAL */
 .inventory-item {
   display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-  align-items: center;
   width: 100%;
+  margin-bottom: 8px;
 }
 
 .read-only-item {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   width: 100%;
-  background: rgba(255, 255, 255, 0.4);
-  border: 1px solid #c4a47a;
+  background: rgba(255, 254, 240, 0.7);
+  border: 1px dashed #c4a47a;
   border-radius: 8px;
-  padding: 12px;
+  padding: 10px 12px;
+  transition: all 0.2s ease;
+}
+
+.read-only-item:hover {
+  background: #fff8f0;
+  border-color: #8b6914;
 }
 
 .qty-badge {
-  background: #5c3d2e;
-  color: #f5e6c8;
-  padding: 6px 12px;
+  background: #fff8f0;
+  color: #8b6914;
+  border: 2px solid #c4a47a;
+  padding: 6px 10px;
   border-radius: 6px;
   font-weight: bold;
-  font-family: 'Georgia', serif;
-  border: 1px solid #d4a056;
-  white-space: nowrap;
+  font-family: 'MedievalSharp', monospace;
+  font-size: 1.1rem;
+  text-align: center;
+  min-width: 45px;
 }
 
 .item-info {
@@ -39,44 +44,51 @@
 .item-title-row {
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 8px;
 }
 
 .item-name {
   font-weight: bold;
   color: #5c3d2e;
   font-size: 1.1rem;
+  font-family: 'MedievalSharp', monospace;
+  letter-spacing: 0.5px;
 }
 
 .plain-text-weight {
   font-style: italic;
   color: #8b6914;
   font-size: 0.9rem;
+  font-family: 'Georgia', serif;
   font-weight: bold;
 }
 
 .item-desc {
   color: #3a2518;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-family: 'Georgia', serif;
+  line-height: 1.3;
 }
 
 .btn-delete {
   background: #3a2518;
   color: #d4a056;
   border: 1px solid #8b6914;
-  padding: 6px 12px;
   border-radius: 6px;
+  padding: 6px 12px;
   cursor: pointer;
-  font-family: 'Georgia', serif;
-  font-weight: bold;
-  transition: background 0.2s;
+  font-family: 'MedievalSharp', monospace;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
 
 .btn-delete:hover {
   background: #721c24;
-  color: #fff;
+  color: #ffffff;
+  border-color: #721c24;
+  transform: scale(1.05);
 }
 
 .qty-input {

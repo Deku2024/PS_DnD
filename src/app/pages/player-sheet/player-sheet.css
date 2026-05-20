@@ -660,3 +660,22 @@ html {
   font-family: 'Georgia', serif;
   margin-left: 8px;
 }
+
+.btn-delete-all {
+  background: transparent;
+  color: #a71d2a;
+  border: 2px solid #c4a47a;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Georgia', serif;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.btn-delete-all:hover {
+  background: #721c24;
+  color: #ffffff;
+  border-color: #721c24;
+  transform: translateY(-1px);
+}

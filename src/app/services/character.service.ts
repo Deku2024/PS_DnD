@@ -67,16 +67,19 @@ export class CharacterService {
   }
 
   async updateMultipleStats(characterId: string, stats: { [key: string]: number }): Promise<void> {
-    const ref = doc(this.firebase.db, this.col, characterId);
-    const updates: any = {
-      updatedAt: new Date().toISOString()
-    };
+    if (!characterId || Object.keys(stats).length === 0) return;
 
-    Object.keys(stats).forEach(key => {
-      updates[key] = increment(stats[key]);
-    });
+    const charRef = doc(this.firebase.db, this.col, characterId);
 
-    await updateDoc(ref, updates);
+    try {
+      await updateDoc(charRef, {
+        ...stats,
+        updatedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error al actualizar estadísticas múltiples:", error);
+      throw error;
+    }
   }
 
   async addItemToInventory(characterId: string, item: { name: string, quantity: number, weight: number, description: string }): Promise<void> {

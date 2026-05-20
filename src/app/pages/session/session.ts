@@ -53,6 +53,9 @@ export class SessionPage implements OnInit, OnDestroy {
   selectedItemId: string = '';
   itemQuantityToGive: number = 1;
 
+  // 🟢 Listado de advertencias para que el Máster sepa si se alcanzaron umbrales
+  dmAlerts: string[] = [];
+
   private unsubscribe?: () => void;
   private authSub?: Subscription;
   private initializing = false;
@@ -69,8 +72,7 @@ export class SessionPage implements OnInit, OnDestroy {
     private presenceService: PresenceService,
     private rollHistoryService: RollHistoryService,
     private itemsService: ItemsService
-  ) {
-  }
+  ) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -175,47 +177,105 @@ export class SessionPage implements OnInit, OnDestroy {
     if (this.selectedPlayerUids.size === 0) return;
     if (this.lifeAction === 0 && this.goldAction === 0 && this.xpAction === 0) return;
 
-    const stats: { [key: string]: number } = {};
-    if (this.lifeAction !== 0) stats['life'] = this.lifeAction;
-    if (this.goldAction !== 0) stats['money.po'] = this.goldAction;
-    if (this.xpAction !== 0) stats['experience'] = this.xpAction;
+    const newAlerts: string[] = [];
 
     for (const uid of this.selectedPlayerUids) {
       const char = this.characters[uid];
       if (char) {
+        const stats: { [key: string]: number } = {};
+
+        if (this.lifeAction !== 0) {
+          const currentLife = char.life ?? 0;
+          const maxLife = char.maxLife ?? currentLife;
+          let newLife = currentLife + this.lifeAction;
+
+          if (newLife > maxLife) {
+            newLife = maxLife;
+            newAlerts.push(`⚠️ ${char.name} ya alcanzó su Vida Máxima (${maxLife}).`);
+          } else if (newLife < 0) {
+            newLife = 0;
+            newAlerts.push(`💀 ${char.name} ha caído a 0 PV.`);
+          }
+          stats['life'] = newLife;
+          char.life = newLife;
+        }
+
+        if (this.goldAction !== 0) {
+          const currentGold = char.money?.po ?? 0;
+          let newGold = currentGold + this.goldAction;
+
+          if (newGold < 0) {
+            newGold = 0;
+            newAlerts.push(`🪙 El oro de ${char.name} se ajustó a 0 (No puede ser negativo).`);
+          }
+          stats['money.po'] = newGold;
+
+          if (!char.money) char.money = { po: 0 };
+          char.money.po = newGold;
+        }
+
+       if (this.xpAction !== 0) {
+          const currentXp = char.experience ?? 0;
+          let newXp = currentXp + this.xpAction;
+
+          if (newXp < 0) {
+            newXp = 0;
+            newAlerts.push(`✨ La experiencia de ${char.name} se ajustó a 0.`);
+          }
+          stats['experience'] = newXp;
+          char.experience = newXp;
+        }
+
         await this.characterService.updateMultipleStats(char.id, stats);
       }
     }
+
+    this.dmAlerts = newAlerts;
 
     this.lifeAction = 0;
     this.goldAction = 0;
     this.xpAction = 0;
     this.selectedPlayerUids.clear();
+
+    this.cd.detectChanges();
   }
 
   async applyAddItem(): Promise<void> {
-    if (this.selectedPlayerUids.size === 0 || !this.selectedItemId || this.itemQuantityToGive <= 0) return;
+    if (!this.selectedItemId || this.selectedPlayerUids.size === 0 || this.itemQuantityToGive <= 0) return;
 
-    const selectedItem = this.dmItems.find(i => i.id === this.selectedItemId);
-    if (!selectedItem) return;
-
-    const itemToGive = {
-      name: selectedItem.name,
-      description: selectedItem.description,
-      weight: selectedItem.weight,
-      quantity: this.itemQuantityToGive
-    };
+    const itemToGive = this.dmItems.find(item => item.id === this.selectedItemId);
+    if (!itemToGive) return;
 
     for (const uid of this.selectedPlayerUids) {
       const char = this.characters[uid];
       if (char) {
-        await this.characterService.addItemToInventory(char.id, itemToGive);
+        const freshChar = await this.characterService.getCharacterById(char.id);
+        let inventory = freshChar?.inventory ? [...freshChar.inventory] : (char.inventory ? [...char.inventory] : []);
+
+        const existingItemIndex = inventory.findIndex((i: any) =>
+          i.name?.trim().toLowerCase() === itemToGive.name?.trim().toLowerCase()
+        );
+
+        if (existingItemIndex > -1) {
+          const currentQty = inventory[existingItemIndex].quantity || 1;
+          inventory[existingItemIndex].quantity = currentQty + this.itemQuantityToGive;
+        } else {
+          inventory.push({
+            ...itemToGive,
+            quantity: this.itemQuantityToGive
+          });
+        }
+
+        await this.characterService.updateCharacter(char.id, { inventory: inventory } as any);
+        char.inventory = inventory;
       }
     }
 
     this.selectedItemId = '';
     this.itemQuantityToGive = 1;
     this.selectedPlayerUids.clear();
+
+    this.cd.detectChanges();
   }
 
   openModal(uid: string): void {
@@ -348,5 +408,3 @@ export class SessionPage implements OnInit, OnDestroy {
     this.itemsUnsub?.();
   }
 }
-
-
