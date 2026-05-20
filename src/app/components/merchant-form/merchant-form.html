@@ -3,7 +3,7 @@
     <!-- Nombre -->
     <input
         type="text"
-        placeholder="nombre"
+        placeholder="Nombre"
         formControlName="name"
     >
 
@@ -20,9 +20,11 @@
             }
 
         </div>
-    }    
+    }
 
-    <h3>Selecciona los objetos que quieres que venda.</h3>
+    <hr class="modal-divider" />
+
+    <h2>Objetos que vende</h2>
 
     <app-item-search
             [items]="items"
@@ -38,8 +40,6 @@
 
     }
 
-    <h2>Objetos que vende</h2>
-
     @if (sellingList.length == 0) {
         <span>Todavía no se han seleccionado objetos</span>
     }
@@ -48,7 +48,7 @@
 
         @for (group of sellingList.controls; track $index; let i = $index) {
 
-            <div [formGroupName]="i">
+            <div class="item-card" [formGroupName]="i">
 
                 <p>
                     {{
@@ -56,10 +56,14 @@
                     }}
                 </p>
 
-                <input
-                    type="number"
-                    formControlName="price"
-                >
+                <label>
+                    Precio
+
+                    <input
+                        type="number"
+                        formControlName="price"
+                    >
+                </label>
 
                 @if (group.get('price')?.invalid && group.get('price')?.touched) {
                     <div class="error">
@@ -79,10 +83,15 @@
                     </div>
                 }
 
-                <input
-                    type="number"
-                    formControlName="quantity"
-                >
+                <label>
+                    Cantidad
+
+                    <input
+                        type="number"
+                        formControlName="quantity"
+                    >
+                </label>
+
 
                 @if (group.get('quantity')?.invalid && group.get('quantity')?.touched) {
                     <div class="error">
@@ -120,7 +129,7 @@
 
     <hr class="modal-divider" />
 
-    <h3>Selecciona los objetos que acepta comprar.</h3>
+    <h2>Objetos que compra</h2>
 
     <app-item-search
         [items]="items"
@@ -133,8 +142,6 @@
             {{ buyingDuplicateError }}
         </div>
     }
-
-    <h2>Objetos que compra</h2>
 
     @if (buyingList.length == 0) {
         <span>Todavía no se han seleccionado objetos</span>
@@ -153,15 +160,58 @@
                     }}
                 </p>
 
-                <input
-                    type="number"
-                    formControlName="price"
-                >
+                <label>
+                    Precio
 
-                <input
-                    type="number"
-                    formControlName="quantity"
-                >
+                    <input
+                        type="number"
+                        formControlName="price"
+                    >
+                </label>
+                @if (group.get('price')?.invalid && group.get('price')?.touched) {
+                    <div class="error">
+
+                        @if (group.get('price')?.errors?.['required']) {
+                        <span>El precio es obligatorio</span>
+                        }
+
+                        @if (group.get('price')?.errors?.['min']) {
+                        <span>El precio no puede ser negativo</span>
+                        }
+
+                        @if (group.get('price')?.errors?.['pattern']) {
+                        <span>Sólo números enteros</span>
+                        }
+
+                    </div>
+                }
+
+                <label>
+                    Cantidad
+
+                    <input
+                        type="number"
+                        formControlName="quantity"
+                    >
+                </label>
+
+                @if (group.get('quantity')?.invalid && group.get('quantity')?.touched) {
+                    <div class="error">
+
+                        @if (group.get('quantity')?.errors?.['required']) {
+                        <span>La cantidad es obligatoria</span>
+                        }
+
+                        @if (group.get('quantity')?.errors?.['min']) {
+                        <span>La cantidad no puede ser negativa</span>
+                        }
+
+                        @if (group.get('quantity')?.errors?.['pattern']) {
+                        <span>Sólo números enteros</span>
+                        }
+
+                    </div>
+                }
 
             </div>
 
