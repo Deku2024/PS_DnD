@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit, effect, input, output } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MerchantService } from '../../services/merchant.service';
 import { Item } from '../../interfaces/Item';
 import { ItemsService } from '../../services/items.service';
@@ -30,7 +30,7 @@ export class MerchantForm implements OnInit {
   constructor(private fb: FormBuilder, merchantService: MerchantService, private itemService: ItemsService, private ch: ChangeDetectorRef) {
     this.merchantForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
-      sellingList: this.fb.array([]),
+      sellingList: this.fb.array([], [this.minArrayLength(1)]),
       buyingList: this.fb.array([])
     })
 
@@ -83,6 +83,23 @@ export class MerchantForm implements OnInit {
     }
   }
 
+  //validación del formulario
+  minArrayLength(min: number) {
+
+    return (control: AbstractControl): ValidationErrors | null => {
+
+      const array = control as FormArray;
+
+      return array.length >= min
+        ? null
+        : { minArrayLength: true };
+    };
+  }
+
+  get nameControl() {
+    return this.merchantForm.get('name');
+  }
+
   // crear info de objetos de mercader
   
   createMerchantItem(item: Item, price: number, quantity: number): FormGroup {
@@ -122,20 +139,37 @@ export class MerchantForm implements OnInit {
   }
 
   saveMerchant() {
-      const merchantData: Merchant = {
-        ...this.merchantForm.value
-      };
+    if (this.merchantForm.invalid) {
+
+      this.merchantForm.markAllAsTouched();
+
+      return;
+    }
+
+    const merchantData: Merchant = {
+      ...this.merchantForm.value
+    };
 
     if (this.merchant()?.id) {
       merchantData.id = this.merchant()!.id;
     }
 
     this.merchantInfo.emit(merchantData);
-    this.merchantForm.reset();
+
+    this.resetForm();
+  }
+
+  resetForm() {
+    this.merchantForm.reset({
+      name: ''
+    });
+
+    this.sellingList.clear();
+    this.buyingList.clear();
   }
 
   cancel() {
-    this.merchantForm.reset();
+    this.resetForm();
     this.cancelEvent.emit(false);
   }
 
