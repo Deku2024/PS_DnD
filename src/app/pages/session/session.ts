@@ -43,9 +43,9 @@ export class SessionPage implements OnInit, OnDestroy {
   imageUploadError = '';
   showErrorModal = false;
   imagePreviewUrl: string | null = null;
+  activeTab: 'players' | 'map' | 'audio' = 'players';
   private pendingFile: File | null = null;
   private cloudinaryService = inject(CloudinaryService);
-
   // Map settings
   pendingIsMap = false;
   pendingHexSize = 40;
@@ -76,6 +76,7 @@ export class SessionPage implements OnInit, OnDestroy {
   modalPlayerEmail = '';
   modalUid = '';
   presenceMap: { [uid: string]: boolean } = {};
+  isSidebarOpen = true;
 
   selectedPlayerUids = new Set<string>();
   lifeAction: number = 0;
@@ -449,7 +450,9 @@ private rollHistoryService: RollHistoryService,
     this.closeModal();
     this.router.navigate(['/choose-character'], {queryParams: {sessionId: this.session.id}});
   }
-
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
   async kickPlayer(uid: string): Promise<void> {
     if (!this.session?.id || !this.isMaster) return;
     try {
