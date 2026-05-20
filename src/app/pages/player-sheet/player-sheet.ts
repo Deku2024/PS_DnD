@@ -8,7 +8,7 @@ import {
   ReactiveFormsModule,
   ValidatorFn,
   Validators,
-  FormsModule // 🟢 IMPORTANTE: Para usar ngModel en el input de cantidad del modal
+  FormsModule
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Dropdown } from "../../components/dropdown/dropdown";
@@ -20,7 +20,7 @@ import { AuthService } from '../../services/auth.service';
 import { SessionService } from '../../services/sessions.service';
 import { MoneyComponent } from '../../components/money.component/money.component';
 import { AbilityComponent } from '../../components/ability.component/ability.component';
-
+import { InventoryItemComponent } from '../../components/inventory.component/inventory.component';
 import { Item } from '../../interfaces/Item';
 
 @Component({
@@ -396,7 +396,6 @@ getFormControl(controlName: string) {
 
   getAttributesList() {
     return this.attributes_list;
-  }
   }
 
   goBack(): void {
