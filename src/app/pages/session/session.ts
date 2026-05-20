@@ -11,11 +11,14 @@ import { CloudinaryService } from '../../services/cloudinary.service';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
 import { BattleButtonComponent } from '../../components/battle.button.component/battle.button.component';
+import { MerchantForm } from "../../components/merchant-form/merchant-form";
+import { Merchant } from '../../interfaces/Merchant';
+import { MerchantService } from '../../services/merchant.service';
 
 @Component({
   selector: 'app-session',
   standalone: true,
-  imports: [CommonModule, BattleButtonComponent, HistoryButtonComponent],
+  imports: [CommonModule, BattleButtonComponent, HistoryButtonComponent, MerchantForm],
   templateUrl: './session.html',
   styleUrl: './session.css'
 })
@@ -42,6 +45,9 @@ export class SessionPage implements OnInit, OnDestroy {
   presenceMap: { [uid: string]: boolean } = {};
 
   showMerchantModal = false;
+  myMerchantsLoading = false;
+  showMyMerchants = false;
+  myMerchants: Merchant[] = [];
 
   private unsubscribe?: () => void;
   private authSub?: Subscription;
@@ -56,7 +62,8 @@ export class SessionPage implements OnInit, OnDestroy {
     private characterService: CharacterService,
     private cd: ChangeDetectorRef,
     private presenceService: PresenceService,
-    private rollHistoryService: RollHistoryService
+    private rollHistoryService: RollHistoryService,
+    private merchantService: MerchantService
 ) {}
 
   ngOnInit(): void {
@@ -283,9 +290,22 @@ export class SessionPage implements OnInit, OnDestroy {
     this.showMerchantModal = false;
   }
 
+  toggleMyMerchants(): void {
+    this.showMyMerchants = !this.showMyMerchants;
+  }
+
+  openMerchantModal(): void {
+    this.showMerchantModal = true;
+  }
+
   ngOnDestroy(): void {
     this.unsubscribe?.();
     this.authSub?.unsubscribe();
     this.presenceUnsub?.();
+  }
+
+  saveMerchant(merchant: Merchant) {
+    if (this.session?.id)
+    this.merchantService.saveMerchant(this.session?.id, merchant);
   }
 }

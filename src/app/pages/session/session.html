@@ -135,6 +135,42 @@
 
     </div>
 
+    <!--Mercaderes-->
+    <div class="card">
+      <h3>Mis mercaderes</h3>
+      <button 
+        class="btn-toggle-merchants"
+        (click)="toggleMyMerchants()"
+        [disabled]="myMerchantsLoading"
+      >
+        {{ myMerchantsLoading ? 'Cargando...' : (showMyMerchants ? '▲ Ocultar mercaderes' : '▼ Ver mis mercaderes')}}
+    
+      </button>
+
+      @if(showMyMerchants && !myMerchantsLoading) {
+        <div class="my-merchants-list">
+            @if (myMerchants.length === 0) {
+              <p class="empty-merchants">
+                Aún no tienes mercaderes
+              </p>
+            }
+
+            <div class="merchant-info">
+              
+                
+            </div>
+        </div>
+
+      }
+
+
+
+
+
+
+    </div>
+
+
     <!-- Acciones -->
     <div class="actions">
       <div *ngIf="!isMaster">
@@ -264,16 +300,19 @@
       </div>
 
       <div class="modal-body">
-
-        <hr class="modal-divider" />
-
-        <div class="modal-actions" *ngIf="currentUser && modalUid === currentUser.uid">
-          <button class="btn-edit-char" (click)="editMyCharacter()">✏ Editar mi personaje</button>
-          <button class="btn-change-char" (click)="changeMyCharacter()">🔁 Cambiar personaje</button>
-        </div>
+        @if (currentUser?.uid; as uid) {
+          <app-merchant-form 
+          [currentUserId]="uid"
+          (merchantInfo)="saveMerchant($event)"
+          ></app-merchant-form>
+        }
       </div>
     </div>
   </div>
+
+  @if (isMaster) {
+    <button (click)="openMerchantModal()">Crear Mercader</button>
+  }
 
 
 </div>
