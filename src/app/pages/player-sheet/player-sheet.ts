@@ -8,47 +8,49 @@ import {
   ReactiveFormsModule,
   ValidatorFn,
   Validators,
-  FormsModule // 🟢 IMPORTANTE: Para usar ngModel en el input de cantidad del modal
+  FormsModule
 } from '@angular/forms';
-import {ActivatedRoute, Router} from '@angular/router';
-import {Dropdown} from "../../components/dropdown/dropdown";
-import {D20RollerButtonComponent} from '../../components/d20.roller.button.component/d20.roller.button.component';
-import {ResultThrowFrameComponent} from '../../components/result.throw.frame.component/result.throw.frame.component';
-import {
-  GeneralThrowsButtonComponent
-} from '../../components/general.throws.button.component/general.throws.button.component';
-import {CharacterService} from '../../services/character.service';
-import {AuthService} from '../../services/auth.service';
-import {SessionService} from '../../services/sessions.service';
-import {InventoryItemComponent} from '../../components/inventory.component/inventory.component';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Dropdown } from "../../components/dropdown/dropdown";
+import { D20RollerButtonComponent } from '../../components/d20.roller.button.component/d20.roller.button.component';
+import { ResultThrowFrameComponent } from '../../components/result.throw.frame.component/result.throw.frame.component';
+import { GeneralThrowsButtonComponent } from '../../components/general.throws.button.component/general.throws.button.component';
+import { CharacterService } from '../../services/character.service';
+import { AuthService } from '../../services/auth.service';
+import { SessionService } from '../../services/sessions.service';
 import { MoneyComponent } from '../../components/money.component/money.component';
-import {AbilityComponent} from '../../components/ability.component/ability.component';
-
+import { AbilityComponent } from '../../components/ability.component/ability.component';
+import { InventoryItemComponent } from '../../components/inventory.component/inventory.component';
 import { Item } from '../../interfaces/Item';
 
 @Component({
   selector: 'app-player-sheet',
   standalone: true,
-  // 🟢 Añadimos FormsModule a imports
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, Dropdown, D20RollerButtonComponent, ResultThrowFrameComponent, GeneralThrowsButtonComponent, InventoryItemComponent, MoneyComponent, AbilityComponent],
+imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    Dropdown,
+    D20RollerButtonComponent,
+    ResultThrowFrameComponent,
+    GeneralThrowsButtonComponent,
+    InventoryItemComponent,
+    MoneyComponent,
+    AbilityComponent
+  ],
   templateUrl: './player-sheet.html',
   styleUrl: './player-sheet.css',
 })
 export class PlayerSheet implements OnInit {
-  classHabilities: string = '';
   sessionId: string | null = null;
   characterId: string | null = null;
   saving = false;
   saveError = '';
   isInInventory = true;
-
   defaultImage: string = '/player-icon-example.png';
   imagePreview: string | ArrayBuffer | null = null;
   selectedFile: File | null = null;
-
   playerSheetForm: FormGroup;
-
-  inventoryItems: Item[] = [];
 
   // 🟢 VARIABLES PARA EL NUEVO MODAL CUSTOM
   showActionModal: boolean = false;
@@ -98,20 +100,16 @@ export class PlayerSheet implements OnInit {
     private location: Location
   ) {
     this.playerSheetForm = this.fb.group({
-      name: ['Aragorn', [Validators.required, Validators.minLength(3)]],
+      name: ['', [Validators.required, Validators.minLength(3)]],
       age: [18, [Validators.required, Validators.min(18), Validators.max(80)]],
-      experience: [5, [Validators.required, Validators.min(0), Validators.max(20)]],
-
-      life: [30, [Validators.required, Validators.min(0)]],
-      maxLife: [60, [Validators.required, Validators.min(0)]],
-      tempLife: [13, [Validators.min(0)]],
-
-      armourClass: [9, [Validators.required, Validators.min(1)]],
-
-      race: ['Elfo', Validators.required],
-      class: ['Bárbaro', Validators.required],
-      alignment: ['Legal Bueno', Validators.required],
-
+      experience: [0, [Validators.required, Validators.min(0), Validators.max(20)]],
+      life: [10, [Validators.required, Validators.min(0)]],
+      maxLife: [10, [Validators.required, Validators.min(0)]],
+      tempLife: [0, [Validators.min(0)]],
+      armourClass: [10, [Validators.required, Validators.min(1)]],
+      race: ['', Validators.required],
+      class: ['', Validators.required],
+      alignment: ['', Validators.required],
       attributes: this.fb.group({
         strength: [10, [Validators.required, Validators.min(1), Validators.max(20)]],
         dexterity: [10, [Validators.required, Validators.min(1), Validators.max(20)]],
@@ -129,11 +127,18 @@ export class PlayerSheet implements OnInit {
       }),
       abilities: this.fb.array([]),
       image: [this.defaultImage]
-
     }, { validators: this.validateLifeNotExceedMax() });
   }
 
-  get abilitiesFormArray() : FormArray {
+  get inventoryFormArray(): FormArray {
+    return this.playerSheetForm.get('inventory') as FormArray;
+  }
+
+  get inventoryItems(): FormGroup[] {
+    return this.inventoryFormArray.controls as FormGroup[];
+  }
+
+  get abilitiesFormArray(): FormArray {
     return this.playerSheetForm.get('abilities') as FormArray;
   }
 
@@ -141,8 +146,30 @@ export class PlayerSheet implements OnInit {
     return this.abilitiesFormArray.controls as FormGroup[];
   }
 
+  get totalWeight(): number {
+    return this.inventoryFormArray.controls.reduce((acc, control) => {
+      const group = control as FormGroup;
+      const q = group.get('quantity')?.value || 0;
+      const w = group.get('weight')?.value || 0;
+      return acc + (q * w);
+    }, 0);
+  }
+
+  get carryCapacity(): number {
+    const strength = this.playerSheetForm.get('attributes.strength')?.value || 10;
+    return strength * 15;
+  }
+
+  get encumbranceStatus() {
+    const strength = this.playerSheetForm.get('attributes.strength')?.value || 10;
+    const weight = this.totalWeight;
+    if (weight > strength * 10) return { label: 'Muy Cargado', class: 'overencumbered' };
+    if (weight > strength * 5) return { label: 'Cargado', class: 'encumbered' };
+    return { label: 'Carga Normal', class: 'normal' };
+  }
+
   addAbility(): void {
-    this.abilitiesFormArray.push(
+this.abilitiesFormArray.push(
       this.fb.group({
         name: ['', Validators.required],
         description: ['', Validators.required]
@@ -168,7 +195,6 @@ export class PlayerSheet implements OnInit {
   ngOnInit(): void {
     this.sessionId = this.route.snapshot.queryParamMap.get('sessionId');
     this.characterId = this.route.snapshot.queryParamMap.get('characterId');
-
     if (this.sessionId && this.characterId) {
       this.characterService.getCharacterById(this.characterId).then(character => {
         if (character) this.patchFormWithCharacter(character);
@@ -177,13 +203,25 @@ export class PlayerSheet implements OnInit {
   }
 
   private patchFormWithCharacter(character: any): void {
-    console.log(character);
     const { userId, sessionId, updatedAt, inventory, abilities, money, ...basic } = character;
-
-    this.inventoryItems = inventory || [];
 
     this.playerSheetForm.patchValue(basic);
     this.playerSheetForm.get('money')?.patchValue(money ?? {ppt: 0, po: 0, pe: 0, pp: 0, pc: 0});
+while (this.inventoryFormArray.length) {
+      this.inventoryFormArray.removeAt(0);
+    }
+    (inventory ?? []).forEach((item: any) => {
+      this.inventoryFormArray.push(this.fb.group({
+        name: [item.name, Validators.required],
+        quantity: [item.quantity, [Validators.required, Validators.min(1)]],
+        weight: [item.weight || 0],
+        description: [item.description]
+      }));
+    });
+
+    while (this.abilitiesFormArray.length) {
+      this.abilitiesFormArray.removeAt(0);
+    }
     (abilities ?? []).forEach((ability: any) => {
       this.abilitiesFormArray.push(this.fb.group({
         name: [ability.name, Validators.required],
@@ -193,71 +231,66 @@ export class PlayerSheet implements OnInit {
     this.cdr.detectChanges();
   }
 
-  onRemoveItem(itemToRemove: Item): void {
+  onRemoveItem(index: number): void {
     if (!this.characterId) return;
-    this.itemToHandle = itemToRemove;
-    const currentQty = itemToRemove.quantity || 1;
-    this.amountToSpend = 1; // Reseteamos el input del modal por defecto
+    const group = this.inventoryFormArray.at(index) as FormGroup;
+    this.itemToHandle = group.value as Item;
 
-    if (currentQty > 1) {
-      this.modalTitle = `Consumir / Tirar: ${itemToRemove.name}`;
-      this.isConfirmationOnly = false;
-    } else {
-      this.modalTitle = `Confirmar acción`;
-      this.isConfirmationOnly = true;
-    }
+    this.amountToSpend = 1;
+    this.isConfirmationOnly = (group.get('quantity')?.value <= 1);
+    this.modalTitle = this.isConfirmationOnly ? 'Confirmar acción' : `Consumir: ${this.itemToHandle.name}`;
     this.showActionModal = true;
-    this.cdr.detectChanges();
   }
 
   async confirmModalAction(): Promise<void> {
     if (!this.characterId || !this.itemToHandle) return;
-    const item = this.itemToHandle;
-    const currentQty = item.quantity || 1;
 
-    if (this.isConfirmationOnly) {
-      this.inventoryItems = this.inventoryItems.filter(i => i.name !== item.name);
-    } else {
-      let qtyToDelete = this.amountToSpend;
-      if (isNaN(qtyToDelete) || qtyToDelete <= 0) qtyToDelete = 1;
-      if (qtyToDelete >= currentQty) {
-        this.inventoryItems = this.inventoryItems.filter(i => i.name !== item.name);
+    // Buscamos el índice en el FormArray
+    const index = this.inventoryFormArray.controls.findIndex(c =>
+      c.get('name')?.value === this.itemToHandle?.name
+    );
+
+    if (index > -1) {
+      const group = this.inventoryFormArray.at(index) as FormGroup;
+      const currentQty = group.get('quantity')?.value || 1;
+
+      if (this.isConfirmationOnly || this.amountToSpend >= currentQty) {
+        this.inventoryFormArray.removeAt(index);
       } else {
-        const itemIndex = this.inventoryItems.findIndex(i => i.name === item.name);
-        if (itemIndex > -1) {
-          this.inventoryItems[itemIndex].quantity = currentQty - qtyToDelete;
-        }
+        group.patchValue({ quantity: currentQty - this.amountToSpend });
       }
-    }
 
-    if (this.playerSheetForm.get('inventory')) {
-      this.playerSheetForm.patchValue({ inventory: this.inventoryItems });
-    }
-
-    try {
-      await this.characterService.updateCharacter(this.characterId, { inventory: this.inventoryItems } as any);
-      this.closeActionModal();
-      this.cdr.detectChanges();
-    } catch (error) {
-      console.error("Error consumiendo el objeto:", error);
+      // Guardar en Firebase
+      try {
+        await this.characterService.updateCharacter(this.characterId, {
+          inventory: this.inventoryFormArray.value
+        });
+        this.closeActionModal();
+        this.cdr.detectChanges();
+      } catch (error) {
+        console.error("Error actualizando inventario:", error);
+      }
     }
   }
 
   async deleteAllModalAction(): Promise<void> {
     if (!this.characterId || !this.itemToHandle) return;
 
-    this.inventoryItems = this.inventoryItems.filter(i => i.name !== this.itemToHandle!.name);
+    const index = this.inventoryFormArray.controls.findIndex(c =>
+      c.get('name')?.value === this.itemToHandle!.name
+    );
 
-    if (this.playerSheetForm.get('inventory')) {
-      this.playerSheetForm.patchValue({ inventory: this.inventoryItems });
-    }
-
-    try {
-      await this.characterService.updateCharacter(this.characterId, { inventory: this.inventoryItems } as any);
-      this.closeActionModal();
-      this.cdr.detectChanges();
-    } catch (error) {
-      console.error("Error borrando el objeto:", error);
+    if (index > -1) {
+      this.inventoryFormArray.removeAt(index);
+      try {
+        await this.characterService.updateCharacter(this.characterId, {
+          inventory: this.inventoryFormArray.value
+        });
+        this.closeActionModal();
+        this.cdr.detectChanges();
+      } catch (error) {
+        console.error("Error borrando objeto:", error);
+      }
     }
   }
 
@@ -273,19 +306,14 @@ export class PlayerSheet implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    if (!this.playerSheetForm.valid) {
-      console.log('Formulario inválido');
-      return;
-    }
-
+    if (!this.playerSheetForm.valid) return;
     const user = this.authService.getCurrentUser();
-    if (!user || !this.sessionId) {
+if (!user || !this.sessionId) {
       console.log('Formulario enviado (sin sesión):', this.playerSheetForm.value);
       return;
     }
 
     this.saving = true;
-    this.saveError = '';
     try {
       let charId: string;
       if (this.characterId) {
@@ -296,9 +324,8 @@ export class PlayerSheet implements OnInit {
       }
       await this.sessionService.setSelectedCharacter(this.sessionId, user.uid, charId);
       this.router.navigate(['/session', this.sessionId]);
-    } catch (e: any) {
-      this.saveError = 'Error al guardar el personaje. Inténtalo de nuevo.';
-      console.error(e);
+    } catch (e) {
+      this.saveError = 'Error al guardar el personaje.';
     } finally {
       this.saving = false;
     }
@@ -328,9 +355,8 @@ export class PlayerSheet implements OnInit {
       this.cdr.markForCheck();
       return;
     }
-
     const file = input.files[0];
-    if (!file.type.startsWith('image/')) {
+if (!file.type.startsWith('image/')) {
       console.error('El archivo no es una imagen');
       return;
     }
@@ -347,7 +373,7 @@ export class PlayerSheet implements OnInit {
     reader.readAsDataURL(file);
   }
 
-  getFormControl(controlName: string) {
+getFormControl(controlName: string) {
     return this.playerSheetForm.get(controlName);
   }
 

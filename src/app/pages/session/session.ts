@@ -13,6 +13,7 @@ import { HexMapComponent } from '../../components/hex-map.component/hex-map.comp
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
 import { BattleButtonComponent } from '../../components/battle.button.component/battle.button.component';
+import { DmFloatingMenuComponent } from '../../components/dm-floating-menu.component/dm-floating-menu.component';
 import { ItemsService } from '../../services/items.service';
 import { Item } from '../../interfaces/Item';
 import { YouTubePlayer } from '@angular/youtube-player';
@@ -20,7 +21,15 @@ import { YouTubePlayer } from '@angular/youtube-player';
 @Component({
   selector: 'app-session',
   standalone: true,
-  imports: [CommonModule, FormsModule, YouTubePlayer, BattleButtonComponent, HistoryButtonComponent, HexMapComponent],
+imports: [
+    CommonModule, 
+    FormsModule, 
+    YouTubePlayer, 
+    BattleButtonComponent, 
+    HistoryButtonComponent, 
+    DmFloatingMenuComponent, 
+    HexMapComponent
+  ],
   templateUrl: './session.html',
   styleUrl: './session.css'
 })
@@ -95,7 +104,7 @@ export class SessionPage implements OnInit, OnDestroy {
     private characterService: CharacterService,
     private cd: ChangeDetectorRef,
     private presenceService: PresenceService,
-    private rollHistoryService: RollHistoryService,
+private rollHistoryService: RollHistoryService,
     private itemsService: ItemsService
   ) {}
 
@@ -601,5 +610,18 @@ export class SessionPage implements OnInit, OnDestroy {
     this.presenceUnsub?.();
     this.itemsUnsub?.();
     Object.values(this.charUnsubs).forEach(unsub => unsub());
+  }
+
+  // 🟢 Dispara el panel inferior del historial
+  triggerHistoryDrawer(): void {
+    // Busca el botón que está dentro de tu componente de historial y lo pulsa
+    const historyNativeButton = document.querySelector('history-button-component button') as HTMLButtonElement;
+    if (historyNativeButton) {
+      historyNativeButton.click();
+    } else {
+      // Alternativa por si el componente controla su propia visibilidad con la variable
+      this.showHistory = !this.showHistory;
+      this.cd.detectChanges();
+    }
   }
 }

@@ -93,7 +93,13 @@
       </p>
 
       <div class="shared-image-controls" *ngIf="isMaster">
-        <input #fileInput type="file" accept="image/*" class="file-input-hidden" (change)="onFileSelected($event)" />
+<input
+  #fileInput
+  type="file"
+  accept="image/*"
+  aria-label="Seleccionar imagen para compartir"
+  class="file-input-hidden"
+  (change)="onFileSelected($event)" />
         <div class="image-preview-container" *ngIf="imagePreviewUrl">
           <app-hex-map
             *ngIf="pendingIsMap"
@@ -358,11 +364,11 @@
         <div class="char-row">
           <span>PPT / PO / PE / PP / PC</span>
           <div class="money-values">
-            <strong>{{ modalCharacter.money?.ppt || 0 }}</strong> /
-            <strong>{{ modalCharacter.money?.po || 0 }}</strong> /
-            <strong>{{ modalCharacter.money?.pe || 0 }}</strong> /
-            <strong>{{ modalCharacter.money?.pp || 0 }}</strong> /
-            <strong>{{ modalCharacter.money?.pc || 0 }}</strong>
+            <strong>{{ modalCharacter.money.ppt || 0 }}</strong> /
+            <strong>{{ modalCharacter.money.po || 0 }}</strong> /
+            <strong>{{ modalCharacter.money.pe || 0 }}</strong> /
+            <strong>{{ modalCharacter.money.pp || 0 }}</strong> /
+            <strong>{{ modalCharacter.money.pc || 0 }}</strong>
           </div>
         </div>
         <hr class="modal-divider" />
@@ -389,5 +395,13 @@
       <div class="modal-body"><p class="error-modal-msg">{{ imageUploadError }}</p></div>
     </div>
   </div>
+
+<app-dm-floating-menu
+    *ngIf="isMaster"
+    [sessionId]="session?.id || ''"
+    [isBattleActive]="session?.status === 'in-battle'"
+    (mapClick)="triggerFileInput()"
+    (historyClick)="triggerHistoryDrawer()">
+  </app-dm-floating-menu>
 
 </div>
