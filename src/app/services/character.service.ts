@@ -1,15 +1,27 @@
 import { Injectable } from '@angular/core';
-import { collection, doc, getDoc, addDoc, query, where, getDocs, updateDoc, onSnapshot, deleteDoc } from 'firebase/firestore';
+import {
+  collection, doc, getDoc, addDoc, query, where,
+  getDocs, updateDoc, onSnapshot, deleteDoc,
+  increment, arrayUnion
+} from 'firebase/firestore';
 import { FirebaseService } from './firebase.service';
-import {SheetInterface} from '../interfaces/SheetInterface';
+import { SheetInterface } from '../interfaces/SheetInterface';
 
-export interface CharacterData extends SheetInterface{
+export interface Money {
+  ppt: number;
+  po: number;
+  pe: number;
+  pp: number;
+  pc: number;
+}
+
+export interface CharacterData extends SheetInterface {
   sessionId: string;
   age: number;
   experience: number;
   race: string;
   class: string;
-  money: number;
+  money: Money;
   updatedAt: string;
 }
 
@@ -62,6 +74,47 @@ export class CharacterService {
     await updateDoc(ref, { ...data, updatedAt: new Date().toISOString() });
   }
 
+  async updateMultipleStats(characterId: string, stats: { [key: string]: number }): Promise<void> {
+    if (!characterId || Object.keys(stats).length === 0) return;
+
+    const charRef = doc(this.firebase.db, this.col, characterId);
+
+    try {
+      await updateDoc(charRef, {
+        ...stats,
+        updatedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error al actualizar estadísticas múltiples:", error);
+      throw error;
+    }
+  }
+
+  async addItemToInventory(characterId: string, item: { name: string, quantity: number, weight: number, description: string }): Promise<void> {
+    const ref = doc(this.firebase.db, this.col, characterId);
+    await updateDoc(ref, {
+      inventory: arrayUnion(item),
+      updatedAt: new Date().toISOString()
+    });
+  }
+
+  async applyDamage(characterId: string, damage: number): Promise<void> {
+    const ref = doc(this.firebase.db, this.col, characterId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+    const current = snap.data() as CharacterData;
+    const newLife = Math.max(0, current.life - damage);
+    await updateDoc(ref, { life: newLife, updatedAt: new Date().toISOString() });
+  }
+
+  listenCharacter(characterId: string, cb: (char: CharacterWithId | null) => void): () => void {
+    const ref = doc(this.firebase.db, this.col, characterId);
+    const unsub = onSnapshot(ref, (snap) => {
+      cb(snap.exists() ? ({ id: snap.id, ...(snap.data() as CharacterData) } as CharacterWithId) : null);
+    });
+    return () => unsub();
+  }
+
   calculateBonus(characteristicValue: number): number {
     return Math.floor((characteristicValue - 10) / 2);
   }
@@ -70,5 +123,4 @@ export class CharacterService {
     const docRef = doc(this.firebase.db, `${this.col}/${characterId}`);
     return await deleteDoc(docRef);
   }
-
 }

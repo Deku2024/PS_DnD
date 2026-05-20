@@ -1,5 +1,5 @@
-import { CommonModule, Location } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import {CommonModule, Location} from '@angular/common';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -7,7 +7,8 @@ import {
   FormGroup,
   ReactiveFormsModule,
   ValidatorFn,
-  Validators
+  Validators,
+  FormsModule // 🟢 IMPORTANTE: Para usar ngModel en el input de cantidad del modal
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Dropdown } from "../../components/dropdown/dropdown";
@@ -20,10 +21,23 @@ import { SessionService } from '../../services/sessions.service';
 import { MoneyComponent } from '../../components/money.component/money.component';
 import { AbilityComponent } from '../../components/ability.component/ability.component';
 
+import { Item } from '../../interfaces/Item';
+
 @Component({
   selector: 'app-player-sheet',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Dropdown, D20RollerButtonComponent, ResultThrowFrameComponent, GeneralThrowsButtonComponent, MoneyComponent, AbilityComponent],
+imports: [
+    CommonModule, 
+    ReactiveFormsModule, 
+    FormsModule, 
+    Dropdown, 
+    D20RollerButtonComponent, 
+    ResultThrowFrameComponent, 
+    GeneralThrowsButtonComponent, 
+    InventoryItemComponent, 
+    MoneyComponent, 
+    AbilityComponent
+  ],
   templateUrl: './player-sheet.html',
   styleUrl: './player-sheet.css',
 })
@@ -32,10 +46,20 @@ export class PlayerSheet implements OnInit {
   characterId: string | null = null;
   saving = false;
   saveError = '';
+  isInInventory = true;
   defaultImage: string = '/player-icon-example.png';
   imagePreview: string | ArrayBuffer | null = null;
   selectedFile: File | null = null;
   playerSheetForm: FormGroup;
+
+  inventoryItems: Item[] = [];
+
+  // 🟢 VARIABLES PARA EL NUEVO MODAL CUSTOM
+  showActionModal: boolean = false;
+  itemToHandle: Item | null = null;
+  amountToSpend: number = 1; // Input del modal para restar
+  modalTitle: string = '';
+  isConfirmationOnly: boolean = false; // true si qty=1, false si qty>1
 
   raceOptions = [
     { value: "human", label: "Humano"},
@@ -103,7 +127,6 @@ export class PlayerSheet implements OnInit {
         pp:  [0, [Validators.min(0)]],
         pc:  [0, [Validators.min(0)]]
       }),
-      inventory: this.fb.array([]),
       abilities: this.fb.array([]),
       image: [this.defaultImage]
     }, { validators: this.validateLifeNotExceedMax() });
@@ -147,10 +170,12 @@ export class PlayerSheet implements OnInit {
   }
 
   addAbility(): void {
-    this.abilitiesFormArray.push(this.fb.group({
-      name: ['', Validators.required],
-      description: ['', Validators.required]
-    }));
+this.abilitiesFormArray.push(
+      this.fb.group({
+        name: ['', Validators.required],
+        description: ['', Validators.required]
+      })
+    );
   }
 
   removeAbility(index: number): void {
@@ -180,10 +205,12 @@ export class PlayerSheet implements OnInit {
 
   private patchFormWithCharacter(character: any): void {
     const { userId, sessionId, updatedAt, inventory, abilities, money, ...basic } = character;
+
+    this.inventoryItems = inventory || [];
+
     this.playerSheetForm.patchValue(basic);
     this.playerSheetForm.get('money')?.patchValue(money ?? {ppt: 0, po: 0, pe: 0, pp: 0, pc: 0});
-
-    while (this.inventoryFormArray.length) {
+while (this.inventoryFormArray.length) {
       this.inventoryFormArray.removeAt(0);
     }
     (inventory ?? []).forEach((item: any) => {
@@ -207,10 +234,92 @@ export class PlayerSheet implements OnInit {
     this.cdr.detectChanges();
   }
 
+  onRemoveItem(itemToRemove: Item): void {
+    if (!this.characterId) return;
+    this.itemToHandle = itemToRemove;
+    const currentQty = itemToRemove.quantity || 1;
+    this.amountToSpend = 1; // Reseteamos el input del modal por defecto
+
+    if (currentQty > 1) {
+      this.modalTitle = `Consumir / Tirar: ${itemToRemove.name}`;
+      this.isConfirmationOnly = false;
+    } else {
+      this.modalTitle = `Confirmar acción`;
+      this.isConfirmationOnly = true;
+    }
+    this.showActionModal = true;
+    this.cdr.detectChanges();
+  }
+
+  async confirmModalAction(): Promise<void> {
+    if (!this.characterId || !this.itemToHandle) return;
+    const item = this.itemToHandle;
+    const currentQty = item.quantity || 1;
+
+    if (this.isConfirmationOnly) {
+      this.inventoryItems = this.inventoryItems.filter(i => i.name !== item.name);
+    } else {
+      let qtyToDelete = this.amountToSpend;
+      if (isNaN(qtyToDelete) || qtyToDelete <= 0) qtyToDelete = 1;
+      if (qtyToDelete >= currentQty) {
+        this.inventoryItems = this.inventoryItems.filter(i => i.name !== item.name);
+      } else {
+        const itemIndex = this.inventoryItems.findIndex(i => i.name === item.name);
+        if (itemIndex > -1) {
+          this.inventoryItems[itemIndex].quantity = currentQty - qtyToDelete;
+        }
+      }
+    }
+
+    if (this.playerSheetForm.get('inventory')) {
+      this.playerSheetForm.patchValue({ inventory: this.inventoryItems });
+    }
+
+    try {
+      await this.characterService.updateCharacter(this.characterId, { inventory: this.inventoryItems } as any);
+      this.closeActionModal();
+      this.cdr.detectChanges();
+    } catch (error) {
+      console.error("Error consumiendo el objeto:", error);
+    }
+  }
+
+  async deleteAllModalAction(): Promise<void> {
+    if (!this.characterId || !this.itemToHandle) return;
+
+    this.inventoryItems = this.inventoryItems.filter(i => i.name !== this.itemToHandle!.name);
+
+    if (this.playerSheetForm.get('inventory')) {
+      this.playerSheetForm.patchValue({ inventory: this.inventoryItems });
+    }
+
+    try {
+      await this.characterService.updateCharacter(this.characterId, { inventory: this.inventoryItems } as any);
+      this.closeActionModal();
+      this.cdr.detectChanges();
+    } catch (error) {
+      console.error("Error borrando el objeto:", error);
+    }
+  }
+
+  cancelModalAction(): void {
+    this.closeActionModal();
+  }
+
+  private closeActionModal(): void {
+    this.showActionModal = false;
+    this.itemToHandle = null;
+    this.modalTitle = '';
+    this.amountToSpend = 1;
+  }
+
   async onSubmit(): Promise<void> {
     if (!this.playerSheetForm.valid) return;
     const user = this.authService.getCurrentUser();
-    if (!user || !this.sessionId) return;
+if (!user || !this.sessionId) {
+      console.log('Formulario enviado (sin sesión):', this.playerSheetForm.value);
+      return;
+    }
 
     this.saving = true;
     try {
@@ -255,7 +364,12 @@ export class PlayerSheet implements OnInit {
       return;
     }
     const file = input.files[0];
-    if (!file.type.startsWith('image/')) return;
+if (!file.type.startsWith('image/')) {
+      console.error('El archivo no es una imagen');
+      return;
+    }
+
+    this.selectedFile = file;
     const reader = new FileReader();
     reader.onload = async () => {
       const base64 = reader.result as string;
@@ -267,15 +381,22 @@ export class PlayerSheet implements OnInit {
     reader.readAsDataURL(file);
   }
 
+getFormControl(controlName: string) {
+    return this.playerSheetForm.get(controlName);
+  }
+
+  private attributes_list = [
+    { name: 'strength', label: 'Fuerza (STR)' },
+    { name: 'dexterity', label: 'Destreza (DEX)' },
+    { name: 'constitution', label: 'Constitución (CON)' },
+    { name: 'intelligence', label: 'Inteligencia (INT)' },
+    { name: 'wisdom', label: 'Sabiduría (WIS)' },
+    { name: 'charisma', label: 'Carisma (CHA)' }
+  ];
+
   getAttributesList() {
-    return [
-      { name: 'strength', label: 'Fuerza (STR)' },
-      { name: 'dexterity', label: 'Destreza (DEX)' },
-      { name: 'constitution', label: 'Constitución (CON)' },
-      { name: 'intelligence', label: 'Inteligencia (INT)' },
-      { name: 'wisdom', label: 'Sabiduría (WIS)' },
-      { name: 'charisma', label: 'Carisma (CHA)' }
-    ];
+    return this.attributes_list;
+  }
   }
 
   goBack(): void {

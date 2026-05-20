@@ -8,6 +8,7 @@ interface Throws {
 
 export interface ThrowsResult {
   result: number;
+  userId?: string;
   throws: number[];
   bonus: number;
   type: TypeOfThrow;
@@ -62,10 +63,10 @@ export class DiceRollerService {
     return result;
   }
 
-  public rollAD20(bonus?: number, dc?: number): ThrowsResult {
+  public rollAD20(bonus?: number, dc?: number, userId?: string): ThrowsResult {
     let throwsResult = this.initializeResult(bonus ?? 0, 20, 1, dc ?? -1);
     throwsResult = this.roll(this.buildThrows(1, 20), dc ?? -1, throwsResult);
-
+    throwsResult.userId = userId;
     this.isCritic(throwsResult);
     this.lastResultSubject.next(throwsResult);
     return throwsResult;

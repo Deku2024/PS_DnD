@@ -1,3 +1,10 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .sheet-empty {
   padding: 2rem 1.25rem;
   text-align: center;
@@ -9,6 +16,7 @@
 .sheet-list {
   overflow-y: auto;
   flex: 1;
+  min-height: 0;
   padding: 0.75rem 1.25rem;
   display: flex;
   flex-direction: column;
@@ -23,6 +31,7 @@
   border: 1px solid rgba(198, 167, 71, 0.25);
   border-radius: 6px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .session-card-header {
@@ -149,7 +158,7 @@
 
 .player-name {
   font-size: 0.82rem;
-  color: var(--color-text-primary, #c6a747);
+  color: #c6a747;
   font-family: 'Palatino Linotype', Palatino, Georgia, serif;
   flex: 1;
   min-width: 0;
@@ -328,4 +337,157 @@
   border-radius: 4px;
   padding: 2px 8px;
   color: #dc2626;
+}
+.player-snapshot-panel {
+  background: rgba(30, 25, 20, 0.95);
+  border: 1px solid #5d4a31;
+  border-radius: 8px;
+  margin: 10px 15px;
+  padding: 12px;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.snapshot-header-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(198, 167, 71, 0.2);
+  align-items: stretch;
+}
+
+.stat-pill {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #4a3c28;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.money-group {
+  flex-grow: 1;
+  min-width: 250px;
+}
+.coins-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+.coin-item {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.coin-item small {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.pill-label {
+  font-size: 0.65rem;
+  color: #8a765a;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.pill-value {
+  font-size: 1rem;
+  color: #e0d0b0;
+  font-weight: bold;
+}
+.snapshot-attributes-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.attr-card {
+  background: linear-gradient(145deg, #2a2218, #1a1510);
+  border: 1px solid #4a3c28;
+  border-radius: 4px;
+  padding: 6px 2px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.attr-card:hover {
+  border-color: #c6a747;
+  transform: translateY(-2px);
+}
+
+.attr-name {
+  display: block;
+  font-size: 0.6rem;
+  color: #8a765a;
+  margin-bottom: 2px;
+}
+
+.attr-val {
+  display: block;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 0 5px rgba(198, 167, 71, 0.3);
+}
+.btn-snapshot-stats {
+  background: #2a2218;
+  color: #c6a747;
+  border: 1px solid #c6a747;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.btn-snapshot-stats:hover {
+  background: #c6a747;
+  color: #000;
+}
+@media (max-width: 768px) {
+  .player-snapshot-panel {
+    margin: 10px 5px;
+    padding: 10px;
+  }
+  .snapshot-header-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 8px;
+  }
+
+  .money-group {
+    grid-column: 1 / -1;
+    min-width: unset;
+  }
+
+  .coins-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 monedas arriba, 2 abajo */
+    gap: 5px;
+  }
+
+  .stat-pill:last-child {
+    grid-column: 1 / -1;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .coins-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .snapshot-attributes-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+  }
+
+  .attr-val {
+    font-size: 0.9rem;
+  }
 }
