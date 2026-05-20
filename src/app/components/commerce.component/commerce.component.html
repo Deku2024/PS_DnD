@@ -6,7 +6,6 @@
 
   <hr class="divider" />
 
-  <!-- Toggle Switch -->
   <div class="mode-toggle">
     <span class="mode-label" [class.active]="!sellMode()">Compra</span>
     <label class="switch">
@@ -16,12 +15,11 @@
     <span class="mode-label" [class.active]="sellMode()">Venta</span>
   </div>
 
-  <!-- Modo Compra -->
   @if (!sellMode()) {
     <section class="buy-section">
       <div class="section-header">
         <h4>Items disponibles para comprar</h4>
-        <span class="total-gold">Oro disponible: {{ totalValueOnCharacter() }} po</span>
+        <span class="total-gold">Po disponible: {{ totalValueOnCharacter() }}</span>
       </div>
 
       <div class="items-list">
@@ -91,7 +89,7 @@
       <div class="inventory-section">
         <h4>Tu inventario</h4>
         <div class="items-list">
-          @for (invItem of currentCharacter().inventory; track invItem.name) {
+          @for (invItem of currentCharacter()?.inventory; track invItem.name) {
             <div class="item-card inventory-item">
               <div class="item-info">
                 <div class="item-header">

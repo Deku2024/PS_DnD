@@ -223,7 +223,7 @@ export class SessionService {
       'audio.updatedAt': Date.now()
     });
   }
-  
+
   async clearAudio(sessionId: string): Promise<void> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     await updateDoc(ref, { audio: null });

@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Injectable, signal, WritableSignal} from '@angular/core';
 import {
   addDoc,
   arrayUnion,
@@ -42,6 +42,8 @@ export interface CharacterWithId extends CharacterData {
 @Injectable({ providedIn: 'root' })
 export class CharacterService {
   private readonly col = 'characters';
+
+  selectedCharacter : WritableSignal<CharacterWithId> = signal<CharacterWithId>({} as CharacterWithId);
 
   constructor(private firebase: FirebaseService, private sessionService: SessionService, private auth : AuthService) {}
 
@@ -134,14 +136,17 @@ export class CharacterService {
     return await deleteDoc(docRef);
   }
 
-  getTotalValue(character : CharacterWithId) : number {
-    return character.money.ppt * 10 +
-      character.money.po +
-      character.money.pe * 0.5 +
-      character.money.pp * 0.1 +
-      character.money.pc * 0.01;
-  }
+  getTotalValue(character: CharacterWithId): number {
+    const money = character.money ?? { ppt: 0, po: 0, pe: 0, pp: 0, pc: 0 };
 
+    return (
+      (money.ppt || 0) * 10 +
+      (money.po || 0) +
+      (money.pe || 0) * 0.5 +
+      (money.pp || 0) * 0.1 +
+      (money.pc || 0) * 0.01
+    );
+  }
   hasThisCoin(character : CharacterWithId, coin :  {name : string, value : number}) : boolean {
     switch (coin.value) {
       case 10: return character.money.ppt > 0;

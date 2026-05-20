@@ -319,30 +319,43 @@
     </div>
 
     <!--Mercaderes-->
-    <div class="card">
-      <h3>Mis mercaderes</h3>
-      <button
-        class="btn-toggle-merchants"
-        (click)="toggleMyMerchants()"
-        [disabled]="myMerchantsLoading"
-      >
-        {{ myMerchantsLoading ? 'Cargando...' : (showMyMerchants ? '▲ Ocultar mercaderes' : '▼ Ver mis mercaderes')}}
+    @if (isMaster) {
 
-      </button>
 
-      @if(showMyMerchants && !myMerchantsLoading) {
-        <div class="my-merchants-list">
+
+      <div class="card">
+        <h3>Mis mercaderes</h3>
+        <button
+          class="btn-toggle-merchants"
+          (click)="toggleMyMerchants()"
+          [disabled]="myMerchantsLoading"
+        >
+          {{ myMerchantsLoading ? 'Cargando...' : (showMyMerchants ? '▲ Ocultar mercaderes' : '▼ Ver mis mercaderes')}}
+
+        </button>
+
+        @if(showMyMerchants && !myMerchantsLoading) {
+          <div class="my-merchants-list">
             @if (myMerchants.length === 0) {
               <p class="empty-merchants">
                 Aún no tienes mercaderes
               </p>
             }
 
-            <div class="merchant-info">
-            </div>
-        </div>
-      }
-    </div>
+            @for (merchant of myMerchants; track $index) {
+              <div class="merchant-info">
+                <span class="merchant">{{merchant.name}}</span>
+                <div class="merchant-options">
+                  <button (click)="deleteMerchant(merchant)">Eliminar</button>
+                  <button (click)="updateMerchant(merchant)">Actualizar</button>
+                </div>
+              </div>
+            }
+          </div>
+
+        }
+      </div>
+    }
 
 
     <!-- Acciones -->
@@ -351,7 +364,10 @@
       <div *ngIf="!isMaster">
         <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
         <button *ngIf="session.status === 'in-battle'" class="btn-notes" (click)="goToCombat()">⚔ Batalla en curso</button>
-        <button *ngIf="myMerchants.length !== 0" (click)="showCommerceModal.set(true)"> Ir a las tiendas</button>
+      </div>
+
+      <div *ngIf="!isMaster">
+        <button *ngIf="myMerchants.length !== 0" (click)="openSelectShop()" class="btn-notes"> Ir a las tiendas</button>
       </div>
 
       <div class="btn-grp" *ngIf="isMaster">
@@ -419,7 +435,7 @@
   </div>
 
   <!-- Modal de manejo de mercaderes -->
-  <div class="modal-overlay" *ngIf="showMerchantModal" (click)="closeMerchantModal()">
+  <div class="modal-overlay" *ngIf="showMerchantModal()" (click)="closeMerchantModal()">
     <div class="modal-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>Mercaderes</h3>
@@ -429,22 +445,122 @@
       <div class="modal-body">
         @if (currentUser?.uid; as uid) {
           <app-merchant-form
-          [currentUserId]="uid"
-          (merchantInfo)="saveMerchant($event)"
+            [merchant]="selectedMerchant"
+            [currentUserId]="uid"
+            (merchantInfo)="saveMerchant($event)"
+            (cancelEvent)="showMerchantModal.set($event)";
           ></app-merchant-form>
         }
       </div>
     </div>
   </div>
 
-  <app-commerce-component #modalComercio *ngIf="showCommerceModal()"></app-commerce-component>
+  <div class="modal-overlay" *ngIf="showSelectShop()" (click)="closeSelectShop()">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Tiendas</h3>
+        <button class="modal-close" (click)="closeSelectShop()">✕</button>
+      </div>
+
+      @for (shop of myMerchants; track shop.id) {
+        <article (click)="openThisShop(shop)" >
+          {{shop.name}}
+        </article>
+      }
+    </div>
+
+  </div>
+
+  <div class="commerce-modal">
+    <div class="modal-header">
+      <h3>{{ currentMerchant().name }}</h3>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+
+    <hr class="divider" />
+
+    <div class="mode-toggle">
+      <span class="mode-label" [class.active]="!sellMode()">Compra</span>
+      <label class="switch">
+        <input type="checkbox" [checked]="sellMode()" (change)="alterMode()" />
+        <span class="slider" [class.sell-mode]="sellMode()" [class.buy-mode]="!sellMode()"></span>
+      </label>
+      <span class="mode-label" [class.active]="sellMode()">Venta</span>
+    </div>
+
+    @if (!sellMode()) {
+      <section class="buy-section">
+        <div class="section-header">
+          <h4>Items disponibles para comprar</h4>
+          <span class="total-gold">Po disponible: {{ totalValueOnCharacter() }}</span>
+        </div>
+
+        <div class="items-list">
+          @for (merchantItem of currentMerchant().sellingList; track merchantItem.itemId) {
+            <div class="item-card">
+              <div class="item-info">
+                <div class="item-header">
+                  <span class="item-name">{{ item.name }}</span>
+                  <span class="item-price">{{ merchantItem.price }} po</span>
+                </div>
+                <div class="item-details">
+                  <span class="item-stock">Stock: {{ merchantItem.quantity }}</span>
+                </div>
+                <p class="item-description">{{ item.description }}</p>
+              </div>
+              <button
+                class="buy-btn"
+                (click)="buyItem(item)"
+                [disabled]="merchantItem.quantity <= 0 || totalValueOnCharacter() < merchantItem.price"
+              >
+                Comprar
+              </button>
+            </div>
+            @if (currentMerchant().sellingList.length === 0) {
+              <div class="empty-message">No hay items disponibles para comprar</div>
+            }
+          }
+        </div>
+      </section>
+    } @else {
+      <section class="sell-section">
+        <div class="section-header">
+          <h4>Items que compra el mercader</h4>
+        </div>
+
+        <div class="items-list">
+          @for (merchantItem of loadSellingItems(); track merchantItem.itemId) {
+            <div class="item-card">
+              <div class="item-info">
+                <div class="item-header">
+                  <span class="item-name">{{ item.name }}</span>
+                  <span class="item-price">{{ merchantItem.price }} po</span>
+                </div>
+                <div class="item-details">
+                  <span class="item-weight">Peso: {{ item.weight }} lb.</span>
+                </div>
+                <p class="item-description">{{ item.description }}</p>
+              </div>
+              <button
+                class="sell-btn"
+                (click)="sellItem(item)"
+                [disabled]="!hasItemInInventory(item)"
+              >
+                Vender
+              </button>
+            </div>
+            @if (currentMerchant().sellingList.length === 0) {
+              <div class="empty-message">No hay items disponibles para comprar</div>
+            }
+          }
+        </div>
+      </section>
+    }
+  </div>
+
 
   @if (isMaster) {
     <button (click)="openMerchantModal()">Crear Mercader</button>
   }
-
-
-
-
 
 </div>

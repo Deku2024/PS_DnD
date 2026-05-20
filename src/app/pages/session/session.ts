@@ -1,39 +1,40 @@
 import {
-  Component,
-  OnDestroy,
-  OnInit,
   ChangeDetectorRef,
-  ViewChild,
+  Component,
   ElementRef,
   inject,
-  WritableSignal, signal
+  OnDestroy,
+  OnInit,
+  signal,
+  ViewChild,
+  WritableSignal
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { SessionService, Session, AudioState } from '../../services/sessions.service';
-import { AuthService } from '../../services/auth.service';
-import { CharacterService, CharacterWithId } from '../../services/character.service';
-import { PresenceService } from '../../services/presence.service';
-import { RollHistoryService } from '../../services/roll-history.service';
-import { HistoryButtonComponent } from '../../components/history.button.component/history.button.component';
-import { CloudinaryService } from '../../services/cloudinary.service';
-import { HexMapComponent } from '../../components/hex-map.component/hex-map.component';
-import { User } from 'firebase/auth';
-import { Subscription } from 'rxjs';
-import { BattleButtonComponent } from '../../components/battle.button.component/battle.button.component';
-import { ItemsService } from '../../services/items.service';
-import { Item } from '../../interfaces/Item';
-import { YouTubePlayer } from '@angular/youtube-player';
-import { MerchantForm } from "../../components/merchant-form/merchant-form";
-import { Merchant } from '../../interfaces/Merchant';
-import { MerchantService } from '../../services/merchant.service';
-import {CommerceComponent} from '../../components/commerce.component/commerce.component';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {ActivatedRoute, Router} from '@angular/router';
+import {AudioState, Session, SessionService} from '../../services/sessions.service';
+import {AuthService} from '../../services/auth.service';
+import {CharacterService, CharacterWithId} from '../../services/character.service';
+import {PresenceService} from '../../services/presence.service';
+import {RollHistoryService} from '../../services/roll-history.service';
+import {HistoryButtonComponent} from '../../components/history.button.component/history.button.component';
+import {CloudinaryService} from '../../services/cloudinary.service';
+import {HexMapComponent} from '../../components/hex-map.component/hex-map.component';
+import {User} from 'firebase/auth';
+import {Subscription} from 'rxjs';
+import {BattleButtonComponent} from '../../components/battle.button.component/battle.button.component';
+import {ItemsService} from '../../services/items.service';
+import {Item} from '../../interfaces/Item';
+import {YouTubePlayer} from '@angular/youtube-player';
+import {MerchantForm} from "../../components/merchant-form/merchant-form";
+import {Merchant} from '../../interfaces/Merchant';
+import {MerchantService} from '../../services/merchant.service';
+import {CommerceService} from '../../services/commerce.service';
 
 @Component({
   selector: 'app-session',
   standalone: true,
-  imports: [CommonModule, FormsModule, YouTubePlayer, BattleButtonComponent, HistoryButtonComponent, HexMapComponent, MerchantForm, CommerceComponent],
+  imports: [CommonModule, FormsModule, YouTubePlayer, BattleButtonComponent, HistoryButtonComponent, HexMapComponent, MerchantForm],
   templateUrl: './session.html',
   styleUrl: './session.css'
 })
@@ -58,6 +59,7 @@ export class SessionPage implements OnInit, OnDestroy {
   localHexSize = 40;
   localGridColor: string = 'blue';
   localCustomColor: string = '#64c8ff';
+  private commerceService = inject(CommerceService);
 
   /** Returns false when gridColor is one of the 3 named presets */
   isPreset(color: string): boolean {
@@ -81,10 +83,12 @@ export class SessionPage implements OnInit, OnDestroy {
   modalUid = '';
   presenceMap: { [uid: string]: boolean } = {};
 
-  showMerchantModal = false;
+  showMerchantModal = signal<boolean>(false);
   myMerchantsLoading = false;
   showMyMerchants = false;
   myMerchants: Merchant[] = [];
+  merchantUnsubscribe: (() => void) | undefined;
+  selectedMerchant: Merchant | null = null;
 
   selectedPlayerUids = new Set<string>();
   lifeAction: number = 0;
@@ -101,6 +105,8 @@ export class SessionPage implements OnInit, OnDestroy {
   defaultItems : WritableSignal<Item[]> = signal<Item[]>([]);
 
   showCommerceModal : WritableSignal<boolean> = signal<boolean>(false);
+  showSelectShop : WritableSignal<boolean> = signal<boolean>(false);
+  currentMerchant : WritableSignal<Merchant> = signal({} as Merchant);
 
   private unsubscribe?: () => void;
   private authSub?: Subscription;
@@ -182,6 +188,8 @@ export class SessionPage implements OnInit, OnDestroy {
         }
         const isFirstLoad = !this.session;
         this.session = session;
+        this.loadMerchants();
+        console.log("se han cargado los mercaderes con éxito: " + this.myMerchants.length);
         if (isFirstLoad && session.isMap) {
           this.localHexSize = session.hexSize ?? 40;
           this.localGridColor = session.gridColor ?? 'blue';
@@ -621,9 +629,25 @@ export class SessionPage implements OnInit, OnDestroy {
 
 
   //Mercaderes
+  loadMerchants() {
+      console.log("se ha entrado en el método");
+      console.log(this.session);
+
+      if (this.session?.id) {
+        this.merchantUnsubscribe = this.merchantService.readMerchants(
+              this.session.id,
+              (merchants) => {
+                this.myMerchants = merchants;
+                this.cd.detectChanges();
+              }
+        )
+        console.log("se ha entrado en el if del método");
+      }
+  }
 
   closeMerchantModal(): void {
-    this.showMerchantModal = false;
+    this.showMerchantModal.set(false);
+    this.selectedMerchant = null;
   }
 
   toggleMyMerchants(): void {
@@ -631,7 +655,8 @@ export class SessionPage implements OnInit, OnDestroy {
   }
 
   openMerchantModal(): void {
-    this.showMerchantModal = true;
+    this.showMerchantModal.set(true);
+    this.selectedMerchant = null;
   }
 
   ngOnDestroy(): void {
@@ -644,6 +669,87 @@ export class SessionPage implements OnInit, OnDestroy {
 
   saveMerchant(merchant: Merchant) {
     if (this.session?.id)
-    this.merchantService.saveMerchant(this.session?.id, merchant);
+    this.merchantService.saveMerchant(this.session.id, merchant);
+    this.closeMerchantModal();
+  }
+
+  deleteMerchant(merchant: Merchant) {
+    if (this.session?.id && merchant.id) {
+      this.merchantService.deleteMerchant(this.session.id, merchant.id);
+    }
+  }
+
+  updateMerchant(merchant: Merchant) {
+    this.openMerchantModal();
+    this.selectedMerchant = merchant;
+  }
+
+  closeSelectShop() : void {
+    this.showSelectShop.set(false);
+  }
+
+  openSelectShop(): void {
+    this.showSelectShop.set(true);
+  }
+
+  sellMode: WritableSignal<boolean> = signal(false);
+
+  protected async openThisShop(shop: Merchant) {
+    this.currentMerchant.set(shop);
+    this.showCommerceModal.set(true);
+    this.showSelectShop.set(false);
+  }
+
+  currentCharacter: WritableSignal<CharacterWithId | null> = signal(null);
+
+  async loadCurrentCharacter(): Promise<void> {
+    this.currentCharacter.set(await this.characterService.getSelectedCharacter());
+  }
+
+  protected async openThisShop(shop: Merchant) {
+    await this.loadCurrentCharacter();  // Cargar personaje primero
+    this.currentMerchant.set(shop);
+    this.showCommerceModal.set(true);
+    this.showSelectShop.set(false);
+  }
+
+  closeCommerceModal(): void {
+    this.showCommerceModal.set(false);
+    this.currentMerchant.set({} as Merchant);
+  }
+
+  totalValueOnCharacter: WritableSignal<number> = signal(this.characterService.getTotalValue(this.currentCharacter()!));
+
+  buyItem(item: Item): void {
+    this.commerceService.buyItemFromMerchant(
+      this.currentCharacter()!,
+      item,
+      this.currentMerchant()
+    );
+  }
+
+  sellItem(item: Item): void {
+    this.commerceService.sellItemToMerchant(
+      this.currentCharacter()!,
+      item,
+      this.currentMerchant()
+    );
+  }
+
+  alterMode(): void {
+    this.sellMode.set(!this.sellMode());
+  }
+
+  protected hasItemInInventory(item: Item) {
+    return this.currentCharacter()?.inventory.some(
+      cItem => item.name === cItem.name
+    );
+  }
+
+  protected loadSellingItems() : Item[] {
+    const items : Item[] = [];
+    for (const item of this.currentMerchant().buyingList) {
+      if (this.currentCharacter()?.inventory.some(cItem => cItem.name === item.itemId))
+    }
   }
 }

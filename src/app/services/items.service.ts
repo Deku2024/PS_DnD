@@ -79,19 +79,32 @@ export class ItemsService {
       return items;
     }
 
-  getItemById(id: string): Promise<Item> {
-    return getDoc(doc(this.Firebase.db, 'items', id)).then(docSnap => {
-      if (docSnap.exists()) {
-        return {
-          id: docSnap.id,
-          name: docSnap.data()['name'],
-          description: docSnap.data()['description'],
-          weight: docSnap.data()['weight'],
-          quantity: docSnap.data()['quantity'] || 1
-        } as Item;
-      }
-      throw new Error(`Item with id ${id} not found`);
-    });
+  async getItemById(id: string): Promise<Item> {
+    const defaultDocSnap = await getDoc(doc(this.Firebase.db, 'defaultItems', id));
+
+    if (defaultDocSnap.exists()) {
+      return {
+        id: defaultDocSnap.id,
+        name: defaultDocSnap.data()['name'],
+        description: defaultDocSnap.data()['description'],
+        weight: defaultDocSnap.data()['weight'],
+        quantity: defaultDocSnap.data()['quantity'] || 1
+      } as Item;
+    }
+
+    const itemDocSnap = await getDoc(doc(this.Firebase.db, 'items', id));
+
+    if (itemDocSnap.exists()) {
+      return {
+        id: itemDocSnap.id,
+        name: itemDocSnap.data()['name'],
+        description: itemDocSnap.data()['description'],
+        weight: itemDocSnap.data()['weight'],
+        quantity: itemDocSnap.data()['quantity'] || 1
+      } as Item;
+    }
+
+    throw new Error(`Item with id ${id} not found in defaultItems or items`);
   }
 
 }
