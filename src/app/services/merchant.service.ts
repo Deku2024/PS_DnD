@@ -33,7 +33,7 @@ export class MerchantService {
       });
 
       callback(merchants);
-    });   
+    });
   }
 
   async deleteMerchant(sessionId: string, merchantId: string) {
@@ -51,7 +51,7 @@ export class MerchantService {
       try {
         const snap = await getDoc(docRef);
         return snap.exists()
-          ? { id: snap.id, ...(snap.data() as Merchant) }
+          ? { id: snap.id, ...(snap.data() as Merchant) } // fix build
           : null;
       } catch (error) {
         console.error(error);
@@ -59,5 +59,5 @@ export class MerchantService {
       }
     }
 
-  
+
 }
