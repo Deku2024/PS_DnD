@@ -35,19 +35,24 @@ export class RollHistoryService implements OnDestroy {
   ) {
     this.rollSub = this.diceRollerService.lastResult$.subscribe(async (result) => {
       if (this.sessionStatus === 'paused' || this.sessionStatus === 'waiting') return;
-
       const sessionId = this.sessionService.getCurrentSessionId();
       const user = this.authService.getCurrentUser();
-      if (!sessionId || !user) return;
-
+      if (!sessionId) return;
+      const finalUserId = result.userId ?? user?.uid ?? 'sistema';
+      const finalUserName = result.userId ? 'Sistema (Iniciativa)' : (user?.email ?? 'Sistema');
       const ref = collection(this.firebase.db, this.rollsCol);
-      await addDoc(ref, {
-        data: result,
-        sessionId,
-        timestamp: serverTimestamp(),
-        userId: user.uid,
-        userName: user.email ?? user.uid
-      });
+
+      try {
+        await addDoc(ref, {
+          data: JSON.parse(JSON.stringify(result)),
+          sessionId: sessionId,
+          timestamp: serverTimestamp(),
+          userId: finalUserId,
+          userName: finalUserName
+        });
+      } catch (error) {
+        console.error("Error al guardar en Firebase:", error);
+      }
     });
   }
 

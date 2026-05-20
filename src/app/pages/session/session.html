@@ -21,15 +21,72 @@
           {{ session.status }}
         </span>
       </div>
-      <p class="session-id">Código de sesión: <code>{{ session.code }}</code></p>
+      <p class="session-id">ID de sesión: <code>{{ session.code }}</code></p>
     </div>
 
     <hr class="divider" />
 
-    <div class="card shared-image-card">
-      <h3>🖼 Imagen compartida</h3>
-      <div class="shared-image-display" *ngIf="session.sharedImageUrl">
-        <img [src]="session.sharedImageUrl" alt="Imagen compartida" class="shared-image" />
+    <div class="card audio-card">
+      <h3>🎵 Música de ambiente</h3>
+
+      <ng-container *ngIf="isMaster">
+        <div class="audio-input-row" *ngIf="!session.audio">
+          <input [(ngModel)]="audioFileName" placeholder="Nombre (opcional)" />
+          <input [(ngModel)]="audioUrl" placeholder="URL de YouTube" />
+          <button class="btn-load-audio" (click)="onLoadAudio()">▶ Cargar</button>
+        </div>
+
+        <div class="audio-controls" *ngIf="session.audio">
+          <span class="audio-filename">🎵 {{ session.audio.fileName }}</span>
+          <div class="audio-buttons">
+            <button class="btn-play-pause" (click)="onTogglePlay()">
+              {{ session.audio.isPlaying ? '⏸ Pausar' : '▶ Reproducir' }}
+            </button>
+            <button class="btn-clear-audio" (click)="onClearAudio()">✖ Quitar</button>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="!isMaster">
+        <p class="audio-status" *ngIf="!session.audio">Sin música activa.</p>
+        <div class="audio-playing" *ngIf="session.audio">
+          <span class="audio-filename">🎵 {{ session.audio.fileName }}</span>
+          <span class="audio-badge" [class.playing]="session.audio.isPlaying">
+            {{ session.audio.isPlaying ? '▶ Reproduciendo' : '⏸ Pausado' }}
+          </span>
+        </div>
+      </ng-container>
+
+      <div style="position: absolute; top: -9999px; left: -9999px; width: 0; height: 0; overflow: hidden;" *ngIf="youtubeVideoId">
+        <youtube-player
+          #youtubePlayer
+          [videoId]="youtubeVideoId"
+          [playerVars]="{ autoplay: 1, controls: 0 }"
+          (ready)="onPlayerReady($event)">
+        </youtube-player>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <div class="card shared-image-card" [class.map-card]="session.isMap">
+      <h3>{{ session.isMap ? '🗺 Mapa de la sesión' : '🖼 Imagen compartida' }}</h3>
+
+      <div class="shared-image-display" *ngIf="session.sharedImageUrl && session.isMap">
+        <app-hex-map
+          [imageUrl]="session.sharedImageUrl"
+          [hexSize]="session.hexSize ?? 40"
+          [gridColor]="session.gridColor ?? 'blue'"
+          [players]="nonMasterPlayers"
+          [tokenPositions]="session.tokenPositions ?? {}"
+          [currentUserId]="currentUser?.uid ?? null"
+          [isMaster]="isMaster"
+          (tokenMoved)="onTokenMoved($event)">
+        </app-hex-map>
+      </div>
+
+      <div class="shared-image-display" *ngIf="session.sharedImageUrl && !session.isMap">
+        <img [src]="session.sharedImageUrl" alt="Imagen compartida por el DM" class="shared-image" />
       </div>
       <p class="shared-image-empty" *ngIf="!session.sharedImageUrl && !isMaster">
         El DM no ha compartido ninguna imagen aún.
@@ -38,7 +95,65 @@
       <div class="shared-image-controls" *ngIf="isMaster">
         <input #fileInput type="file" accept="image/*" class="file-input-hidden" (change)="onFileSelected($event)" />
         <div class="image-preview-container" *ngIf="imagePreviewUrl">
-          <img [src]="imagePreviewUrl" alt="Previsualización" class="image-preview" />
+          <app-hex-map
+            *ngIf="pendingIsMap"
+            [imageUrl]="imagePreviewUrl!"
+            [hexSize]="pendingHexSize"
+            [gridColor]="pendingGridColor"
+            [players]="[]"
+            [tokenPositions]="{}"
+            [currentUserId]="null"
+            [isMaster]="false">
+          </app-hex-map>
+          <img *ngIf="!pendingIsMap" [src]="imagePreviewUrl" alt="Previsualización" class="image-preview" />
+
+          <div class="map-toggle-row">
+            <label class="map-toggle-label">
+              <input
+                type="checkbox"
+                [(ngModel)]="pendingIsMap"
+                class="map-toggle-check" />
+              <span>🗺 Es un mapa</span>
+            </label>
+            <div class="hex-size-row" *ngIf="pendingIsMap">
+              <label class="hex-size-label">Tamaño hex:</label>
+              <input
+                type="checkbox"
+                type="range"
+                min="20" max="120" step="5"
+                [(ngModel)]="pendingHexSize"
+                aria-label="Tamaño de celda hexagonal"
+                class="hex-size-slider" />
+              <span class="hex-size-value">{{ pendingHexSize }}px</span>
+            </div>
+            <div class="grid-color-row" *ngIf="pendingIsMap">
+              <label class="hex-size-label">Color grid:</label>
+              <div class="color-picker-row">
+                <button class="color-btn" [class.active]="pendingGridColor === 'blue'" (click)="pendingGridColor = 'blue'" title="Azul">
+                  <span class="color-dot color-dot-blue"></span>
+                </button>
+                <button class="color-btn" [class.active]="pendingGridColor === 'white'" (click)="pendingGridColor = 'white'" title="Blanco">
+                  <span class="color-dot color-dot-white"></span>
+                </button>
+                <button class="color-btn" [class.active]="pendingGridColor === 'black'" (click)="pendingGridColor = 'black'" title="Negro">
+                  <span class="color-dot color-dot-black"></span>
+                </button>
+                <label class="color-btn color-btn-custom"
+                       [class.active]="!isPreset(pendingGridColor)"
+                       title="Color personalizado">
+                  <input type="color"
+                         class="color-input-hidden"
+                         aria-label="Color personalizado del grid"
+                         [value]="pendingCustomColor"
+                         (input)="pendingGridColor = $any($event.target).value; pendingCustomColor = $any($event.target).value" />
+                  <span class="color-dot"
+                        [style.background]="pendingCustomColor"
+                        [style.border-color]="'rgba(180,180,180,0.4)'"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
           <div class="image-preview-actions">
             <button class="btn-upload-image btn-confirm" (click)="confirmUpload()" [disabled]="isUploadingImage">
               <span>{{ isUploadingImage ? '⏳ Subiendo...' : '✔ Confirmar' }}</span>
@@ -46,6 +161,57 @@
             <button class="btn-remove-image" (click)="cancelPreview()" [disabled]="isUploadingImage">✕ Cancelar</button>
           </div>
         </div>
+
+        <div class="map-settings-controls" *ngIf="!imagePreviewUrl && session.sharedImageUrl">
+          <div class="map-toggle-row">
+            <label class="map-toggle-label">
+              <input
+                type="checkbox"
+                [checked]="session.isMap"
+                (change)="toggleIsMap()"
+                class="map-toggle-check" />
+              <span>🗺 Es un mapa</span>
+            </label>
+          </div>
+          <div class="hex-size-row" *ngIf="session.isMap">
+            <label class="hex-size-label">Tamaño hex:</label>
+            <input
+              type="range"
+              min="20" max="120" step="5"
+              [(ngModel)]="localHexSize"
+              aria-label="Tamaño de celda hexagonal"
+              class="hex-size-slider"
+              (change)="applyHexSize()" />
+            <span class="hex-size-value">{{ localHexSize }}px</span>
+          </div>
+          <div class="grid-color-row" *ngIf="session.isMap">
+            <label class="hex-size-label">Color grid:</label>
+            <div class="color-picker-row">
+              <button class="color-btn" [class.active]="localGridColor === 'blue'" (click)="applyGridColor('blue')" title="Azul">
+                <span class="color-dot color-dot-blue"></span>
+              </button>
+              <button class="color-btn" [class.active]="localGridColor === 'white'" (click)="applyGridColor('white')" title="Blanco">
+                <span class="color-dot color-dot-white"></span>
+              </button>
+              <button class="color-btn" [class.active]="localGridColor === 'black'" (click)="applyGridColor('black')" title="Negro">
+                <span class="color-dot color-dot-black"></span>
+              </button>
+              <label class="color-btn color-btn-custom"
+                     [class.active]="!isPreset(localGridColor)"
+                     title="Color personalizado">
+                <input type="color"
+                       class="color-input-hidden"
+                       aria-label="Color personalizado del grid"
+                       [value]="localCustomColor"
+                       (change)="applyGridColor($any($event.target).value); localCustomColor = $any($event.target).value" />
+                <span class="color-dot"
+                      [style.background]="localCustomColor"
+                      [style.border-color]="'rgba(180,180,180,0.4)'"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
         <div class="shared-image-main-actions" *ngIf="!imagePreviewUrl">
           <button class="btn-upload-image" (click)="triggerFileInput()">
             {{ session.sharedImageUrl ? '🔄 Cambiar imagen' : '📤 Subir imagen' }}
@@ -59,7 +225,9 @@
 
     <div class="card">
       <h3>Dungeon Master</h3>
-      <p class="player master-player">👑 {{ session.playersUsernames[session.masterId] || session.masterId }}</p>
+      <p class="player master-player">
+        👑 {{ session.playersUsernames[session.masterId] || session.playerEmails[session.masterId] || session.masterId }}
+      </p>
     </div>
 
     <div class="card">
@@ -101,13 +269,11 @@
 
       <p class="selection-info">Afectando a: <strong>{{ selectedPlayerUids.size }}</strong> seleccionados</p>
 
-      @if (dmAlerts.length > 0) {
-        <div class="dm-alerts-box">
-          @for (alert of dmAlerts; track alert) {
-            <p class="dm-alert-text">{{ alert }}</p>
-          }
-        </div>
-      }
+      <div class="dm-alerts-box" *ngIf="dmAlerts.length > 0">
+        <p class="dm-alert-text" *ngFor="let alert of dmAlerts">
+          {{ alert }}
+        </p>
+      </div>
 
       <div class="dm-flex-container">
         <div class="dm-batch-section">
@@ -180,7 +346,7 @@
   <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
     <div class="modal-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>📜 {{ modalPlayerEmail }}</h3>
+        <h3>📜 {{ modalPlayerName }}</h3>
         <button class="modal-close" (click)="closeModal()">✕</button>
       </div>
       <div class="modal-body" *ngIf="modalCharacter; else noChar">
@@ -188,7 +354,17 @@
         <div class="char-row"><span>Raza</span><strong>{{ modalCharacter.race }}</strong></div>
         <div class="char-row"><span>Clase</span><strong>{{ modalCharacter.class }}</strong></div>
         <div class="char-row"><span>Vida</span><strong>{{ modalCharacter.life }} / {{ modalCharacter.maxLife }}</strong></div>
-        <div class="char-row"><span>Oro</span><strong>{{ modalCharacter.money?.po || 0 }}</strong></div>
+        <div class="char-row"><span>Armadura</span><strong>{{ modalCharacter.armourClass }}</strong></div>
+        <div class="char-row">
+          <span>PPT / PO / PE / PP / PC</span>
+          <div class="money-values">
+            <strong>{{ modalCharacter.money?.ppt || 0 }}</strong> /
+            <strong>{{ modalCharacter.money?.po || 0 }}</strong> /
+            <strong>{{ modalCharacter.money?.pe || 0 }}</strong> /
+            <strong>{{ modalCharacter.money?.pp || 0 }}</strong> /
+            <strong>{{ modalCharacter.money?.pc || 0 }}</strong>
+          </div>
+        </div>
         <hr class="modal-divider" />
         <div class="attrs-grid">
           <div class="attr-item"><span>FUE</span><strong>{{ modalCharacter.attributes.strength }}</strong></div>

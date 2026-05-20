@@ -1,9 +1,9 @@
 export interface Item {
-    id?: string;
-    name: string;
-    description: string;
-    weight: number;
-    quantity?: number;
+  id?: string;
+  name: string;
+  description: string;
+  weight: number;
+  quantity?: number;
 }
 
 export interface MerchantItemInfo {

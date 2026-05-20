@@ -3,6 +3,7 @@ import {Component, Input, inject} from '@angular/core';
 import {BattleService} from '../../services/battle.service';
 import {Router} from '@angular/router';
 import {SessionService} from '../../services/sessions.service';
+import { RollHistoryService } from '../../services/roll-history.service';
 
 @Component({
   selector: 'battle-button-component',
@@ -17,7 +18,7 @@ export class BattleButtonComponent {
   showConfirmModal = false;
   combatService = inject(BattleService);
 
-  constructor(private router: Router, private sessionService: SessionService) {}
+  constructor(private router: Router, private sessionService: SessionService,private rollHistoryService: RollHistoryService) {}
 
   async startBattle(): Promise<void> {
     if (this.hasActiveBattle) {
@@ -37,6 +38,7 @@ export class BattleButtonComponent {
     if (!sessionId) return;
     this.showConfirmModal = false;
     if (this.hasActiveBattle) {
+      await this.rollHistoryService.deleteSessionRolls(sessionId);
       await this.sessionService.updateCombatOrder(sessionId, []);
     }
     this.combatService.status = 'preparing';
