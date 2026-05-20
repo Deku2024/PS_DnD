@@ -1,39 +1,51 @@
 <div class="dm-speed-dial">
   <div class="dial-actions" [class.open]="showMenu">
 
-    <div class="dial-item" *ngIf="!showLocalActions">
+    <!-- Solo DM: volver a la mesa principal (en páginas secundarias) -->
+    <div class="dial-item" *ngIf="isDm && !showLocalActions">
       <span class="dial-label">MESA PRINCIPAL</span>
       <button class="sub-fab" (click)="goToMainSession()" title="Volver a la partida">🎲</button>
     </div>
 
-    <div class="dial-item" *ngIf="showLocalActions">
-      <span class="dial-label">COMPARTIR MAPA</span>
-      <button class="sub-fab" (click)="onMap()">🗺️</button>
-    </div>
-
+    <!-- Ambos: historial -->
     <div class="dial-item">
       <span class="dial-label">HISTORIAL</span>
       <button class="sub-fab" (click)="onHistory()">📜</button>
     </div>
 
-    <div class="dial-item">
+    <!-- Solo DM: iniciar/ver batalla -->
+    <div class="dial-item" *ngIf="isDm">
       <span class="dial-label">{{ isBattleActive ? 'BATALLA EN CURSO' : 'EMPEZAR BATALLA' }}</span>
       <button class="sub-fab" (click)="goToCombat()">⚔️</button>
     </div>
 
-    <div class="dial-item">
+    <!-- Solo jugador: ver batalla (solo si hay una activa) -->
+    <div class="dial-item" *ngIf="!isDm && isBattleActive">
+      <span class="dial-label">BATALLA EN CURSO</span>
+      <button class="sub-fab" (click)="goToCombat()">⚔️</button>
+    </div>
+
+    <!-- Solo jugador: ir a su ficha -->
+    <div class="dial-item" *ngIf="!isDm">
+      <span class="dial-label">MI FICHA</span>
+      <button class="sub-fab" (click)="goToMySheet()">📜</button>
+    </div>
+
+    <!-- Solo DM: notas -->
+    <div class="dial-item" *ngIf="isDm">
       <span class="dial-label">NOTAS DM</span>
       <button class="sub-fab" (click)="goToNotes()">📝</button>
     </div>
 
-    <div class="dial-item">
-      <span class="dial-label">ABANDONAR PARTIDA</span>
-      <button class="sub-fab" (click)="leave()">🚪</button>
+    <!-- Solo DM: pausar/reanudar -->
+    <div class="dial-item" *ngIf="isDm">
+      <span class="dial-label">{{ (sessionStatus === 'paused' || sessionStatus === 'waiting') ? 'REANUDAR' : 'PAUSAR' }}</span>
+      <button class="sub-fab" (click)="toggleStatus()">{{ (sessionStatus === 'paused' || sessionStatus === 'waiting') ? '▶️' : '⏸️' }}</button>
     </div>
 
   </div>
 
   <button class="dm-main-btn" (click)="toggleMenu()" [class.active]="showMenu">
-    <span class="btn-icon-centered">{{ showMenu ? '✕' : '👑' }}</span>
+    <span class="btn-icon-centered">{{ showMenu ? '✕' : (isDm ? '👑' : '⚔') }}</span>
   </button>
 </div>

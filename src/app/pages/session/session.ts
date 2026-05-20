@@ -22,12 +22,12 @@ import { YouTubePlayer } from '@angular/youtube-player';
   selector: 'app-session',
   standalone: true,
 imports: [
-    CommonModule, 
-    FormsModule, 
-    YouTubePlayer, 
-    BattleButtonComponent, 
-    HistoryButtonComponent, 
-    DmFloatingMenuComponent, 
+    CommonModule,
+    FormsModule,
+    YouTubePlayer,
+    BattleButtonComponent,
+    HistoryButtonComponent,
+    DmFloatingMenuComponent,
     HexMapComponent
   ],
   templateUrl: './session.html',
@@ -82,6 +82,15 @@ export class SessionPage implements OnInit, OnDestroy {
   lifeAction: number = 0;
   goldAction: number = 0;
   xpAction: number = 0;
+  codeCopied = false;
+
+  copyCode(): void {
+    if (!this.session?.code) return;
+    navigator.clipboard.writeText(this.session.code).then(() => {
+      this.codeCopied = true;
+      setTimeout(() => this.codeCopied = false, 2000);
+    });
+  }
 
   dmItems: Item[] = [];
   selectedItemId: string = '';
@@ -301,6 +310,11 @@ private rollHistoryService: RollHistoryService,
 
   get isMaster(): boolean {
     return !!this.currentUser && !!this.session && this.session.masterId === this.currentUser.uid;
+  }
+
+  get mySelectedCharacterId(): string {
+    if (!this.currentUser || !this.session?.selectedCharacters) return '';
+    return this.session.selectedCharacters[this.currentUser.uid] || '';
   }
 
   togglePlayerSelection(uid: string): void {
@@ -595,7 +609,7 @@ private rollHistoryService: RollHistoryService,
       .filter(uid => uid !== this.session!.masterId)
       .map(uid => ({
         uid,
-        username: this.session!.playersUsernames[uid] || uid,
+        username: this.session!.playersUsernames[uid] || this.session!.playerEmails[uid] || uid,
         avatarUrl: this.characters[uid]?.image || undefined,
       }));
   }
