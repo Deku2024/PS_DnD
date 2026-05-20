@@ -318,12 +318,40 @@
       </div>
     </div>
 
-    <hr class="divider" />
+    <!--Mercaderes-->
+    <div class="card">
+      <h3>Mis mercaderes</h3>
+      <button
+        class="btn-toggle-merchants"
+        (click)="toggleMyMerchants()"
+        [disabled]="myMerchantsLoading"
+      >
+        {{ myMerchantsLoading ? 'Cargando...' : (showMyMerchants ? '▲ Ocultar mercaderes' : '▼ Ver mis mercaderes')}}
 
+      </button>
+
+      @if(showMyMerchants && !myMerchantsLoading) {
+        <div class="my-merchants-list">
+            @if (myMerchants.length === 0) {
+              <p class="empty-merchants">
+                Aún no tienes mercaderes
+              </p>
+            }
+
+            <div class="merchant-info">
+            </div>
+        </div>
+      }
+    </div>
+
+
+    <!-- Acciones -->
+    <hr class="divider" />
     <div class="actions">
       <div *ngIf="!isMaster">
         <button class="btn-back" (click)="leaveSession()">← Salir de la sesión</button>
         <button *ngIf="session.status === 'in-battle'" class="btn-notes" (click)="goToCombat()">⚔ Batalla en curso</button>
+        <button *ngIf="myMerchants.length !== 0" (click)="showCommerceModal.set(true)"> Ir a las tiendas</button>
       </div>
 
       <div class="btn-grp" *ngIf="isMaster">
@@ -389,5 +417,34 @@
       <div class="modal-body"><p class="error-modal-msg">{{ imageUploadError }}</p></div>
     </div>
   </div>
+
+  <!-- Modal de manejo de mercaderes -->
+  <div class="modal-overlay" *ngIf="showMerchantModal" (click)="closeMerchantModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Mercaderes</h3>
+        <button class="modal-close" (click)="closeMerchantModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        @if (currentUser?.uid; as uid) {
+          <app-merchant-form
+          [currentUserId]="uid"
+          (merchantInfo)="saveMerchant($event)"
+          ></app-merchant-form>
+        }
+      </div>
+    </div>
+  </div>
+
+  <app-commerce-component #modalComercio *ngIf="showCommerceModal()"></app-commerce-component>
+
+  @if (isMaster) {
+    <button (click)="openMerchantModal()">Crear Mercader</button>
+  }
+
+
+
+
 
 </div>

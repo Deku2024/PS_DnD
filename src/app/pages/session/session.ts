@@ -1,4 +1,13 @@
-import { Component, OnDestroy, OnInit, ChangeDetectorRef, ViewChild, ElementRef, inject } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  ChangeDetectorRef,
+  ViewChild,
+  ElementRef,
+  inject,
+  WritableSignal, signal
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -16,11 +25,15 @@ import { BattleButtonComponent } from '../../components/battle.button.component/
 import { ItemsService } from '../../services/items.service';
 import { Item } from '../../interfaces/Item';
 import { YouTubePlayer } from '@angular/youtube-player';
+import { MerchantForm } from "../../components/merchant-form/merchant-form";
+import { Merchant } from '../../interfaces/Merchant';
+import { MerchantService } from '../../services/merchant.service';
+import {CommerceComponent} from '../../components/commerce.component/commerce.component';
 
 @Component({
   selector: 'app-session',
   standalone: true,
-  imports: [CommonModule, FormsModule, YouTubePlayer, BattleButtonComponent, HistoryButtonComponent, HexMapComponent],
+  imports: [CommonModule, FormsModule, YouTubePlayer, BattleButtonComponent, HistoryButtonComponent, HexMapComponent, MerchantForm, CommerceComponent],
   templateUrl: './session.html',
   styleUrl: './session.css'
 })
@@ -68,6 +81,11 @@ export class SessionPage implements OnInit, OnDestroy {
   modalUid = '';
   presenceMap: { [uid: string]: boolean } = {};
 
+  showMerchantModal = false;
+  myMerchantsLoading = false;
+  showMyMerchants = false;
+  myMerchants: Merchant[] = [];
+
   selectedPlayerUids = new Set<string>();
   lifeAction: number = 0;
   goldAction: number = 0;
@@ -79,6 +97,10 @@ export class SessionPage implements OnInit, OnDestroy {
 
   // Listado de advertencias para que el Máster sepa si se alcanzaron umbrales
   dmAlerts: string[] = [];
+
+  defaultItems : WritableSignal<Item[]> = signal<Item[]>([]);
+
+  showCommerceModal : WritableSignal<boolean> = signal<boolean>(false);
 
   private unsubscribe?: () => void;
   private authSub?: Subscription;
@@ -96,6 +118,7 @@ export class SessionPage implements OnInit, OnDestroy {
     private cd: ChangeDetectorRef,
     private presenceService: PresenceService,
     private rollHistoryService: RollHistoryService,
+    private merchantService: MerchantService,
     private itemsService: ItemsService
   ) {}
 
@@ -129,6 +152,7 @@ export class SessionPage implements OnInit, OnDestroy {
 
     const snap = await this.sessionService.getSession(id);
     const isDm = snap?.masterId === user.uid;
+    this.defaultItems.set(await this.itemsService.loadDefaultItems());
 
     if (!isDm) {
       const selected = snap?.selectedCharacters?.[user.uid];
@@ -138,7 +162,7 @@ export class SessionPage implements OnInit, OnDestroy {
       }
     } else {
       this.itemsUnsub = this.itemsService.readItems(user.uid, (items) => {
-        this.dmItems = items;
+        this.dmItems = [...this.defaultItems(), ...items];
         this.cd.detectChanges();
       });
     }
@@ -595,11 +619,31 @@ export class SessionPage implements OnInit, OnDestroy {
     await this.sessionService.updateTokenPosition(this.session.id, event.uid, event.row, event.col);
   }
 
+
+  //Mercaderes
+
+  closeMerchantModal(): void {
+    this.showMerchantModal = false;
+  }
+
+  toggleMyMerchants(): void {
+    this.showMyMerchants = !this.showMyMerchants;
+  }
+
+  openMerchantModal(): void {
+    this.showMerchantModal = true;
+  }
+
   ngOnDestroy(): void {
     this.unsubscribe?.();
     this.authSub?.unsubscribe();
     this.presenceUnsub?.();
     this.itemsUnsub?.();
     Object.values(this.charUnsubs).forEach(unsub => unsub());
+  }
+
+  saveMerchant(merchant: Merchant) {
+    if (this.session?.id)
+    this.merchantService.saveMerchant(this.session?.id, merchant);
   }
 }
