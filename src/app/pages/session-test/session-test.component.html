@@ -63,5 +63,60 @@
 
   <!---Botón para acceder al bestiario-->
   <button (click)="enterMonsterPage()" [disabled]="!currentUser">Ver mi bestiario</button>
+  <button (click)="openObjectsModal()">Mis Objetos</button>
 
+  <!--Modal para el manejo de objetos del usuario-->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📜 Tus objetos, {{ currentUser?.displayName }}</h3>
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="user-objects">
+            @for (item of items; track $index) {
+              <div class="object-card">
+
+                <div class="object-info">
+                  <p>{{item.name}}</p>
+                  <p>{{item.description}}</p>
+                  <p>Peso: {{item.weight}} lb</p>
+                </div>
+
+                <div class="object-actions">
+                  <button
+                    class="btn-icon btn-edit"
+                    (click)="editItem(item)"
+                    title="Editar"
+                  >
+                    ✎
+                  </button>
+
+                  <button
+                    class="btn-icon btn-delete"
+                    (click)="deleteItem(item)"
+                    title="Eliminar"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+              </div>
+            }
+
+        </div>
+
+        <hr class="modal-divider" />
+
+        <div class="object-input">
+          <inventory-item
+            [item]="selectedItem"
+            (save)="saveItem($event)"
+            (remove)="deleteItem($event)"
+          ></inventory-item>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
