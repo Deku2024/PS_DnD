@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { CharacterService, CharacterWithId } from '../../services/character.service';
 import { PresenceService } from '../../services/presence.service';
 import { RollHistoryService } from '../../services/roll-history.service';
+import { UsernameService } from '../../services/username.service';
 import { HistoryButtonComponent } from '../../components/history.button.component/history.button.component';
 import { CloudinaryService } from '../../services/cloudinary.service';
 import { HexMapComponent } from '../../components/hex-map.component/hex-map.component';
@@ -114,8 +115,7 @@ export class SessionPage implements OnInit, OnDestroy {
     private characterService: CharacterService,
     private cd: ChangeDetectorRef,
     private presenceService: PresenceService,
-private rollHistoryService: RollHistoryService,
-    private itemsService: ItemsService
+private rollHistoryService: RollHistoryService,    private usernameService: UsernameService,    private itemsService: ItemsService
   ) {}
 
   ngOnInit(): void {
@@ -177,6 +177,7 @@ private rollHistoryService: RollHistoryService,
         }
         const isFirstLoad = !this.session;
         this.session = session;
+        this.fillMissingUsernames(session);
         if (isFirstLoad && session.isMap) {
           this.localHexSize = session.hexSize ?? 40;
           this.localGridColor = session.gridColor ?? 'blue';
@@ -193,6 +194,23 @@ private rollHistoryService: RollHistoryService,
     this.presenceUnsub = this.presenceService.listenPresence(id, (map) => {
       this.presenceMap = map;
       this.cd.detectChanges();
+    });
+  }
+
+  private fillMissingUsernames(session: Session): void {
+    const missing = session.players.filter(
+      uid => !session.playersUsernames?.[uid]
+    );
+    if (!missing.length) return;
+    missing.forEach(uid => {
+      const email = session.playerEmails?.[uid];
+      if (!email) return;
+      this.usernameService.getUsernameFromEmail(email).then(name => {
+        if (name && this.session) {
+          this.session.playersUsernames[uid] = name;
+          this.cd.detectChanges();
+        }
+      });
     });
   }
 
