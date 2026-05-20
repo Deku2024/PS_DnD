@@ -136,39 +136,43 @@
     </div>
 
     <!--Mercaderes-->
-    <div class="card">
-      <h3>Mis mercaderes</h3>
-      <button 
-        class="btn-toggle-merchants"
-        (click)="toggleMyMerchants()"
-        [disabled]="myMerchantsLoading"
-      >
-        {{ myMerchantsLoading ? 'Cargando...' : (showMyMerchants ? '▲ Ocultar mercaderes' : '▼ Ver mis mercaderes')}}
-    
-      </button>
-
-      @if(showMyMerchants && !myMerchantsLoading) {
-        <div class="my-merchants-list">
-            @if (myMerchants.length === 0) {
-              <p class="empty-merchants">
-                Aún no tienes mercaderes
-              </p>
-            }
-
-            <div class="merchant-info">
-              
-                
-            </div>
-        </div>
-
-      }
+    @if (isMaster) {
 
 
 
-
-
-
-    </div>
+      <div class="card">
+        <h3>Mis mercaderes</h3>
+        <button 
+          class="btn-toggle-merchants"
+          (click)="toggleMyMerchants()"
+          [disabled]="myMerchantsLoading"
+        >
+          {{ myMerchantsLoading ? 'Cargando...' : (showMyMerchants ? '▲ Ocultar mercaderes' : '▼ Ver mis mercaderes')}}
+      
+        </button>
+  
+        @if(showMyMerchants && !myMerchantsLoading) {
+          <div class="my-merchants-list">
+              @if (myMerchants.length === 0) {
+                <p class="empty-merchants">
+                  Aún no tienes mercaderes
+                </p>
+              }
+  
+              @for (merchant of myMerchants; track $index) {
+                <div class="merchant-info">
+                  <span class="merchant">{{merchant.name}}</span>
+                  <div class="merchant-options">
+                    <button (click)="deleteMerchant(merchant)">Eliminar</button>
+                    <button (click)="updateMerchant(merchant)">Actualizar</button>
+                  </div>
+                </div>
+              }
+          </div>
+  
+        }
+      </div>
+    }
 
 
     <!-- Acciones -->
@@ -292,7 +296,7 @@
   </div>
 
   <!-- Modal de manejo de mercaderes -->
-  <div class="modal-overlay" *ngIf="showMerchantModal" (click)="closeMerchantModal()">
+  <div class="modal-overlay" *ngIf="showMerchantModal()" (click)="closeMerchantModal()">
     <div class="modal-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>Mercaderes</h3>
@@ -302,8 +306,10 @@
       <div class="modal-body">
         @if (currentUser?.uid; as uid) {
           <app-merchant-form 
+          [merchant]="selectedMerchant"
           [currentUserId]="uid"
           (merchantInfo)="saveMerchant($event)"
+          (cancelEvent)="showMerchantModal.set($event)";
           ></app-merchant-form>
         }
       </div>

@@ -19,7 +19,7 @@ export class MerchantService {
     return addDoc(this.merchantRef(sessionId), merchant);
   }
 
-  async readMerchants(sessionId: string, callback: (merchants: any[]) => void) {
+  readMerchants(sessionId: string, callback: (merchants: any[]) => void) {
     const q = query(this.merchantRef(sessionId));
 
     return onSnapshot(q, snapshot => {

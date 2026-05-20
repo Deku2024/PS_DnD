@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ChangeDetectorRef, ViewChild, ElementRef, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef, ViewChild, ElementRef, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SessionService, Session } from '../../services/sessions.service';
@@ -44,10 +44,12 @@ export class SessionPage implements OnInit, OnDestroy {
   modalUid = '';
   presenceMap: { [uid: string]: boolean } = {};
 
-  showMerchantModal = false;
+  showMerchantModal = signal<boolean>(false);
   myMerchantsLoading = false;
   showMyMerchants = false;
   myMerchants: Merchant[] = [];
+  merchantUnsubscribe: (() => void) | undefined;
+  selectedMerchant: Merchant | null = null;
 
   private unsubscribe?: () => void;
   private authSub?: Subscription;
@@ -114,6 +116,8 @@ export class SessionPage implements OnInit, OnDestroy {
           return;
         }
         this.session = session;
+        this.loadMerchants();
+        console.log("se han cargado los mercaderes con éxito: " + this.myMerchants.length);
         this.rollHistoryService.setSessionStatus(session.status);
         this.rollHistoryService.startListening(id);
         await this.loadCharacters(session);
@@ -285,9 +289,25 @@ export class SessionPage implements OnInit, OnDestroy {
 
 
   //Mercaderes
+  loadMerchants() {
+      console.log("se ha entrado en el método");
+      console.log(this.session);
+      
+      if (this.session?.id) {
+        this.merchantUnsubscribe = this.merchantService.readMerchants(
+              this.session.id,
+              (merchants) => {
+                this.myMerchants = merchants;
+                this.cd.detectChanges();
+              }
+        )
+        console.log("se ha entrado en el if del método");
+      }
+  }
 
   closeMerchantModal(): void {
-    this.showMerchantModal = false;
+    this.showMerchantModal.set(false);
+    this.selectedMerchant = null;
   }
 
   toggleMyMerchants(): void {
@@ -295,7 +315,8 @@ export class SessionPage implements OnInit, OnDestroy {
   }
 
   openMerchantModal(): void {
-    this.showMerchantModal = true;
+    this.showMerchantModal.set(true);
+    this.selectedMerchant = null;
   }
 
   ngOnDestroy(): void {
@@ -306,6 +327,18 @@ export class SessionPage implements OnInit, OnDestroy {
 
   saveMerchant(merchant: Merchant) {
     if (this.session?.id)
-    this.merchantService.saveMerchant(this.session?.id, merchant);
+    this.merchantService.saveMerchant(this.session.id, merchant);
+    this.closeMerchantModal();
+  }
+
+  deleteMerchant(merchant: Merchant) {
+    if (this.session?.id && merchant.id) {
+      this.merchantService.deleteMerchant(this.session.id, merchant.id);
+    }
+  }
+
+  updateMerchant(merchant: Merchant) {
+    this.openMerchantModal();
+    this.selectedMerchant = merchant;
   }
 }

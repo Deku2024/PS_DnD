@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, input, output } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, effect, input, output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
 import { MerchantService } from '../../services/merchant.service';
 import { Item } from '../../interfaces/Item';
@@ -13,7 +13,9 @@ import { Merchant } from '../../interfaces/Merchant';
 })
 export class MerchantForm implements OnInit {
   currentUserId = input.required<string>();
+  merchant = input<Merchant | null>(null);
   merchantInfo = output<Merchant>();
+  cancelEvent = output<boolean>();
   merchantForm: FormGroup;
   items: Item[] = [];
   unsubscribe: (() => void) | undefined;
@@ -28,14 +30,50 @@ export class MerchantForm implements OnInit {
       sellingList: this.fb.array([]),
       buyingList: this.fb.array([])
     })
+
+
+    effect(() => {
+      const merchant = this.merchant();
+
+      if (merchant) {
+        this.loadMerchantData(merchant);
+      }
+    })
+  }
+
+  private loadMerchantData(merchant: Merchant) {
+    this.merchantForm.patchValue({
+      name: merchant.name
+    });
+
+    this.sellingList.clear();
+    this.buyingList.clear();
+
+    merchant.sellingList.forEach(item => {
+      this.sellingList.push(this.fb.group({
+        itemId: [item.itemId],
+        price: [item.price],
+        quantity: [item.quantity]
+      }))
+    });
+
+    merchant.buyingList.forEach(item => {
+      this.buyingList.push(this.fb.group({
+        itemId: [item.itemId],
+        price: [item.price],
+        quantity: [item.quantity]
+      }))
+    });
+
+
   }
 
   private loadUserItems() {
     if (this.currentUserId()) {
       this.unsubscribe = this.itemService.readItems(
             this.currentUserId(),
-            (monsters) => {
-              this.items = monsters;
+            (items) => {
+              this.items = items;
               this.ch.detectChanges();
             }
       )
@@ -81,6 +119,20 @@ export class MerchantForm implements OnInit {
   }
 
   saveMerchant() {
-    this.merchantInfo.emit(this.merchantForm.value);
+      const merchantData: Merchant = {
+        ...this.merchantForm.value
+      };
+
+    if (this.merchant()?.id) {
+      merchantData.id = this.merchant()!.id;
+    }
+
+    this.merchantInfo.emit(merchantData);
+    this.merchantForm.reset();
+  }
+
+  cancel() {
+    this.merchantForm.reset();
+    this.cancelEvent.emit(false);
   }
 }

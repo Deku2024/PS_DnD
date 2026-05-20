@@ -1,4 +1,4 @@
-import {Item, MerchantItemInfo} from './Item';
+import {MerchantItemInfo} from './Item';
 
 export interface Merchant {
   id?: string;
