@@ -1,8 +1,9 @@
-import { ChangeDetectorRef, Component, OnInit, input } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, input, output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
 import { MerchantService } from '../../services/merchant.service';
 import { Item } from '../../interfaces/Item';
 import { ItemsService } from '../../services/items.service';
+import { Merchant } from '../../interfaces/Merchant';
 
 @Component({
   selector: 'app-merchant-form',
@@ -12,6 +13,7 @@ import { ItemsService } from '../../services/items.service';
 })
 export class MerchantForm implements OnInit {
   currentUserId = input.required<string>();
+  merchantInfo = output<Merchant>();
   merchantForm: FormGroup;
   items: Item[] = [];
   unsubscribe: (() => void) | undefined;
@@ -23,28 +25,30 @@ export class MerchantForm implements OnInit {
   constructor(private fb: FormBuilder, merchantService: MerchantService, private itemService: ItemsService, private ch: ChangeDetectorRef) {
     this.merchantForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
-      sellingList: this.fb.group({}),
-      buyingList: this.fb.group({})
+      sellingList: this.fb.array([]),
+      buyingList: this.fb.array([])
     })
   }
 
   private loadUserItems() {
-    this.unsubscribe = this.itemService.readItems(
-          this.currentUserId(),
-          (monsters) => {
-            this.items = monsters;
-            this.ch.detectChanges();
-          }
-    )
+    if (this.currentUserId()) {
+      this.unsubscribe = this.itemService.readItems(
+            this.currentUserId(),
+            (monsters) => {
+              this.items = monsters;
+              this.ch.detectChanges();
+            }
+      )
+    }
   }
 
   // crear info de objetos de mercader
   
-  createMerchantItem(item: Item): FormGroup {
+  createMerchantItem(item: Item, price: number, quantity: number): FormGroup {
     return this.fb.group({
       itemId: [item.id],
-      price: [0],
-      quantity: [1]
+      price: [price],
+      quantity: [quantity]
     });
   }
 
@@ -60,19 +64,23 @@ export class MerchantForm implements OnInit {
 
   //Añadir items a las listas
 
-  addItemToSellingList(item: Item) {
+  addItemToSellingList(item: Item, price: number, quantity: number) {
     this.sellingList.push(
-      this.createMerchantItem(item)
+      this.createMerchantItem(item, price, quantity)
     );
   }
 
-  addItemToBuyingList(item: Item) {
+  addItemToBuyingList(item: Item, price: number, quantity: number) {
     this.buyingList.push(
-      this.createMerchantItem(item)
+      this.createMerchantItem(item, price, quantity)
     );
   }
 
   getItemById(id: string): Item | undefined {
     return this.items.find(item => item.id === id);
+  }
+
+  saveMerchant() {
+    this.merchantInfo.emit(this.merchantForm.value);
   }
 }

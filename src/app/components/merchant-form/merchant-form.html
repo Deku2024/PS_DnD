@@ -1,1 +1,162 @@
+<form [formGroup]="merchantForm">
 
+    <!-- Nombre -->
+    <input
+        type="text"
+        placeholder="nombre"
+        formControlName="name"
+    >
+
+    <h3>Selecciona los objetos que quieres que venda.</h3>
+
+    <div class="sellingObjects">
+
+        @for (item of items; track item.id) {
+
+            <div class="item-card">
+
+                <p>{{ item.name }}</p>
+
+                <input
+                    #sellingPrice
+                    type="number"
+                    placeholder="Precio"
+                >
+
+                <input
+                    #sellingQuantity
+                    type="number"
+                    placeholder="Cantidad"
+                >
+
+                <button
+                    type="button"
+                    (click)="addItemToSellingList(
+                        item,
+                        +sellingPrice.value,
+                        +sellingQuantity.value
+                    )"
+                >
+                    Añadir
+                </button>
+
+            </div>
+
+        }
+
+    </div>
+
+    <h2>Objetos que vende</h2>
+
+    @if (sellingList.length == 0) {
+        <span>Todavía no se han seleccionado objetos</span>
+    }
+
+    <div formArrayName="sellingList">
+
+        @for (group of sellingList.controls; track $index; let i = $index) {
+
+            <div [formGroupName]="i">
+
+                <p>
+                    {{
+                        getItemById(group.get('itemId')?.value)?.name
+                    }}
+                </p>
+
+                <input
+                    type="number"
+                    formControlName="price"
+                >
+
+                <input
+                    type="number"
+                    formControlName="quantity"
+                >
+
+            </div>
+
+        }
+
+    </div>
+
+    <hr class="modal-divider" />
+
+    <h3>Selecciona los objetos que acepta comprar.</h3>
+    
+    <div class="buyingObjects">
+        
+        @for (item of items; track item.id) {
+            
+            <div class="item-card">
+                
+                <p>{{ item.name }}</p>
+
+                <input
+                    #buyingPrice
+                    type="number"
+                    placeholder="Precio"
+                    >
+                    
+                    <input
+                    #buyingQuantity
+                    type="number"
+                    placeholder="Cantidad"
+                >
+
+                <button
+                type="button"
+                    (click)="addItemToBuyingList(
+                        item,
+                        +buyingPrice.value,
+                        +buyingQuantity.value
+                    )"
+                >
+                    Añadir
+                </button>
+
+            </div>
+
+        }
+        
+    </div>
+    
+
+    <h2>Objetos que compra</h2>
+
+    @if (buyingList.length == 0) {
+        <span>Todavía no se han seleccionado objetos</span>
+    }
+
+
+    <div formArrayName="buyingList">
+
+        @for (group of buyingList.controls; track $index; let i = $index) {
+
+            <div [formGroupName]="i">
+
+                <p>
+                    {{
+                        getItemById(group.get('itemId')?.value)?.name
+                    }}
+                </p>
+
+                <input
+                    type="number"
+                    formControlName="price"
+                >
+
+                <input
+                    type="number"
+                    formControlName="quantity"
+                >
+
+            </div>
+
+        }
+
+    </div>
+
+    <button type="submit" (click)="saveMerchant()">Guardar</button>
+
+</form>
