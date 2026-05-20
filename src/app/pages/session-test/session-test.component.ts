@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -28,6 +28,8 @@ export class SessionTestComponent implements OnInit, OnDestroy {
   mySessions: Session[] = [];
   showMySessions = false;
   mySessionsLoading = false;
+  showConfirmDialog = signal<boolean>(false);
+  sessionId = signal<string>("");
 
   authService = inject(AuthService);
 
@@ -176,5 +178,25 @@ export class SessionTestComponent implements OnInit, OnDestroy {
     this.router.navigate(['/bestiary']);
   }
 
+  deleteThisSession(sessionId : string) : void {
+    this.sessionService.deleteSessions(sessionId);
+    this.closeConfirmDialog();
+  }
+
+  showConfirmDialogToThisSession(sessionId : string) : void {
+    this.showConfirmDialog.set(true);
+    this.sessionId.set(sessionId);
+  }
+
+  removeCurrentPlayerFromSession(sessionId : string) : void {
+    this.sessionService.leaveSession(sessionId);
+    this.closeConfirmDialog();
+  }
+
+  closeConfirmDialog() {
+    this.showConfirmDialog.set(false);
+    this.sessionId.set("");
+    this.loadMySessions();
+  }
 
 }
