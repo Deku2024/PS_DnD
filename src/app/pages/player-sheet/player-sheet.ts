@@ -125,6 +125,7 @@ export class PlayerSheet implements OnInit {
         pp:  [0, [Validators.min(0)]],
         pc:  [0, [Validators.min(0)]]
       }),
+      inventory: this.fb.array([]),
       abilities: this.fb.array([]),
       image: [this.defaultImage]
     }, { validators: this.validateLifeNotExceedMax() });
