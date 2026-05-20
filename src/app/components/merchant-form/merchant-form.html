@@ -30,6 +30,14 @@
             (itemSelected)="onSellingItemSelected($event)"
     />
 
+    @if (sellingDuplicateError) {
+
+        <div class="error-message">
+            {{ sellingDuplicateError }}
+        </div>
+
+    }
+
     <h2>Objetos que vende</h2>
 
     @if (sellingList.length == 0) {
@@ -53,10 +61,46 @@
                     formControlName="price"
                 >
 
+                @if (group.get('price')?.invalid && group.get('price')?.touched) {
+                    <div class="error">
+
+                        @if (group.get('price')?.errors?.['required']) {
+                        <span>El precio es obligatorio</span>
+                        }
+
+                        @if (group.get('price')?.errors?.['min']) {
+                        <span>El precio no puede ser negativo</span>
+                        }
+
+                        @if (group.get('price')?.errors?.['pattern']) {
+                        <span>Sólo números enteros</span>
+                        }
+
+                    </div>
+                }
+
                 <input
                     type="number"
                     formControlName="quantity"
                 >
+
+                @if (group.get('quantity')?.invalid && group.get('quantity')?.touched) {
+                    <div class="error">
+
+                        @if (group.get('quantity')?.errors?.['required']) {
+                        <span>La cantidad es obligatoria</span>
+                        }
+
+                        @if (group.get('quantity')?.errors?.['min']) {
+                        <span>La cantidad no puede ser negativa</span>
+                        }
+
+                        @if (group.get('quantity')?.errors?.['pattern']) {
+                        <span>Sólo números enteros</span>
+                        }
+
+                    </div>
+                }
 
             </div>
 
@@ -83,6 +127,12 @@
         placeholder="Buscar objeto para comprar..."
         (itemSelected)="onBuyingItemSelected($event)"
     />
+
+    @if (buyingDuplicateError) {
+        <div class="error-message">
+            {{ buyingDuplicateError }}
+        </div>
+    }
 
     <h2>Objetos que compra</h2>
 
