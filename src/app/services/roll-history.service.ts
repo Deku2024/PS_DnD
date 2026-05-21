@@ -34,7 +34,6 @@ export class RollHistoryService implements OnDestroy {
     private authService: AuthService
   ) {
     this.rollSub = this.diceRollerService.lastResult$.subscribe(async (result) => {
-      if (this.sessionStatus === 'paused' || this.sessionStatus === 'waiting') return;
       const sessionId = this.sessionService.getCurrentSessionId();
       const user = this.authService.getCurrentUser();
       if (!sessionId) return;

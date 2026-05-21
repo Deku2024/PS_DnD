@@ -39,7 +39,7 @@ export class MonsterSheet implements OnInit {
   selectedFile: File | null = null;
 
   isInInventory = true;
-  
+
   raceOptions = [
     { value: "Aberration", label: "Aberración" },
     { value: "Monstrosity", label: "Monstruosidad" },
@@ -95,7 +95,7 @@ export class MonsterSheet implements OnInit {
         wisdom: [10, [Validators.required, Validators.min(1), Validators.max(20)]],
         charisma: [10, [Validators.required, Validators.min(1), Validators.max(20)]]
       }),
-
+      inventory: this.fb.array([]),
       abilities: this.fb.array([]),
       image: [this.defaultImage]
     }, { validators: this.validateLifeNotExceedMax() });

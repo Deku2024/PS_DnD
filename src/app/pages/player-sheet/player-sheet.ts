@@ -103,7 +103,7 @@ export class PlayerSheet implements OnInit {
     this.playerSheetForm = this.fb.group({
       name: ['Naivara', [Validators.required, Validators.minLength(3)]],
       age: [18, [Validators.required, Validators.min(18), Validators.max(80)]],
-      experience: [0, [Validators.required, Validators.min(0)]],
+      experience: [1, [Validators.required, Validators.min(0)]],
       life: [10, [Validators.required, Validators.min(0)]],
       maxLife: [10, [Validators.required, Validators.min(0)]],
       tempLife: [0, [Validators.min(0)]],
