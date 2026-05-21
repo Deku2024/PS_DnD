@@ -157,7 +157,7 @@
 
     <div class="form-section">
       <div class="section-header">
-<h2>Inventario y Carga</h2>
+        <h2>Inventario y Carga</h2>
       </div>
 
       <div class="weight-status-card" [ngClass]="encumbranceStatus.class">
@@ -166,26 +166,23 @@
           <span>Capacidad: <strong>{{ carryCapacity }} lb</strong></span>
         </div>
         <div class="weight-bar">
-          <div class="weight-fill" [style.width.%]="(totalWeight / carryCapacity) * 100"></div>
-        </div>
-        <p class="status-label">Estado: <strong>{{ encumbranceStatus.label }}</strong></p>
+          <div class="weight-fill" [style.width.%]="carryCapacity > 0 ? Math.min((totalWeight / carryCapacity) * 100, 100) : 0"></div>
+        </div> <p class="status-label">Estado: <strong>{{ encumbranceStatus.label }}</strong></p>
         <p *ngIf="totalWeight > carryCapacity" class="weight-warning">⚠️ ¡Exceso de peso! Movimiento reducido.</p>
-      </div>
+      </div> <div class="inventario">
+      @if (inventoryFormArray.controls.length === 0) {
+        <p class="empty-msg">El inventario está vacío.</p>
+      }
 
-      <div class="inventario">
-        @if (inventoryFormArray.controls.length === 0) {
-          <p class="empty-msg">El inventario está vacío.</p>
-        }
-
-        @for (control of inventoryFormArray.controls; track $index) {
-          <inventory-item
-            [isInInventory]="true"
-            [item]="control.value"
-            (remove)="onRemoveItem($index)"
-          />
-        }
-      </div>
-      </div>
+      @for (control of inventoryFormArray.controls; track $index) {
+        <inventory-item
+          [isInInventory]="true"
+          [item]="control.value"
+          (remove)="onRemoveItem($index)"
+        />
+      }
+    </div>
+    </div>
 
     <div class="form-section">
 <div class="section-header">

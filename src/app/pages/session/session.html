@@ -233,7 +233,8 @@
               [class.badge-active]="session.status === 'active'"
               [class.badge-closed]="session.status === 'closed'">
           {{ session.status }}
-        </span>        <span class="ornament">🙦</span>
+        </span>
+        <span class="ornament">🙦</span>
       </header>
 
       <div class="landscape-content">
@@ -251,8 +252,25 @@
 
             <div class="sidebar-scroll">
 
+              <!-- TAB: PLAYERS -->
               <div class="tab-content" *ngIf="activeTab === 'players'">
-                <div class="players-header" style="margin-bottom: 8px;">
+
+                <div class="landscape-inner-card dm-actions-panel" *ngIf="isMaster">
+                  <h4 style="color: #c6a747; text-align: center; margin-bottom: 10px;">CENTRO DE MANDO DM</h4>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin-bottom: 8px;">
+                    <input type="number" [(ngModel)]="lifeAction" placeholder="❤️ HP" class="landscape-input">
+                    <input type="number" [(ngModel)]="goldAction" placeholder="💰 PO" class="landscape-input">
+                    <input type="number" [(ngModel)]="xpAction" placeholder="✨ XP" class="landscape-input">
+                  </div>
+                  <button type="button" (click)="applyBatchActions()" class="landscape-btn" style="width: 100%; margin-bottom: 10px;" [disabled]="selectedPlayerUids.size === 0">APLICAR CAMBIOS</button>
+                  <select [(ngModel)]="selectedItemId" class="landscape-input" style="margin-bottom: 5px;">
+                    <option value="" disabled selected>Selecciona objeto...</option>
+                    <option *ngFor="let item of dmItems" [value]="item.id">{{ item.name }}</option>
+                  </select>
+                  <button type="button" (click)="applyAddItem()" class="landscape-btn" style="width: 100%;">ENTREGAR OBJETO</button>
+                </div>
+
+                <div class="players-header" style="margin-top: 10px;">
                   <h3 style="font-size: 0.9rem; margin:0;">Mesa de Juego</h3>
                   <button *ngIf="isMaster" class="btn-select-all" style="font-size:0.75rem; padding: 2px 6px;" (click)="selectAllPlayers()">
                     {{ selectedPlayerUids.size === session.players.length - 1 ? 'Ninguno' : 'Todos' }}
@@ -281,20 +299,9 @@
                     </div>
                   </div>
                 </ng-container>
-
-                <div class="landscape-inner-card" *ngIf="isMaster" style="margin-top: 15px; background: rgba(0,0,0,0.4);">
-                  <h4 style="font-size: 0.75rem; margin-bottom: 8px;">Acciones en Lote ({{ selectedPlayerUids.size }})</h4>
-                  <div style="display: flex; gap: 4px; margin-bottom: 6px;">
-                    <input type="number" [(ngModel)]="lifeAction" placeholder="❤️ HP" class="landscape-input" style="padding: 4px;">
-                    <input type="number" [(ngModel)]="goldAction" placeholder="💰 PO" class="landscape-input" style="padding: 4px;">
-                    <input type="number" [(ngModel)]="xpAction" placeholder="✨ XP" class="landscape-input" style="padding: 4px;">
-                  </div>
-                  <button type="button" (click)="applyBatchActions()" class="landscape-btn" style="width: 100%; padding: 6px; font-weight: bold;" [disabled]="selectedPlayerUids.size === 0 || (lifeAction === 0 && goldAction === 0 && xpAction === 0)">
-                    APLICAR ATRIBUTOS
-                  </button>
-                </div>
               </div>
 
+              <!-- TAB: MAP -->
               <div class="tab-content" *ngIf="activeTab === 'map'">
                 <div class="landscape-inner-card">
                   <h4>Controles de Escenario</h4>
@@ -365,6 +372,7 @@
                 </div>
               </div>
 
+              <!-- TAB: AUDIO -->
               <div class="tab-content" *ngIf="activeTab === 'audio'">
                 <div class="landscape-inner-card">
                   <h4>Música Ambiental</h4>
@@ -389,7 +397,7 @@
                 </div>
               </div>
 
-            </div>
+            </div><!-- /sidebar-scroll -->
 
             <footer class="sidebar-footer">
               <div class="master-action-row" *ngIf="isMaster">
