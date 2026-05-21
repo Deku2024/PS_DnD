@@ -12,14 +12,9 @@
     class="hex-overlay"
     [attr.viewBox]="'0 0 ' + imgWidth + ' ' + imgHeight"
     preserveAspectRatio="none"
+    overflow="hidden"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <defs>
-      <clipPath *ngFor="let token of playerTokens; let i = index" [attr.id]="'token-clip-' + i">
-        <circle [attr.cx]="token.cx" [attr.cy]="token.cy" [attr.r]="hexSize * 0.60" />
-      </clipPath>
-    </defs>
-
     <polygon
       *ngFor="let hex of hexes"
       [attr.points]="hex.points"
@@ -51,15 +46,16 @@
         stroke="white"
         [attr.stroke-width]="hexSize * 0.07"
       />
-      <!-- Avatar del personaje -->
+      <!-- Avatar del personaje: clip-path en el <g> para máxima compatibilidad con Safari/WebKit -->
+      <!-- Avatar: CSS circle(50%) no usa url() y Angular no lo sanitiza -->
       <image
         *ngIf="token.avatarUrl"
+        class="token-avatar"
         [attr.x]="token.cx - hexSize * 0.60"
         [attr.y]="token.cy - hexSize * 0.60"
         [attr.width]="hexSize * 1.20"
         [attr.height]="hexSize * 1.20"
         [attr.href]="token.avatarUrl"
-        [attr.clip-path]="'url(#token-clip-' + i + ')'"
         preserveAspectRatio="xMidYMid slice"
       />
       <!-- Borde blanco encima de la imagen -->

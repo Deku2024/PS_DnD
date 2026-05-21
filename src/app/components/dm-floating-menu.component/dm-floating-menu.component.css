@@ -133,3 +133,48 @@
   font-size: 1.5rem;
   transform: translateY(0);
 }
+
+/* ── Responsive: móvil ── */
+@media (max-width: 600px) {
+  .dm-speed-dial {
+    bottom: 1rem;
+    right: 0.75rem;
+  }
+
+  .dial-actions {
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .dial-item {
+    gap: 0.5rem;
+  }
+
+  .dial-label {
+    font-size: 0.65rem;
+    padding: 0.25rem 0.55rem;
+    max-width: 46vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sub-fab {
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .dm-main-btn {
+    width: 50px;
+    height: 50px;
+  }
+
+  .btn-icon-centered {
+    font-size: 1.4rem;
+  }
+
+  .dm-main-btn.active .btn-icon-centered {
+    font-size: 1.2rem;
+  }
+}

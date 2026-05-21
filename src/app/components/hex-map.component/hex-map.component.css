@@ -54,6 +54,12 @@
   filter: drop-shadow(0 0 6px rgba(255, 224, 102, 0.8));
 }
 
+.token-avatar {
+  /* circle(50%) recorta al círculo inscrito en el bounding box del <image>.
+     No usa url(), por lo que Angular no lo sanitiza. */
+  clip-path: circle(50%);
+}
+
 .token-label {
   pointer-events: none;
   user-select: none;

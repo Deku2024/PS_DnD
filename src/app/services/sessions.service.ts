@@ -5,6 +5,7 @@ import {
   arrayUnion,
   collection,
   deleteDoc,
+  deleteField,
   doc,
   getDoc,
   getDocs,
@@ -192,13 +193,13 @@ export class SessionService {
     if (session.masterId === userId) throw new Error('No puedes expulsar al master.');
 
     const updates: any = {
-      players: arrayRemove(this.currentUserId),
-      playersEmails: arrayRemove(this.firebase.auth.currentUser?.email),
-      playersUsernames: arrayRemove(this.firebase.auth.currentUser?.email),
+      players: arrayRemove(userId),
+      [`playerEmails.${userId}`]: deleteField(),
+      [`playersUsernames.${userId}`]: deleteField(),
     };
 
     if (session.selectedCharacters?.[userId] !== undefined) {
-      updates[`selectedCharacters.${userId}`] = null;
+      updates[`selectedCharacters.${userId}`] = deleteField();
     }
 
     await updateDoc(ref, updates);
