@@ -1576,12 +1576,13 @@ h2 {
     overflow: hidden;
     position: relative;
     width: 100%;
-    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 0;
+    transition: flex-basis 0.4s cubic-bezier(0.4, 0, 0.2, 1), margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     margin-left: 0;
   }
 
   .sidebar-wrapper.is-closed + .main-stage {
-    width: 100vw;
+    flex: 0 0 100vw;
     margin-left: -320px;
   }
 
