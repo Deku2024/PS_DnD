@@ -41,6 +41,7 @@ export class BattleButtonComponent {
       await this.rollHistoryService.deleteSessionRolls(sessionId);
       await this.sessionService.updateCombatOrder(sessionId, []);
     }
+    this.combatService.combatants = [];
     this.combatService.status = 'preparing';
     await this.sessionService.updateStatus(sessionId, 'in-battle');
     this.router.navigate(['/session', sessionId, 'dm-combat']);
