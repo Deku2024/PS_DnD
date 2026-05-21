@@ -77,6 +77,7 @@ export class SessionPage implements OnInit, OnDestroy {
   modalPlayerEmail = '';
   modalUid = '';
   presenceMap: { [uid: string]: boolean } = {};
+  private usernameCache: { [uid: string]: string } = {};
   isSidebarOpen = true;
 
   selectedPlayerUids = new Set<string>();
@@ -198,6 +199,15 @@ private rollHistoryService: RollHistoryService,    private usernameService: User
   }
 
   private fillMissingUsernames(session: Session): void {
+    if (!session.playersUsernames) session.playersUsernames = {};
+
+    // Apply cached names synchronously before any async fetch
+    session.players.forEach(uid => {
+      if (!session.playersUsernames[uid] && this.usernameCache[uid]) {
+        session.playersUsernames[uid] = this.usernameCache[uid];
+      }
+    });
+
     const missing = session.players.filter(
       uid => !session.playersUsernames?.[uid]
     );
@@ -207,6 +217,7 @@ private rollHistoryService: RollHistoryService,    private usernameService: User
       if (!email) return;
       this.usernameService.getUsernameFromEmail(email).then(name => {
         if (name && this.session) {
+          this.usernameCache[uid] = name;
           this.session.playersUsernames[uid] = name;
           this.cd.detectChanges();
         }
