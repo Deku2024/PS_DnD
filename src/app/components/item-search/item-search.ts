@@ -33,6 +33,7 @@ export class ItemSearch {
   }
 
   selectItem(item: Item) {
+    console.log(item.id)
 
     this.itemSelected.emit(item);
 
