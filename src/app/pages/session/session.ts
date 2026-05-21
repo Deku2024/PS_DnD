@@ -279,6 +279,16 @@ export class SessionPage implements OnInit, OnDestroy {
     }
   }
 
+  onPlayerStateChange(event: any): void {
+    // YT.PlayerState.PLAYING = 1
+    // If the player starts playing but it should be paused (e.g. after a seekTo
+    // triggers buffering -> playing, or on initial autoplay load while paused),
+    // immediately pause it.
+    if (event.data === 1 && this.lastAudioState && !this.lastAudioState.isPlaying) {
+      this.youtubePlayer?.pauseVideo();
+    }
+  }
+
   private syncAudio(audio: AudioState | null): void {
     if (!audio) {
       this.youtubeVideoId = undefined;
@@ -302,19 +312,30 @@ export class SessionPage implements OnInit, OnDestroy {
   }
 
   private syncExistingPlayer(audio: AudioState): void {
-    if (this.youtubePlayer && this.youtubePlayer.getPlayerState) {
-      const elapsed = (Date.now() - audio.updatedAt) / 1000;
-      const expectedTime = audio.currentTime + (audio.isPlaying ? elapsed : 0);
-      const currentTime = this.youtubePlayer.getCurrentTime() || 0;
+    if (!this.youtubePlayer?.getPlayerState) return;
 
-      if (Math.abs(currentTime - expectedTime) > this.syncThreshold) {
+    const elapsed = (Date.now() - audio.updatedAt) / 1000;
+    const expectedTime = audio.currentTime + (audio.isPlaying ? elapsed : 0);
+    const currentTime = this.youtubePlayer.getCurrentTime() || 0;
+    const state = this.youtubePlayer.getPlayerState();
+    const needsSeek = Math.abs(currentTime - expectedTime) > this.syncThreshold;
+
+    if (audio.isPlaying) {
+      if (needsSeek) {
         this.youtubePlayer.seekTo(expectedTime, true);
       }
-
-      const state = this.youtubePlayer.getPlayerState();
-      if (audio.isPlaying && state !== 1) {
+      if (state !== 1) {
         this.youtubePlayer.playVideo();
-      } else if (!audio.isPlaying && state === 1) {
+      }
+    } else {
+      if (needsSeek) {
+        this.youtubePlayer.seekTo(expectedTime, true);
+      }
+      // Pause if currently playing OR if we just seeked.
+      // seekTo on a paused video triggers buffering (state 3) -> playing (state 1),
+      // so calling pauseVideo here is a first attempt; the stateChange handler
+      // provides the definitive safety net for any remaining auto-play.
+      if (state === 1 || needsSeek) {
         this.youtubePlayer.pauseVideo();
       }
     }
