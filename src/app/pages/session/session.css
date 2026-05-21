@@ -2079,7 +2079,7 @@ app-hex-map svg {
 }
 
 .btn-toggle-merchants:hover {
-  background: rgba(198, 167, 71, 0.15);
+  background: rgba(198, 167, 71, 0.5);
   color: #e8d5a0;
 }
 
@@ -2103,7 +2103,7 @@ app-hex-map svg {
   align-items: center;
   justify-content: space-between;
   background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(198, 167, 71, 0.15);
+  border: 1px solid rgba(198, 167, 71, 5);
   border-left: 3px solid rgba(198, 167, 71, 0.5);
   border-radius: 3px;
   padding: 0.65rem 0.85rem;
@@ -2112,7 +2112,7 @@ app-hex-map svg {
 }
 
 .merchant-row:hover {
-  background: rgba(198, 167, 71, 0.06);
+  background: rgba(198, 167, 71, 0.5);
   border-left-color: #c6a747;
 }
 
@@ -2203,4 +2203,179 @@ app-hex-map svg {
   .merchant {
     font-size: 0.85rem;
   }
+}
+/* Modal de lista de mercaderes (VER) */
+.merchants-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.merchants-card {
+  background: #0a0603;
+  background-image: radial-gradient(ellipse at top, #1a0e05 0%, #0a0603 100%);
+  border: 2px solid #d4a056;
+  border-radius: 20px;
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+}
+
+.merchants-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #d4a056;
+}
+
+.merchants-header h3 {
+  margin: 0;
+  color: #d4a056;
+  font-family: 'MedievalSharp', monospace;
+  font-size: 1.2rem;
+  letter-spacing: 0.15em;
+}
+
+.merchants-close {
+  background: none;
+  border: none;
+  color: #d4a056;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.merchants-close:hover {
+  background: rgba(212, 160, 86, 0.2);
+  color: #e06a5a;
+}
+
+.merchants-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.merchant-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(212, 160, 86, 0.3);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s;
+}
+
+.merchant-item:hover {
+  background: rgba(0, 0, 0, 0.7);
+  border-color: #d4a056;
+}
+
+.merchant-name {
+  color: #e8d5a0;
+  font-size: 1rem;
+  font-weight: bold;
+  flex: 1;
+}
+
+.merchant-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.merchant-buttons button {
+  background: #2c1810;
+  border: 1px solid #8b6914;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.merchant-buttons button:first-child {
+  background: #5c2a1e;
+  color: #d4a96a;
+}
+
+.merchant-buttons button:first-child:hover {
+  background: #7a3a2a;
+  transform: scale(1.02);
+}
+
+.merchant-buttons button:last-child {
+  background: #2a3a2a;
+  color: #90b86a;
+}
+
+.merchant-buttons button:last-child:hover {
+  background: #3a5a3a;
+  transform: scale(1.02);
+}
+
+.empty-merchants {
+  text-align: center;
+  color: #8a6e2f;
+  padding: 2rem;
+  font-style: italic;
+}
+
+/* Scrollbar para lista de mercaderes */
+.merchants-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.merchants-list::-webkit-scrollbar-track {
+  background: #1a0e05;
+  border-radius: 3px;
+}
+
+.merchants-list::-webkit-scrollbar-thumb {
+  background: #d4a056;
+  border-radius: 3px;
+}
+
+/* Botón crear mercader */
+.btn-create-merchant {
+  background: linear-gradient(135deg, #3a2518 0%, #2a1a08 100%);
+  border: 2px solid #d4a056;
+  border-radius: 10px;
+  color: #d4a056;
+  font-family: 'MedievalSharp', monospace;
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 0.15em;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 1rem;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.btn-create-merchant:hover {
+  background: linear-gradient(135deg, #4a3528 0%, #3a2518 100%);
+  border-color: #e6b84a;
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px rgba(212, 160, 86, 0.3);
 }

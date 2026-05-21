@@ -43,9 +43,32 @@
       <button class="sub-fab" (click)="toggleStatus()">{{ (sessionStatus === 'paused' || sessionStatus === 'waiting') ? '▶️' : '⏸️' }}</button>
     </div>
 
+    <div class="dial-item">
+      <span class="dial-label">TIRAR DADOS</span>
+      <general-throw-component [switchStyle]="true"
+      ></general-throw-component>
+    </div>
+
+    <div class="dial-item" *ngIf="isDm">
+      <span class="dial-label">MIS MERCADERES</span>
+      <button class="sub-fab" (click)="showMerchatsToggle()">💰</button>
+    </div>
+
+    <div class="dial-item" *ngIf="!isDm">
+      <span class="dial-label">TIENDAS</span>
+      <button class="sub-fab" (click)="showSelectShopsToggle()">💰</button>
+    </div>
+
+    <div class="dial-item" *ngIf="isDm">
+      <span class="dial-label">AÑADIR MERCADER</span>
+      <button class="sub-fab" (click)="toggleAddMerchant()">💰</button>
+    </div>
+
   </div>
 
   <button class="dm-main-btn" (click)="toggleMenu()" [class.active]="showMenu">
     <span class="btn-icon-centered">{{ showMenu ? '✕' : (isDm ? '👑' : '⚔') }}</span>
   </button>
 </div>
+
+<result-frame></result-frame>

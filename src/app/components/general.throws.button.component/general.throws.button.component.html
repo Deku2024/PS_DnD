@@ -1,49 +1,67 @@
-<button type="button" (click)="interactWithPanel()">Hacer tiradas generales</button>
+<!-- Botón principal con dos estilos -->
+<button
+  *ngIf="!switchStyle()"
+  type="button"
+  class="throw-btn-normal"
+  (click)="interactWithPanel()">
+  Hacer tiradas generales
+</button>
+
+<button
+  *ngIf="switchStyle()"
+  type="button"
+  class="throw-btn-icon"
+  (click)="interactWithPanel()"
+  title="Tiradas rápidas">
+  🎲
+</button>
 
 @if (isMenuOpen()) {
-  <div id="overlay_for_general_throw" (click)="closeMenu()"></div>
 
   <div id="menu_for_throws">
 
     <div class="menu-header">
       <h3>Tiradas Rápidas</h3>
-      <button type="button" id="close-btn" (click)="closeMenu()">✖</button>
+      <button type="button" class="close-btn" (click)="closeMenu()">✕</button>
     </div>
 
     <div class="throw-modifiers">
-      <label>
+      <label [class.active]="throwType() === TypeOfThrow.Advantage">
         <input type="checkbox"
                [checked]="throwType() === TypeOfThrow.Advantage"
                (change)="toggleType(TypeOfThrow.Advantage)">
-        Ventaja
+        <span>Ventaja</span>
       </label>
-      <label>
+      <label [class.active]="throwType() === TypeOfThrow.Disadvantage">
         <input type="checkbox"
                [checked]="throwType() === TypeOfThrow.Disadvantage"
                (change)="toggleType(TypeOfThrow.Disadvantage)">
-        Desventaja
+        <span>Desventaja</span>
       </label>
     </div>
 
-    <single-custom-throw-button [dataThrow]="'d2'" [dc]="dc()" (callback)="closeMenu()"/>
-    <single-custom-throw-button [dataThrow]="'d4'" [dc]="dc()" (callback)="closeMenu()"/>
-    <single-custom-throw-button [dataThrow]="'d6'" [dc]="dc()" (callback)="closeMenu()"/>
-    <single-custom-throw-button [dataThrow]="'d8'" [dc]="dc()" (callback)="closeMenu()"/>
-    <single-custom-throw-button [dataThrow]="'d10'" [dc]="dc()" (callback)="closeMenu()"/>
-    <single-custom-throw-button [dataThrow]="'d12'" [dc]="dc()" (callback)="closeMenu()"/>
-    <single-custom-throw-button [dataThrow]="'d20'" [dc]="dc()" (callback)="closeMenu()"/>
-    <single-custom-throw-button [dataThrow]="'d100'" [dc]="dc()" (callback)="closeMenu()"/>
-    <input #customThrow placeholder="Tiradas custom (ej: 4d4 + 4)" (input)="clearError()">
-
-    <div id="inputAndError">
-      <button type="button" id="throw-custom-button" (click)="throwCustom(customThrow.value)">Tirada custom</button>
-
-      @if (errorMessage() !== "") {
-        <div class="error-message">
-          {{ errorMessage() }}
-        </div>
-      }
+    <div class="dice-grid">
+      <single-custom-throw-button [dataThrow]="'d2'" [dc]="dc()" (callback)="closeMenu()"/>
+      <single-custom-throw-button [dataThrow]="'d4'" [dc]="dc()" (callback)="closeMenu()"/>
+      <single-custom-throw-button [dataThrow]="'d6'" [dc]="dc()" (callback)="closeMenu()"/>
+      <single-custom-throw-button [dataThrow]="'d8'" [dc]="dc()" (callback)="closeMenu()"/>
+      <single-custom-throw-button [dataThrow]="'d10'" [dc]="dc()" (callback)="closeMenu()"/>
+      <single-custom-throw-button [dataThrow]="'d12'" [dc]="dc()" (callback)="closeMenu()"/>
+      <single-custom-throw-button [dataThrow]="'d20'" [dc]="dc()" (callback)="closeMenu()"/>
+      <single-custom-throw-button [dataThrow]="'d100'" [dc]="dc()" (callback)="closeMenu()"/>
     </div>
 
+    <div class="custom-section">
+      <input #customThrow
+             placeholder="Tiradas custom (ej: 4d4 + 4)"
+             (input)="clearError()"
+             class="custom-input">
+      <div class="custom-action">
+        <button type="button" class="custom-btn" (click)="throwCustom(customThrow.value)">Tirada custom</button>
+        @if (errorMessage() !== "") {
+          <div class="error-message">{{ errorMessage() }}</div>
+        }
+      </div>
+    </div>
   </div>
 }

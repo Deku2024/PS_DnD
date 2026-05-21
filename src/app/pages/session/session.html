@@ -398,9 +398,6 @@
                   {{ (session.status === 'paused' || session.status === 'waiting') ? '▶️ REANUDAR' : '⏸️ PAUSAR' }}
                 </button>
               </div>
-              <div class="master-action-row" *ngIf="!isMaster">
-                <button class="btn-enter" (click)="openSelectShop()">Abrir tienda</button>
-              </div>
               <div class="master-action-row" style="margin-top:2px;">
                 <battle-button-component style="flex:1; width:100%;" [hasActiveBattle]="session.status === 'in-battle'"/>
               </div>
@@ -643,10 +640,59 @@
     </div>
   }
 
+  @if (isMaster && showMerchantModal()) {
+    <div class="modal-overlay" *ngIf="showMerchantModal()" (click)="closeMerchantModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Mercaderes</h3>
+        </div>
 
-  @if (isMaster) {
-    <button (click)="openMerchantModal()">Crear Mercader</button>
+        <div class="modal-body">
+          @if (currentUser?.uid; as uid) {
+            <app-merchant-form
+              [merchant]="selectedMerchant"
+              [currentUserId]="uid"
+              (merchantInfo)="saveMerchant($event)"
+              (cancelEvent)="showMerchantModal.set($event)"
+            ></app-merchant-form>
+          }
+        </div>
+      </div>
+    </div>
+    <button class="btn-create-merchant" (click)="openMerchantModal()">Crear Mercader</button>
   }
+
+  @if (isMaster && showMyMerchants) {
+    <div class="merchants-overlay" (click)="toggleMyMerchants()">
+      <div class="merchants-card" (click)="$event.stopPropagation()">
+        <div class="merchants-header">
+          <h3>Mis mercaderes</h3>
+          <button class="merchants-close" (click)="toggleMyMerchants()" [disabled]="myMerchantsLoading">✕</button>
+        </div>
+
+        @if(showMyMerchants && !myMerchantsLoading) {
+          <div class="merchants-list">
+            @if (myMerchants.length === 0) {
+              <p class="empty-merchants">Aún no tienes mercaderes</p>
+            }
+
+            @for (merchant of myMerchants; track $index) {
+              <div class="merchant-row">
+                <div class="merchant-info">
+                  <span class="merchant">{{merchant.name}}</span>
+                  <div class="merchant-options">
+                    <button (click)="deleteMerchant(merchant)">Eliminar</button>
+                    <button (click)="updateMerchant(merchant)">Actualizar</button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
 
   <app-dm-floating-menu
     *ngIf="currentUser && session"
@@ -656,6 +702,9 @@
     [myCharacterId]="mySelectedCharacterId"
     [sessionStatus]="session.status"
     (toggleStatusClick)="toggleSessionStatus()"
-    (historyClick)="triggerHistoryDrawer()">
+    (historyClick)="triggerHistoryDrawer()"
+    (showMerchants)="toggleMyMerchants()"
+    (showShops)="toggleShowSelectShop()"
+    (addMerchant)="toggleMerchantModal()">
   </app-dm-floating-menu>
 </div>

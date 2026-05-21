@@ -32,6 +32,7 @@ import {CommerceService} from '../../services/commerce.service';
 import {DmFloatingMenuComponent} from '../../components/dm-floating-menu.component/dm-floating-menu.component';
 import {MerchantForm} from '../../components/merchant-form/merchant-form';
 import {UsernameService} from '../../services/username.service';
+import {disabled} from '@angular/forms/signals';
 
 
 @Component({
@@ -711,6 +712,11 @@ export class SessionPage implements OnInit, OnDestroy {
     this.selectedMerchant = null;
   }
 
+  toggleMerchantModal(): void {
+    this.showMerchantModal.set(!this.showMerchantModal());
+    this.selectedMerchant = null;
+  }
+
   ngOnDestroy(): void {
     this.unsubscribe?.();
     this.authSub?.unsubscribe();
@@ -894,4 +900,11 @@ export class SessionPage implements OnInit, OnDestroy {
     }
   }
 
+  toggleShowSelectShop(): void {
+    this.showSelectShop.set(!this.showSelectShop());
+
+    if (this.showSelectShop()) this.openSelectShop();
+  }
+
+  protected readonly disabled = disabled;
 }
