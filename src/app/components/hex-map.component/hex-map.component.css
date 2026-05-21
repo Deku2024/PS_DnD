@@ -13,6 +13,29 @@
   border-radius: 4px;
 }
 
+:host-context(.horizontal-layout.sidebar-closed) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  max-width: 100%;
+}
+
+:host-context(.horizontal-layout.sidebar-closed) .hex-map-wrapper {
+  display: inline-block;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  line-height: 0;
+}
+
+:host-context(.horizontal-layout.sidebar-closed) .hex-map-image {
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
 .hex-overlay {
   position: absolute;
   top: 0;

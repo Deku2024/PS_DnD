@@ -1326,6 +1326,10 @@ h2 {
     gap: 15px;
   }
 
+  .horizontal-layout.sidebar-closed .landscape-header {
+    display: none;
+  }
+
   .server-title {
     font-size: 1.1rem;
     color: #c6a747;
@@ -1350,12 +1354,14 @@ h2 {
   .sidebar-wrapper {
     position: relative;
     display: flex;
+    flex: 0 0 320px;
+    width: 320px;
     z-index: 450;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .sidebar-wrapper.is-closed {
-    transform: translateX(-320px);
+    margin-left: -320px;
   }
 
   .toggle-pull-button {
@@ -1577,13 +1583,6 @@ h2 {
     position: relative;
     width: 100%;
     min-width: 0;
-    transition: flex-basis 0.4s cubic-bezier(0.4, 0, 0.2, 1), margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-left: 0;
-  }
-
-  .sidebar-wrapper.is-closed + .main-stage {
-    flex: 0 0 100vw;
-    margin-left: -320px;
   }
 
   .no-image-msg {
@@ -1617,9 +1616,11 @@ h2 {
 
 @media screen and (orientation: landscape) {
   .map-wrapper-landscape {
-    max-height: 100% !important;
-    padding: 30px;
+    height: 100% !important;
+    max-height: none !important;
+    align-self: stretch;
     box-sizing: border-box;
+    padding-top: 0;
   }
 }
 
@@ -1633,12 +1634,21 @@ h2 {
   width: auto !important;
   height: auto !important;
   max-width: 95% !important;
-  max-height: 95% !important;
+  max-height: 100% !important;
 
-  margin: auto;
+  margin: 0 auto;
 
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center center;
+}
+
+@media screen and (orientation: landscape) {
+  .horizontal-layout.sidebar-closed .map-wrapper-landscape app-hex-map {
+    width: auto !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+  }
 }
 
 .shared-map, .shared-image {

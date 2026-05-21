@@ -228,7 +228,7 @@
     </div>
 
 
-    <div class="horizontal-layout">
+    <div class="horizontal-layout" [class.sidebar-closed]="!isSidebarOpen">
       <header class="landscape-header">
         <span class="ornament">🙤</span>
         <h1 class="server-title">{{ session.name }}</h1>
