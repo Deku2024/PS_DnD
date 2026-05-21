@@ -51,6 +51,7 @@ export class PlayerSheet implements OnInit {
   imagePreview: string | ArrayBuffer | null = null;
   selectedFile: File | null = null;
   playerSheetForm: FormGroup;
+  protected readonly Math = Math;
 
   // 🟢 VARIABLES PARA EL NUEVO MODAL CUSTOM
   showActionModal: boolean = false;
@@ -156,17 +157,31 @@ export class PlayerSheet implements OnInit {
     }, 0);
   }
 
+  get strength(): number {
+    return this.playerSheetForm.get('attributes.strength')?.value || 10;
+  }
+
+  get maxCapacity(): number {
+    return this.strength * 15;
+  }
+
   get carryCapacity(): number {
     const strength = this.playerSheetForm.get('attributes.strength')?.value || 10;
     return strength * 15;
   }
 
   get encumbranceStatus() {
-    const strength = this.playerSheetForm.get('attributes.strength')?.value || 10;
     const weight = this.totalWeight;
-    if (weight > strength * 10) return { label: 'Muy Cargado', class: 'overencumbered' };
-    if (weight > strength * 5) return { label: 'Cargado', class: 'encumbered' };
-    return { label: 'Carga Normal', class: 'normal' };
+    const limitCargado = this.strength * 5;
+    const limitMuyCargado = this.strength * 10;
+
+    if (weight > limitMuyCargado) {
+      return { label: 'Muy Cargado', class: 'overencumbered', color: 'red' };
+    }
+    if (weight > limitCargado) {
+      return { label: 'Cargado', class: 'encumbered', color: 'orange' };
+    }
+    return { label: 'Carga Normal', class: 'normal', color: 'green' };
   }
 
   addAbility(): void {
