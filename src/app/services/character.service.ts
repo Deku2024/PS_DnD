@@ -169,20 +169,16 @@ export class CharacterService {
     }
   }
 
-  async getSelectedCharacter(userId?: string): Promise<CharacterWithId | null> {
-    if (!userId) {
-      userId = this.auth.getCurrentUser()?.uid;
-    }
-    if (!userId) {
+  async getSelectedCharacter(sessionId: string, userId?: string | undefined): Promise<CharacterWithId | null> {
+    const uid = userId ?? this.auth.getCurrentUser()?.uid;
+    if (!uid) {
       return null;
     }
-    const session = await this.sessionService.getSession(
-      this.sessionService.getCurrentSessionId()!
-    );
+    const session = await this.sessionService.getSession(sessionId);
     if (!session || !session.selectedCharacters) {
       return null;
     }
-    const characterId = session.selectedCharacters[userId];
+    const characterId = session.selectedCharacters[uid];
     if (!characterId) {
       return null;
     }

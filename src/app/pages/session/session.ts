@@ -26,15 +26,26 @@ import {BattleButtonComponent} from '../../components/battle.button.component/ba
 import {ItemsService} from '../../services/items.service';
 import {Item} from '../../interfaces/Item';
 import {YouTubePlayer} from '@angular/youtube-player';
-import {MerchantForm} from "../../components/merchant-form/merchant-form";
 import {Merchant} from '../../interfaces/Merchant';
 import {MerchantService} from '../../services/merchant.service';
 import {CommerceService} from '../../services/commerce.service';
+import {DmFloatingMenuComponent} from '../../components/dm-floating-menu.component/dm-floating-menu.component';
+import {MerchantForm} from '../../components/merchant-form/merchant-form';
+
 
 @Component({
   selector: 'app-session',
   standalone: true,
-  imports: [CommonModule, FormsModule, YouTubePlayer, BattleButtonComponent, HistoryButtonComponent, HexMapComponent, MerchantForm],
+  imports: [
+    CommonModule,
+    FormsModule,
+    YouTubePlayer,
+    BattleButtonComponent,
+    HistoryButtonComponent,
+    DmFloatingMenuComponent,
+    HexMapComponent,
+    MerchantForm
+  ],
   templateUrl: './session.html',
   styleUrl: './session.css'
 })
@@ -48,9 +59,9 @@ export class SessionPage implements OnInit, OnDestroy {
   imageUploadError = '';
   showErrorModal = false;
   imagePreviewUrl: string | null = null;
+  activeTab: 'players' | 'map' | 'audio' = 'players';
   private pendingFile: File | null = null;
   private cloudinaryService = inject(CloudinaryService);
-
   // Map settings
   pendingIsMap = false;
   pendingHexSize = 40;
@@ -82,6 +93,7 @@ export class SessionPage implements OnInit, OnDestroy {
   modalPlayerEmail = '';
   modalUid = '';
   presenceMap: { [uid: string]: boolean } = {};
+  isSidebarOpen = true;
 
   showMerchantModal = signal<boolean>(false);
   myMerchantsLoading = false;
@@ -107,6 +119,10 @@ export class SessionPage implements OnInit, OnDestroy {
   showCommerceModal : WritableSignal<boolean> = signal<boolean>(false);
   showSelectShop : WritableSignal<boolean> = signal<boolean>(false);
   currentMerchant : WritableSignal<Merchant> = signal({} as Merchant);
+  buyingItems: WritableSignal<Item[]> = signal([]);
+  sellingItems: WritableSignal<Item[]> = signal([]);
+  currentCharacter: WritableSignal<CharacterWithId | null> = signal(null);
+  sellMode: WritableSignal<boolean> = signal(false);
 
   private unsubscribe?: () => void;
   private authSub?: Subscription;
@@ -128,7 +144,7 @@ export class SessionPage implements OnInit, OnDestroy {
     private itemsService: ItemsService
   ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     if (!(window as any).YT) {
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
@@ -472,7 +488,9 @@ export class SessionPage implements OnInit, OnDestroy {
     this.closeModal();
     this.router.navigate(['/choose-character'], {queryParams: {sessionId: this.session.id}});
   }
-
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
   async kickPlayer(uid: string): Promise<void> {
     if (!this.session?.id || !this.isMaster) return;
     try {
@@ -692,22 +710,16 @@ export class SessionPage implements OnInit, OnDestroy {
     this.showSelectShop.set(true);
   }
 
-  sellMode: WritableSignal<boolean> = signal(false);
-
-  protected async openThisShop(shop: Merchant) {
-    this.currentMerchant.set(shop);
-    this.showCommerceModal.set(true);
-    this.showSelectShop.set(false);
-  }
-
-  currentCharacter: WritableSignal<CharacterWithId | null> = signal(null);
-
   async loadCurrentCharacter(): Promise<void> {
-    this.currentCharacter.set(await this.characterService.getSelectedCharacter());
+    this.currentCharacter.set(await this.characterService.getSelectedCharacter(this.session?.id || ""));
   }
 
   protected async openThisShop(shop: Merchant) {
-    await this.loadCurrentCharacter();  // Cargar personaje primero
+    await this.loadCurrentCharacter();
+    await this.loadBuyingItems();
+    await this.loadSellingItems();
+    console.log("Mercader actual: " + this.currentMerchant().sellingList)
+    this.totalValueOnCharacter.set(this.characterService.getTotalValue(this.currentCharacter()!));
     this.currentMerchant.set(shop);
     this.showCommerceModal.set(true);
     this.showSelectShop.set(false);
@@ -718,7 +730,7 @@ export class SessionPage implements OnInit, OnDestroy {
     this.currentMerchant.set({} as Merchant);
   }
 
-  totalValueOnCharacter: WritableSignal<number> = signal(this.characterService.getTotalValue(this.currentCharacter()!));
+  totalValueOnCharacter: WritableSignal<number> = signal(0);
 
   buyItem(item: Item): void {
     this.commerceService.buyItemFromMerchant(
@@ -741,15 +753,42 @@ export class SessionPage implements OnInit, OnDestroy {
   }
 
   protected hasItemInInventory(item: Item) {
-    return this.currentCharacter()?.inventory.some(
-      cItem => item.name === cItem.name
-    );
+    return this.currentCharacter()?.inventory ? this.currentCharacter()?.inventory.some(cItem => item.name === cItem.name) : false;
   }
 
-  protected loadSellingItems() : Item[] {
-    const items : Item[] = [];
-    for (const item of this.currentMerchant().buyingList) {
-      if (this.currentCharacter()?.inventory.some(cItem => cItem.name === item.itemId))
+  protected async loadBuyingItems(): Promise<void> {
+    const items: Item[] = [];
+    for (const merchantItem of this.currentMerchant()?.buyingList || []) {
+      const item = await this.itemsService.getItemById(merchantItem.itemId);
+      if (item && this.currentCharacter()?.inventory?.some(cItem => cItem.name === item.name)) {
+        items.push(item);
+      }
+    }
+    this.buyingItems.set(items);
+  }
+
+  protected async loadSellingItems(): Promise<void> {
+    const items: Item[] = [];
+    for (const merchantItem of this.currentMerchant()?.sellingList || []) {
+      items.push(await this.itemsService.getItemById(merchantItem.itemId));
+    }
+    this.sellingItems.set(items);
+  }
+
+  getValueOfThisItem(item : Item) {
+    return this.currentMerchant().buyingList?.find(mItem => mItem.itemId === item.id)?.price ?? 0;
+  }
+
+  triggerHistoryDrawer(): void {
+    // Busca el botón que está dentro de tu componente de historial y lo pulsa
+    const historyNativeButton = document.querySelector('history-button-component button') as HTMLButtonElement;
+    if (historyNativeButton) {
+      historyNativeButton.click();
+    } else {
+      // Alternativa por si el componente controla su propia visibilidad con la variable
+      this.showHistory = !this.showHistory;
+      this.cd.detectChanges();
     }
   }
+
 }
