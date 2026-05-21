@@ -749,12 +749,13 @@ export class SessionPage implements OnInit, OnDestroy {
   }
 
   protected async openThisShop(shop: Merchant) {
-    await this.loadCurrentCharacter();
-    await this.loadBuyingItems();
-    await this.loadSellingItems();
-    console.log("Mercader actual: " + this.currentMerchant().sellingList)
-    this.totalValueOnCharacter.set(this.characterService.getTotalValue(this.currentCharacter()!));
+    console.log("Cargando. " + shop.name)
     this.currentMerchant.set(shop);
+    await this.loadCurrentCharacter();
+    await this.loadBuyingItems(shop);
+    await this.loadSellingItems(shop);
+    this.cd.detectChanges();
+    this.totalValueOnCharacter.set(this.characterService.getTotalValue(this.currentCharacter()!));
     this.showCommerceModal.set(true);
     this.showSelectShop.set(false);
   }
@@ -766,20 +767,66 @@ export class SessionPage implements OnInit, OnDestroy {
 
   totalValueOnCharacter: WritableSignal<number> = signal(0);
 
-  buyItem(item: Item): void {
+  async buyItem(item: Item): Promise<void> {
     this.commerceService.buyItemFromMerchant(
       this.currentCharacter()!,
       item,
       this.currentMerchant()
     );
+    await this.refreshCurrentMerchant();
+
+    const merchant = this.currentMerchant();
+    if (merchant) {
+      await this.loadSellingItems(merchant);
+    }
+
+    await this.loadCurrentCharacter();
+    this.totalValueOnCharacter.set(this.characterService.getTotalValue(this.currentCharacter()!));
+
+    this.cd.detectChanges();
   }
 
-  sellItem(item: Item): void {
+  async sellItem(item: Item): Promise<void> {
     this.commerceService.sellItemToMerchant(
       this.currentCharacter()!,
       item,
       this.currentMerchant()
     );
+    await this.refreshCurrentMerchant();
+
+    const merchant = this.currentMerchant();
+    if (merchant) {
+      await this.loadBuyingItems(merchant);
+    }
+
+    await this.loadCurrentCharacter();
+    this.totalValueOnCharacter.set(this.characterService.getTotalValue(this.currentCharacter()!));
+
+    this.cd.detectChanges();
+  }
+
+  private async refreshCurrentMerchant(): Promise<void> {
+    const currentMerchant = this.currentMerchant();
+    if (!currentMerchant || !currentMerchant.id) return;
+
+    const sessionId = this.session?.id || this.sessionService.getCurrentSessionId();
+    if (!sessionId) return;
+
+    const updatedMerchant = this.myMerchants.find(m => m.id === currentMerchant.id);
+    if (updatedMerchant) {
+      this.currentMerchant.set(updatedMerchant);
+    } else {
+      this.loadMerchants();
+      await this.delay(200);
+      const reloadedMerchant = this.myMerchants.find(m => m.id === currentMerchant.id);
+      if (reloadedMerchant) {
+        this.currentMerchant.set(reloadedMerchant);
+      }
+    }
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   alterMode(): void {
@@ -790,9 +837,9 @@ export class SessionPage implements OnInit, OnDestroy {
     return this.currentCharacter()?.inventory ? this.currentCharacter()?.inventory.some(cItem => item.name === cItem.name) : false;
   }
 
-  protected async loadBuyingItems(): Promise<void> {
+  protected async loadBuyingItems(merchant: Merchant): Promise<void> {
     const items: Item[] = [];
-    for (const merchantItem of this.currentMerchant()?.buyingList || []) {
+    for (const merchantItem of merchant.buyingList || []) {
       const item = await this.itemsService.getItemById(merchantItem.itemId);
       if (item && this.currentCharacter()?.inventory?.some(cItem => cItem.name === item.name)) {
         items.push(item);
@@ -801,12 +848,34 @@ export class SessionPage implements OnInit, OnDestroy {
     this.buyingItems.set(items);
   }
 
-  protected async loadSellingItems(): Promise<void> {
+  protected async loadSellingItems(merchant: Merchant): Promise<void> {
     const items: Item[] = [];
-    for (const merchantItem of this.currentMerchant()?.sellingList || []) {
-      items.push(await this.itemsService.getItemById(merchantItem.itemId));
+    for (const merchantItem of merchant.sellingList || []) {
+      try {
+        const item = await this.itemsService.getItemById(merchantItem.itemId);
+        if (item) {
+          items.push({
+            ...item,
+            quantity: merchantItem.quantity
+          });
+        }
+      } catch (error) {}
     }
     this.sellingItems.set(items);
+  }
+
+  private async refreshAfterTransaction(): Promise<void> {
+    await this.loadCurrentCharacter();
+
+    const merchant = this.currentMerchant();
+    if (merchant) {
+      await this.loadBuyingItems(merchant);
+      await this.loadSellingItems(merchant);
+    }
+
+    this.totalValueOnCharacter.set(this.characterService.getTotalValue(this.currentCharacter()!));
+
+    this.cd.detectChanges();
   }
 
   getValueOfThisItem(item : Item) {

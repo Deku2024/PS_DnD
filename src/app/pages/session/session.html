@@ -521,7 +521,6 @@
     <div class="modal-card" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>Mercaderes</h3>
-        <button class="modal-close" (click)="closeMerchantModal()">✕</button>
       </div>
 
       <div class="modal-body">
@@ -553,92 +552,96 @@
 
   </div>
 
-  <div class="commerce-modal" *ngIf="currentMerchant() && currentMerchant().name">
-    <div class="modal-header">
-      <h3>{{ currentMerchant().name }}</h3>
-      <button class="close-btn" (click)="closeCommerceModal()">✕</button>
-    </div>
-
-    <hr class="divider" />
-
-    <div class="mode-toggle">
-      <span class="mode-label" [class.active]="!sellMode()">Compra</span>
-      <label class="switch">
-        <input type="checkbox" [checked]="sellMode()" (change)="alterMode()" />
-        <span class="slider" [class.sell-mode]="sellMode()" [class.buy-mode]="!sellMode()"></span>
-      </label>
-      <span class="mode-label" [class.active]="sellMode()">Venta</span>
-    </div>
-
-    @if (!sellMode()) {
-      <section class="buy-section">
-        <div class="section-header">
-          <h4>Items disponibles para comprar</h4>
-          <span class="total-gold">Po disponible: {{ totalValueOnCharacter() }}</span>
+  @if (currentMerchant() && currentMerchant().name) {
+    <div class="commerce-modal-overlay" (click)="closeCommerceModal()">
+      <div class="commerce-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ currentMerchant().name }}</h3>
+          <button class="close-btn" (click)="closeCommerceModal()">✕</button>
         </div>
 
-        <div class="items-list">
-          @for (merchantItem of buyingItems(); track merchantItem.id) {
-            <div class="item-card">
-              <div class="item-info">
-                <div class="item-header">
-                  <span class="item-name">{{ merchantItem.name }}</span>
-                  <span class="item-price">{{ getValueOfThisItem(merchantItem) }} po</span>
-                </div>
-                <div class="item-details">
-                  <span class="item-stock">Stock: {{ merchantItem.quantity }}</span>
-                </div>
-                <p class="item-description">{{ merchantItem.description }}</p>
-              </div>
-              <button
-                class="buy-btn"
-                (click)="buyItem(merchantItem)"
-                [disabled]="(merchantItem.quantity ?? 0) <= 0 || totalValueOnCharacter() < getValueOfThisItem(merchantItem)"
-              >
-                Comprar
-              </button>
+        <hr class="divider" />
+
+        <div class="mode-toggle">
+          <span class="mode-label" [class.active]="!sellMode()">Compra</span>
+          <label class="switch">
+            <input type="checkbox" [checked]="sellMode()" (change)="alterMode()" />
+            <span class="slider" [class.sell-mode]="sellMode()" [class.buy-mode]="!sellMode()"></span>
+          </label>
+          <span class="mode-label" [class.active]="sellMode()">Venta</span>
+        </div>
+
+        @if (!sellMode()) {
+          <section class="buy-section">
+            <div class="section-header">
+              <h4>Items disponibles para comprar</h4>
+              <span class="total-gold">Po disponible: {{ totalValueOnCharacter() }}</span>
             </div>
-            @if (currentMerchant().sellingList.length === 0) {
-              <div class="empty-message">No hay items disponibles para comprar</div>
-            }
-          }
-        </div>
-      </section>
-    } @else {
-      <section class="sell-section">
-        <div class="section-header">
-          <h4>Items que compra el mercader</h4>
-        </div>
 
-        <div class="items-list">
-          @for (merchantItem of buyingItems(); track merchantItem.id) {
-            <div class="item-card">
-              <div class="item-info">
-                <div class="item-header">
-                  <span class="item-name">{{ merchantItem.name }}</span>
-                  <span class="item-price">{{ getValueOfThisItem(merchantItem) }} po</span>
+            <div class="items-list">
+              @for (merchantItem of sellingItems(); track merchantItem.id) {
+                <div class="item-card">
+                  <div class="item-info">
+                    <div class="item-header">
+                      <span class="item-name">{{ merchantItem.name }}</span>
+                      <span class="item-price">{{ getValueOfThisItem(merchantItem) }} po</span>
+                    </div>
+                    <div class="item-details">
+                      <span class="item-stock">Stock: {{ merchantItem.quantity }}</span>
+                    </div>
+                    <p class="item-description">{{ merchantItem.description }}</p>
+                  </div>
+                  <button
+                    class="buy-btn"
+                    (click)="buyItem(merchantItem)"
+                    [disabled]="(merchantItem.quantity ?? 0) <= 0 || totalValueOnCharacter() < getValueOfThisItem(merchantItem)"
+                  >
+                    Comprar
+                  </button>
                 </div>
-                <div class="item-details">
-                  <span class="item-weight">Peso: {{ merchantItem.weight }} lb.</span>
-                </div>
-                <p class="item-description">{{ merchantItem.description }}</p>
-              </div>
-              <button
-                class="sell-btn"
-                (click)="sellItem(merchantItem)"
-                [disabled]="!hasItemInInventory(merchantItem)"
-              >
-                Vender
-              </button>
+                @if (sellingItems().length === 0) {
+                  <div class="empty-message">No hay items disponibles para comprar</div>
+                }
+              }
             </div>
-            @if (currentMerchant().sellingList.length === 0) {
-              <div class="empty-message">No hay items disponibles para comprar</div>
-            }
-          }
-        </div>
-      </section>
-    }
-  </div>
+          </section>
+        } @else {
+          <section class="sell-section">
+            <div class="section-header">
+              <h4>Items que compra el mercader</h4>
+            </div>
+
+            <div class="items-list">
+              @for (merchantItem of buyingItems(); track merchantItem.id) {
+                <div class="item-card">
+                  <div class="item-info">
+                    <div class="item-header">
+                      <span class="item-name">{{ merchantItem.name }}</span>
+                      <span class="item-price">{{ getValueOfThisItem(merchantItem) }} po</span>
+                    </div>
+                    <div class="item-details">
+                      <span class="item-weight">Peso: {{ merchantItem.weight }} lb.</span>
+                    </div>
+                    <p class="item-description">{{ merchantItem.description }}</p>
+                  </div>
+                  <button
+                    class="sell-btn"
+                    (click)="sellItem(merchantItem)"
+                    [disabled]="!hasItemInInventory(merchantItem)"
+                  >
+                    Vender
+                  </button>
+                </div>
+                @if (buyingItems().length === 0) {
+                  <div class="empty-message">No hay items disponibles para vender</div>
+                }
+              }
+            </div>
+          </section>
+        }
+      </div>
+    </div>
+  }
 
 
   @if (isMaster) {

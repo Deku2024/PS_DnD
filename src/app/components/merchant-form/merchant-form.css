@@ -1,0 +1,329 @@
+:host {
+  display: block;
+  color: #c6a747;
+  font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #c6a747;
+  text-shadow: 0 0 12px rgba(198, 167, 71, 0.25);
+}
+
+h3, label {
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #8a6e2f;
+  opacity: 0.95;
+}
+
+/*inputs*/
+
+input[type="text"],
+input[type="number"] {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(198, 167, 71, 0.25);
+  border-radius: 4px;
+  color: #e8d5a0;
+  padding: 0.75rem 0.9rem;
+  font-family: inherit;
+  font-size: 0.92rem;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    box-shadow 0.15s;
+  box-sizing: border-box;
+}
+
+input::placeholder {
+  color: #6a5428;
+  letter-spacing: 0.04em;
+}
+
+input:focus {
+  outline: none;
+  border-color: #c6a747;
+  background: rgba(198, 167, 71, 0.05);
+  box-shadow: 0 0 0 3px rgba(198, 167, 71, 0.08);
+}
+
+/*quitar las flechitas dle input*/
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+/*mensajes de error*/
+
+.error,
+.error-message {
+  color: #ef4444;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  margin-top: -0.5rem;
+}
+
+.error span {
+  display: block;
+  margin-top: 0.15rem;
+}
+
+form > span {
+  color: #6a5428;
+  font-size: 0.85rem;
+  font-style: italic;
+  margin-top: -0.6rem;
+}
+
+[formArrayName="sellingList"],
+[formArrayName="buyingList"] {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/*card del objeto*/
+
+.item-card,
+[formGroupName] {
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(198, 167, 71, 0.06),
+      rgba(198, 167, 71, 0.03)
+    );
+
+  border:
+    1px solid rgba(198, 167, 71, 0.18);
+
+  border-left:
+    4px solid rgba(198, 167, 71, 0.55);
+
+  border-radius: 6px;
+
+  padding: 1rem;
+
+  position: relative;
+
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    transform 0.1s,
+    box-shadow 0.2s;
+}
+
+.item-card:hover,
+[formGroupName]:hover {
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(198, 167, 71, 0.08),
+      rgba(198, 167, 71, 0.04)
+    );
+
+  border-left-color: #c6a747;
+
+  box-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+/* Esquinas decorativas */
+
+.item-card::before,
+.item-card::after {
+
+  content: '✦';
+
+  position: absolute;
+
+  font-size: 0.65rem;
+
+  color: rgba(198, 167, 71, 0.55);
+}
+
+.item-card::before {
+  top: 8px;
+  left: 10px;
+}
+
+.item-card::after {
+  top: 8px;
+  right: 10px;
+}
+
+/*nombre del objeto*/
+
+.item-card p,
+[formGroupName] p {
+
+  margin: 0;
+
+  color: #e8d5a0;
+
+  font-size: 1rem;
+  font-weight: 600;
+
+  letter-spacing: 0.04em;
+
+  text-align: center;
+
+  padding-bottom: 0.75rem;
+
+  border-bottom:
+    1px solid rgba(198, 167, 71, 0.12);
+}
+
+/*inputs de las tarjetas*/
+
+.item-card label,
+[formGroupName] label {
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  font-size: 0.78rem;
+
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  color: #8a6e2f;
+}
+
+.item-card label input,
+[formGroupName] label input {
+
+  width: 140px;
+
+  margin-left: auto;
+}
+
+.item-card .error,
+[formGroupName] .error {
+
+  margin-top: -0.5rem;
+
+  padding-left: 0.2rem;
+}
+
+/*botones*/
+
+button {
+  background: transparent;
+  border: 1px solid #c6a747;
+  color: #c6a747;
+
+  padding: 0.75rem 1.2rem;
+  border-radius: 4px;
+
+  cursor: pointer;
+
+  font-family: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s,
+    transform 0.1s;
+}
+
+/* Hover */
+
+button:hover:not(:disabled) {
+  background: rgba(198, 167, 71, 0.15);
+  color: #e8d5a0;
+  transform: translateY(-1px);
+}
+
+/* Disabled */
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Cancel button */
+
+button[type="button"] {
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #ef4444;
+}
+
+button[type="button"]:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: #ef4444;
+  color: #fecaca;
+}
+
+form > button:last-child {
+  margin-top: -0.6rem;
+}
+
+
+.modal-divider {
+  border: none;
+  border-top: 1px solid rgba(198, 167, 71, 0.15);
+  margin: 0.5rem 0;
+}
+
+/*responsive*/
+
+@media (max-width: 680px) {
+
+  [formGroupName] {
+    grid-template-columns: 1fr;
+  }
+
+  [formGroupName] p {
+    margin-bottom: 0.4rem;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  .item-card label,
+  [formGroupName] label {
+
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .item-card label input,
+  [formGroupName] label input {
+
+    width: 100%;
+  }
+}
+

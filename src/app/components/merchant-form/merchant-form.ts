@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit, effect, input, output } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MerchantService } from '../../services/merchant.service';
 import { Item } from '../../interfaces/Item';
 import { ItemsService } from '../../services/items.service';
@@ -19,6 +19,9 @@ export class MerchantForm implements OnInit {
   cancelEvent = output<boolean>();
 
   merchantForm: FormGroup;
+
+  sellingDuplicateError = '';
+  buyingDuplicateError = '';;
   
   items: Item[] = [];
   unsubscribe: (() => void) | undefined;
@@ -30,7 +33,7 @@ export class MerchantForm implements OnInit {
   constructor(private fb: FormBuilder, merchantService: MerchantService, private itemService: ItemsService, private ch: ChangeDetectorRef) {
     this.merchantForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
-      sellingList: this.fb.array([]),
+      sellingList: this.fb.array([], [this.minArrayLength(1)]),
       buyingList: this.fb.array([])
     })
 
@@ -83,13 +86,38 @@ export class MerchantForm implements OnInit {
     }
   }
 
+  //validación del formulario
+  minArrayLength(min: number) {
+
+    return (control: AbstractControl): ValidationErrors | null => {
+
+      const array = control as FormArray;
+
+      return array.length >= min
+        ? null
+        : { minArrayLength: true };
+    };
+  }
+
+  get nameControl() {
+    return this.merchantForm.get('name');
+  }
+
+  //control de objetos duplicados
+  private itemExists(list: FormArray, itemId: string): boolean {
+    return list.controls.some(
+      control => control.value.itemId === itemId
+    );
+  }
+
+
   // crear info de objetos de mercader
   
   createMerchantItem(item: Item, price: number, quantity: number): FormGroup {
     return this.fb.group({
       itemId: [item.id],
-      price: [price],
-      quantity: [quantity]
+      price: [price, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]],
+      quantity: [quantity, [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)]]
     });
   }
 
@@ -122,20 +150,37 @@ export class MerchantForm implements OnInit {
   }
 
   saveMerchant() {
-      const merchantData: Merchant = {
-        ...this.merchantForm.value
-      };
+    if (this.merchantForm.invalid) {
+
+      this.merchantForm.markAllAsTouched();
+
+      return;
+    }
+
+    const merchantData: Merchant = {
+      ...this.merchantForm.value
+    };
 
     if (this.merchant()?.id) {
       merchantData.id = this.merchant()!.id;
     }
 
     this.merchantInfo.emit(merchantData);
-    this.merchantForm.reset();
+
+    this.resetForm();
+  }
+
+  resetForm() {
+    this.merchantForm.reset({
+      name: ''
+    });
+
+    this.sellingList.clear();
+    this.buyingList.clear();
   }
 
   cancel() {
-    this.merchantForm.reset();
+    this.resetForm();
     this.cancelEvent.emit(false);
   }
 
@@ -143,22 +188,31 @@ export class MerchantForm implements OnInit {
 
   onSellingItemSelected(item: Item) {
 
-    const exists = this.sellingList.controls.some(
-      control => control.value.itemId === item.id
-    );
+    if (this.itemExists(this.sellingList, item.id!)) {
+      this.sellingDuplicateError = 'Ese objeto ya está en venta';
+      setTimeout(() => {
+        this.sellingDuplicateError = '';
+      }, 3000);
 
-    if (exists) return;
+      return;
+    }
+
+    this.sellingDuplicateError = '';
 
     this.addItemToSellingList(item, 0, 1);
   }
 
   onBuyingItemSelected(item: Item) {
 
-    const exists = this.buyingList.controls.some(
-      control => control.value.itemId === item.id
-    );
+    if (this.itemExists(this.buyingList, item.id!)) {
+        this.buyingDuplicateError = 'Ese objeto ya está en compra';
+        setTimeout(() => {
+          this.buyingDuplicateError = '';
+        }, 3000);
+      return;
+    }
 
-    if (exists) return;
+    this.buyingDuplicateError = '';
 
     this.addItemToBuyingList(item, 0, 1);
   }
