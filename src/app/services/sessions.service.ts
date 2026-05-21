@@ -1,12 +1,13 @@
 import {Injectable} from '@angular/core';
 import {
   addDoc,
+  arrayRemove,
+  arrayUnion,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
-  arrayUnion,
-  arrayRemove,
   onSnapshot,
   query,
   serverTimestamp,
@@ -15,11 +16,12 @@ import {
   where
 } from 'firebase/firestore';
 import * as bcrypt from 'bcryptjs';
-import { FirebaseService } from './firebase.service';
-import { AuthService } from './auth.service';
-import { PresenceService } from './presence.service';
-import { Subscription } from 'rxjs';
+import {FirebaseService} from './firebase.service';
+import {AuthService} from './auth.service';
+import {PresenceService} from './presence.service';
+import {Subscription} from 'rxjs';
 import {UsernameService} from './username.service';
+import {CharacterWithId} from './character.service';
 
 export interface AudioState {
   url: string;
@@ -190,8 +192,9 @@ export class SessionService {
     if (session.masterId === userId) throw new Error('No puedes expulsar al master.');
 
     const updates: any = {
-      players: arrayRemove(userId),
-      [`playerEmails.${userId}`]: null,
+      players: arrayRemove(this.currentUserId),
+      playersEmails: arrayRemove(this.firebase.auth.currentUser?.email),
+      playersUsernames: arrayRemove(this.firebase.auth.currentUser?.email),
     };
 
     if (session.selectedCharacters?.[userId] !== undefined) {
@@ -223,7 +226,7 @@ export class SessionService {
       'audio.updatedAt': Date.now()
     });
   }
-  
+
   async clearAudio(sessionId: string): Promise<void> {
     const ref = doc(this.firebase.db, this.sessionsCol, sessionId);
     await updateDoc(ref, { audio: null });
@@ -284,6 +287,39 @@ export class SessionService {
     return snap.docs.map(d => {
       const { password, ...data } = d.data() as Session;
       return { id: d.id, ...data } as Session;
+    });
+  }
+
+  async deleteSessions(sessionId: string) : Promise<void> {
+    (await getDocs(query(collection(this.firebase.db, 'rolls'), where('sessionId', '==', sessionId)))).forEach(doc => {
+      deleteDoc(doc.ref);
+    });
+
+    (await getDocs(query(collection(this.firebase.db, 'characters'), where('sessionId', '==', sessionId)))).forEach(doc => {
+      const character = doc.data() as CharacterWithId;
+      deleteDoc(doc.ref);
+    });
+
+    (await getDocs(query(collection(this.firebase.db, 'session-history'), where('sessionId', '==', sessionId)))).forEach(doc => {
+      deleteDoc(doc.ref);
+    });
+
+    deleteDoc(doc(this.firebase.db, this.sessionsCol, sessionId));
+  }
+
+  async leaveSession(sessiondId: string) : Promise<void> {
+    const ref = doc(this.firebase.db, this.sessionsCol, sessiondId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) throw new Error('La sesión no existe.');
+    const session = snap.data() as Session;
+    const updates: any = {
+      players: arrayRemove(this.currentUserId),
+      playersEmails: arrayRemove(this.firebase.auth.currentUser?.email),
+      playersUsernames: arrayRemove(this.firebase.auth.currentUser?.email),
+    };
+    await updateDoc(ref, updates);
+    (await getDocs(query(collection(this.firebase.db, 'characters'), where('sessionId', '==', sessiondId)))).forEach(doc => {
+      deleteDoc(doc.ref);
     });
   }
 
