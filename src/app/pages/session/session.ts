@@ -157,6 +157,9 @@ export class SessionPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // Forzar landscape; solo funciona en PWA/fullscreen; falla silenciosamente en navegador normal
+    (screen.orientation as any)?.lock?.('landscape')?.catch?.(() => {});
+
     if (!(window as any).YT) {
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
@@ -768,6 +771,7 @@ export class SessionPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    (screen.orientation as any)?.unlock?.();
     this.unsubscribe?.();
     this.authSub?.unsubscribe();
     this.presenceUnsub?.();
