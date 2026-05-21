@@ -32,6 +32,7 @@ import {CommerceService} from '../../services/commerce.service';
 import {DmFloatingMenuComponent} from '../../components/dm-floating-menu.component/dm-floating-menu.component';
 import {MerchantForm} from '../../components/merchant-form/merchant-form';
 import {UsernameService} from '../../services/username.service';
+import { DiceAssetCacheService } from '../../services/dice-asset-cache.service';
 
 
 @Component({
@@ -63,6 +64,7 @@ export class SessionPage implements OnInit, OnDestroy {
   activeTab: 'players' | 'map' | 'audio' = 'players';
   private pendingFile: File | null = null;
   private cloudinaryService = inject(CloudinaryService);
+  private diceAssetCache = inject(DiceAssetCacheService);
   // Map settings
   pendingIsMap = false;
   pendingHexSize = 40;
@@ -157,6 +159,8 @@ export class SessionPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.diceAssetCache.preloadDiceImage();
+
     // Forzar landscape; solo funciona en PWA/fullscreen; falla silenciosamente en navegador normal
     (screen.orientation as any)?.lock?.('landscape')?.catch?.(() => {});
 
