@@ -257,17 +257,35 @@
 
                 <div class="landscape-inner-card dm-actions-panel" *ngIf="isMaster">
                   <h4 style="color: #c6a747; text-align: center; margin-bottom: 10px;">CENTRO DE MANDO DM</h4>
+                  <p style="color: #a89060; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Modificar jugadores seleccionados</p>
                   <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin-bottom: 8px;">
-                    <input type="number" [(ngModel)]="lifeAction" placeholder="❤️ HP" class="landscape-input">
-                    <input type="number" [(ngModel)]="goldAction" placeholder="💰 PO" class="landscape-input">
-                    <input type="number" [(ngModel)]="xpAction" placeholder="✨ XP" class="landscape-input">
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                      <span style="color: #a89060; font-size: 0.65rem; text-align: center;">Vida</span>
+                      <input type="number" [(ngModel)]="lifeAction" placeholder="0" class="landscape-input">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                      <span style="color: #a89060; font-size: 0.65rem; text-align: center;">Oro</span>
+                      <input type="number" [(ngModel)]="goldAction" placeholder="0" class="landscape-input">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                      <span style="color: #a89060; font-size: 0.65rem; text-align: center;">Exp</span>
+                      <input type="number" [(ngModel)]="xpAction" placeholder="0" class="landscape-input">
+                    </div>
                   </div>
                   <button type="button" (click)="applyBatchActions()" class="landscape-btn" style="width: 100%; margin-bottom: 10px;" [disabled]="selectedPlayerUids.size === 0">APLICAR CAMBIOS</button>
+                  <p style="color: #a89060; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">Entregar objeto</p>
                   <select [(ngModel)]="selectedItemId" class="landscape-input" style="margin-bottom: 5px;">
                     <option value="" disabled selected>Selecciona objeto...</option>
                     <option *ngFor="let item of dmItems" [value]="item.id">{{ item.name }}</option>
                   </select>
-                  <button type="button" (click)="applyAddItem()" class="landscape-btn" style="width: 100%;">ENTREGAR OBJETO</button>
+                  <div style="display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 4px; margin-bottom: 5px;">
+                    <label style="font-size: 0.7rem; color: #aaa; white-space: nowrap;">CANTIDAD:</label>
+                    <input type="number" [(ngModel)]="itemQuantityToGive" min="1" class="landscape-input">
+                  </div>
+                  <button type="button" (click)="applyAddItem()" class="landscape-btn" style="width: 100%;" [disabled]="!selectedItemId || selectedPlayerUids.size === 0 || itemQuantityToGive <= 0">ENTREGAR OBJETO</button>
+                  <div class="dm-alerts-box" *ngIf="dmAlerts.length > 0" style="margin-top: 6px;">
+                    <p class="dm-alert-text" *ngFor="let alert of dmAlerts">{{ alert }}</p>
+                  </div>
                 </div>
 
                 <div class="players-header" style="margin-top: 10px;">
@@ -400,15 +418,6 @@
             </div><!-- /sidebar-scroll -->
 
             <footer class="sidebar-footer">
-              <div class="master-action-row" *ngIf="isMaster">
-                <button class="landscape-btn" style="flex:1;" (click)="goToNotes()">📝 Notas</button>
-                <button class="landscape-btn" style="flex:1;" [ngClass]="session.status === 'paused' || session.status === 'waiting' ? 'btn-resume' : 'btn-pause'" (click)="toggleSessionStatus()">
-                  {{ (session.status === 'paused' || session.status === 'waiting') ? '▶️ REANUDAR' : '⏸️ PAUSAR' }}
-                </button>
-              </div>
-              <div class="master-action-row" style="margin-top:2px;">
-                <battle-button-component style="flex:1; width:100%;" [hasActiveBattle]="session.status === 'in-battle'"/>
-              </div>
               <button class="btn-exit-landscape" (click)="leaveSession()">← ABANDONAR PARTIDA</button>
             </footer>
           </aside>
@@ -508,6 +517,9 @@
         <div class="modal-actions" *ngIf="currentUser && modalUid === currentUser.uid">
           <button class="btn-edit-char" (click)="editMyCharacter()">✏ Editar</button>
           <button class="btn-change-char" (click)="changeMyCharacter()">🔁 Cambiar</button>
+        </div>
+        <div class="modal-actions" *ngIf="isMaster && modalUid !== currentUser?.uid && modalCharacter">
+          <button class="btn-edit-char" (click)="viewPlayerSheet()">📜 Ver ficha completa</button>
         </div>
       </div>
       <ng-template #noChar><div class="modal-body"><p class="no-char">Sin personaje adjunto.</p></div></ng-template>
@@ -646,28 +658,6 @@
         }
       </div>
     </div>
-  }
-
-  @if (isMaster && showMerchantModal()) {
-    <div class="modal-overlay" *ngIf="showMerchantModal()" (click)="closeMerchantModal()">
-      <div class="modal-card" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>Mercaderes</h3>
-        </div>
-
-        <div class="modal-body">
-          @if (currentUser?.uid; as uid) {
-            <app-merchant-form
-              [merchant]="selectedMerchant"
-              [currentUserId]="uid"
-              (merchantInfo)="saveMerchant($event)"
-              (cancelEvent)="showMerchantModal.set($event)"
-            ></app-merchant-form>
-          }
-        </div>
-      </div>
-    </div>
-    <button class="btn-create-merchant" (click)="openMerchantModal()">Crear Mercader</button>
   }
 
   @if (isMaster && showMyMerchants) {

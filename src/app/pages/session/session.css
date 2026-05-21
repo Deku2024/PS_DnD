@@ -2378,6 +2378,8 @@ app-hex-map svg {
   border-color: #e6b84a;
   transform: translateY(-2px);
   box-shadow: 0 0 12px rgba(212, 160, 86, 0.3);
+}
+
 @media screen and (orientation: landscape) {
   .sidebar-scroll {
     overflow-y: auto !important;

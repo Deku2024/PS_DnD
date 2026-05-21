@@ -32,7 +32,6 @@ import {CommerceService} from '../../services/commerce.service';
 import {DmFloatingMenuComponent} from '../../components/dm-floating-menu.component/dm-floating-menu.component';
 import {MerchantForm} from '../../components/merchant-form/merchant-form';
 import {UsernameService} from '../../services/username.service';
-import {disabled} from '@angular/forms/signals';
 
 
 @Component({
@@ -216,8 +215,7 @@ export class SessionPage implements OnInit, OnDestroy {
         }
         const isFirstLoad = !this.session;
         this.session = session;
-        this.loadMerchants();
-        console.log("se han cargado los mercaderes con éxito: " + this.myMerchants.length);
+        if (isFirstLoad) this.loadMerchants();
         this.fillMissingUsernames(session);
         if (isFirstLoad && session.isMap) {
           this.localHexSize = session.hexSize ?? 40;
@@ -465,30 +463,46 @@ export class SessionPage implements OnInit, OnDestroy {
     const itemToGive = this.dmItems.find(item => item.id === this.selectedItemId);
     if (!itemToGive) return;
 
+    const resultAlerts: string[] = [];
+
     for (const uid of this.selectedPlayerUids) {
       const char = this.characters[uid];
       if (char) {
-        const freshChar = await this.characterService.getCharacterById(char.id);
-        let inventory = freshChar?.inventory ? [...freshChar.inventory] : (char.inventory ? [...char.inventory] : []);
+        try {
+          const freshChar = await this.characterService.getCharacterById(char.id);
+          let inventory = freshChar?.inventory ? [...freshChar.inventory] : (char.inventory ? [...char.inventory] : []);
 
-        const existingItemIndex = inventory.findIndex((i: any) =>
-          i.name?.trim().toLowerCase() === itemToGive.name?.trim().toLowerCase()
-        );
+          const existingItemIndex = inventory.findIndex((i: any) =>
+            i.name?.trim().toLowerCase() === itemToGive.name?.trim().toLowerCase()
+          );
 
-        if (existingItemIndex > -1) {
-          const currentQty = inventory[existingItemIndex].quantity || 1;
-          inventory[existingItemIndex].quantity = currentQty + this.itemQuantityToGive;
-        } else {
-          inventory.push({
-            ...itemToGive,
-            quantity: this.itemQuantityToGive
-          });
+          if (existingItemIndex > -1) {
+            const currentQty = inventory[existingItemIndex].quantity || 1;
+            inventory[existingItemIndex] = {
+              ...inventory[existingItemIndex],
+              quantity: currentQty + this.itemQuantityToGive
+            };
+          } else {
+            const newItem: { name: string; quantity: number; description: string; weight: number } = {
+              name: itemToGive.name,
+              description: itemToGive.description ?? '',
+              weight: itemToGive.weight ?? 0,
+              quantity: this.itemQuantityToGive
+            };
+            inventory.push(newItem);
+          }
+
+          await this.characterService.updateCharacter(char.id, { inventory } as any);
+          char.inventory = inventory;
+          resultAlerts.push(`✅ ${char.name} recibió x${this.itemQuantityToGive} ${itemToGive.name}`);
+        } catch (e) {
+          resultAlerts.push(`❌ Error al entregar "${itemToGive.name}" a ${char.name}`);
         }
-
-        await this.characterService.updateCharacter(char.id, { inventory: inventory } as any);
-        char.inventory = inventory;
       }
     }
+
+    this.dmAlerts = resultAlerts;
+    setTimeout(() => { this.dmAlerts = []; this.cd.detectChanges(); }, 5000);
 
     this.selectedItemId = '';
     this.itemQuantityToGive = 1;
@@ -516,6 +530,13 @@ export class SessionPage implements OnInit, OnDestroy {
     const myUid = this.currentUser.uid;
     const selected = this.session?.selectedCharacters?.[myUid];
     this.router.navigate(['/player-sheet'], {queryParams: {sessionId: this.session.id, characterId: selected}});
+  }
+
+  viewPlayerSheet(): void {
+    if (!this.session?.id || !this.modalCharacter) return;
+    const characterId = this.modalCharacter.id;
+    this.closeModal();
+    this.router.navigate(['/player-sheet'], {queryParams: {sessionId: this.session.id, characterId}});
   }
 
   changeMyCharacter(): void {
@@ -682,20 +703,17 @@ export class SessionPage implements OnInit, OnDestroy {
 
 
   //Mercaderes
-  loadMerchants() {
-      console.log("se ha entrado en el método");
-      console.log(this.session);
-
-      if (this.session?.id) {
-        this.merchantUnsubscribe = this.merchantService.readMerchants(
-              this.session.id,
-              (merchants) => {
-                this.myMerchants = merchants;
-                this.cd.detectChanges();
-              }
-        )
-        console.log("se ha entrado en el if del método");
-      }
+  loadMerchants(): void {
+    if (this.merchantUnsubscribe) return; // ya suscrito
+    if (this.session?.id) {
+      this.merchantUnsubscribe = this.merchantService.readMerchants(
+        this.session.id,
+        (merchants) => {
+          this.myMerchants = merchants;
+          this.cd.detectChanges();
+        }
+      );
+    }
   }
 
   closeMerchantModal(): void {
@@ -722,6 +740,7 @@ export class SessionPage implements OnInit, OnDestroy {
     this.authSub?.unsubscribe();
     this.presenceUnsub?.();
     this.itemsUnsub?.();
+    this.merchantUnsubscribe?.();
     Object.values(this.charUnsubs).forEach(unsub => unsub());
   }
 
@@ -902,9 +921,5 @@ export class SessionPage implements OnInit, OnDestroy {
 
   toggleShowSelectShop(): void {
     this.showSelectShop.set(!this.showSelectShop());
-
-    if (this.showSelectShop()) this.openSelectShop();
   }
-
-  protected readonly disabled = disabled;
 }

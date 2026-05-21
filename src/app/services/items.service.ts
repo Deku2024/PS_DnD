@@ -74,7 +74,7 @@ export class ItemsService {
     async loadDefaultItems(): Promise<Item[]> {
       let items : Item[] = [];
       (await getDocs(collection(this.Firebase.db, 'defaultItems'))).forEach(doc => {
-        items.push(doc.data() as Item);
+        items.push({ id: doc.id, ...doc.data() } as Item);
       });
       return items;
     }
