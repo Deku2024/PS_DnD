@@ -101,16 +101,16 @@ export class PlayerSheet implements OnInit {
     private location: Location
   ) {
     this.playerSheetForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3)]],
+      name: ['Naivara', [Validators.required, Validators.minLength(3)]],
       age: [18, [Validators.required, Validators.min(18), Validators.max(80)]],
-      experience: [0, [Validators.required, Validators.min(0), Validators.max(20)]],
+      experience: [1, [Validators.required, Validators.min(0)]],
       life: [10, [Validators.required, Validators.min(0)]],
       maxLife: [10, [Validators.required, Validators.min(0)]],
       tempLife: [0, [Validators.min(0)]],
       armourClass: [10, [Validators.required, Validators.min(1)]],
-      race: ['', Validators.required],
-      class: ['', Validators.required],
-      alignment: ['', Validators.required],
+      race: ['Elfo', Validators.required],
+      class: ['Explorador', Validators.required],
+      alignment: ['Legal bueno', Validators.required],
       attributes: this.fb.group({
         strength: [10, [Validators.required, Validators.min(1), Validators.max(20)]],
         dexterity: [10, [Validators.required, Validators.min(1), Validators.max(20)]],

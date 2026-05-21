@@ -1,4 +1,14 @@
-import { ChangeDetectorRef, Component, OnInit, effect, input, output } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  effect,
+  input,
+  output,
+  WritableSignal,
+  signal,
+  inject
+} from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MerchantService } from '../../services/merchant.service';
 import { Item } from '../../interfaces/Item';
@@ -21,12 +31,17 @@ export class MerchantForm implements OnInit {
   merchantForm: FormGroup;
 
   sellingDuplicateError = '';
-  buyingDuplicateError = '';;
-  
+  buyingDuplicateError = '';
+
+  defaultItems : WritableSignal<Item[]> = signal<Item[]>([]);
+
+  itemsService = inject(ItemsService);
+
   items: Item[] = [];
   unsubscribe: (() => void) | undefined;
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    this.defaultItems.set(await this.itemsService.loadDefaultItems());
     this.loadUserItems();
   }
 
@@ -79,7 +94,7 @@ export class MerchantForm implements OnInit {
       this.unsubscribe = this.itemService.readItems(
             this.currentUserId(),
             (items) => {
-              this.items = items;
+              this.items = [...items, ...this.defaultItems()];
               this.ch.detectChanges();
             }
       )
@@ -112,7 +127,7 @@ export class MerchantForm implements OnInit {
 
 
   // crear info de objetos de mercader
-  
+
   createMerchantItem(item: Item, price: number, quantity: number): FormGroup {
     return this.fb.group({
       itemId: [item.id],

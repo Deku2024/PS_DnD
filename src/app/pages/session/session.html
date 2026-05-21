@@ -562,7 +562,7 @@
       </div>
 
       @for (shop of myMerchants; track shop.id) {
-        <article (click)="openThisShop(shop)" >
+        <article class="merchant-row" (click)="openThisShop(shop)" >
           {{shop.name}}
         </article>
       }
@@ -580,13 +580,19 @@
 
         <hr class="divider" />
 
-        <div class="mode-toggle">
-          <span class="mode-label" [class.active]="!sellMode()">Compra</span>
-          <label class="switch">
-            <input type="checkbox" [checked]="sellMode()" (change)="alterMode()" />
-            <span class="slider" [class.sell-mode]="sellMode()" [class.buy-mode]="!sellMode()"></span>
-          </label>
-          <span class="mode-label" [class.active]="sellMode()">Venta</span>
+        <div class="mode-tabs">
+          <button
+            class="tab-mode"
+            [class.active]="sellMode()"
+            (click)="!sellMode() && alterMode()">
+            <span class="tab-text">Compra</span>
+          </button>
+          <button
+            class="tab-mode"
+            [class.active]="!sellMode()"
+            (click)="sellMode() && alterMode()">
+            <span class="tab-text">Venta</span>
+          </button>
         </div>
 
         @if (!sellMode()) {

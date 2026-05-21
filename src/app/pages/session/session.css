@@ -2111,7 +2111,7 @@ app-hex-map svg {
   transition: border-color 0.2s, background 0.2s;
 }
 
-.merchant-row:hover {
+.merchant-row:hover, article{
   background: rgba(198, 167, 71, 0.5);
   border-left-color: #c6a747;
 }
@@ -2395,5 +2395,123 @@ app-hex-map svg {
     opacity: 1 !important;
     flex-shrink: 0 !important;
     margin-bottom: 20px !important;
+  }
+}
+
+article {
+  padding: 2rem;
+  margin: 2rem;
+  text-align: center;
+  cursor: pointer;
+}
+/* Tabs de compra/venta - Estilo consistente con la temática */
+.mode-tabs {
+  display: flex;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(198, 167, 71, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  backdrop-filter: blur(4px);
+  margin: 0.5rem 1rem;
+}
+
+.tab-mode {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: 'Palatino Linotype', Palatino, Georgia, serif;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #8a6e2f;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.tab-mode:first-child {
+  border-right: 1px solid rgba(198, 167, 71, 0.2);
+}
+
+.tab-mode.active {
+  color: #c6a747;
+  background: linear-gradient(135deg, rgba(198, 167, 71, 0.15), rgba(198, 167, 71, 0.05));
+  text-shadow: 0 0 8px rgba(198, 167, 71, 0.4);
+}
+
+.tab-mode.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #c6a747, #c6a747, transparent);
+  animation: slideIn 0.3s ease;
+}
+
+.tab-mode:hover:not(.active) {
+  color: #a88a3a;
+  background: rgba(198, 167, 71, 0.08);
+}
+
+.tab-icon {
+  font-size: 1rem;
+  filter: drop-shadow(0 0 4px rgba(198, 167, 71, 0.3));
+}
+
+.tab-text {
+  font-size: 0.85rem;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+/* Ajuste para móvil */
+@media (max-width: 480px) {
+  .mode-tabs {
+    margin: 0.5rem 0.75rem;
+  }
+
+  .tab-mode {
+    padding: 0.6rem 0.75rem;
+    gap: 0.35rem;
+  }
+
+  .tab-icon {
+    font-size: 0.9rem;
+  }
+
+  .tab-text {
+    font-size: 0.75rem;
+  }
+}
+
+/* Ajuste para landscape (si está dentro del layout horizontal) */
+@media screen and (orientation: landscape) {
+  .mode-tabs {
+    margin: 0.25rem 0.5rem;
+  }
+
+  .tab-mode {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .tab-text {
+    font-size: 0.8rem;
   }
 }
