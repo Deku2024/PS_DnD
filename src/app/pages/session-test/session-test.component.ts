@@ -229,8 +229,8 @@ export class SessionTestComponent implements OnInit, OnDestroy {
     this.selectedItem = item;
   }
 
-  deleteThisSession(sessionId : string) : void {
-    this.sessionService.deleteSessions(sessionId);
+  async deleteThisSession(sessionId: string): Promise<void> {
+    await this.sessionService.deleteSessions(sessionId);
     this.closeConfirmDialog();
   }
 
