@@ -31,6 +31,7 @@ import {MerchantService} from '../../services/merchant.service';
 import {CommerceService} from '../../services/commerce.service';
 import {DmFloatingMenuComponent} from '../../components/dm-floating-menu.component/dm-floating-menu.component';
 import {MerchantForm} from '../../components/merchant-form/merchant-form';
+import {UsernameService} from '../../services/username.service';
 
 
 @Component({
@@ -106,6 +107,15 @@ export class SessionPage implements OnInit, OnDestroy {
   lifeAction: number = 0;
   goldAction: number = 0;
   xpAction: number = 0;
+  codeCopied = false;
+
+  copyCode(): void {
+    if (!this.session?.code) return;
+    navigator.clipboard.writeText(this.session.code).then(() => {
+      this.codeCopied = true;
+      setTimeout(() => this.codeCopied = false, 2000);
+    });
+  }
 
   dmItems: Item[] = [];
   selectedItemId: string = '';
@@ -141,10 +151,11 @@ export class SessionPage implements OnInit, OnDestroy {
     private presenceService: PresenceService,
     private rollHistoryService: RollHistoryService,
     private merchantService: MerchantService,
-    private itemsService: ItemsService
+    private itemsService: ItemsService,
+    private usernameService: UsernameService,
   ) {}
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
     if (!(window as any).YT) {
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
@@ -206,6 +217,7 @@ export class SessionPage implements OnInit, OnDestroy {
         this.session = session;
         this.loadMerchants();
         console.log("se han cargado los mercaderes con éxito: " + this.myMerchants.length);
+        this.fillMissingUsernames(session);
         if (isFirstLoad && session.isMap) {
           this.localHexSize = session.hexSize ?? 40;
           this.localGridColor = session.gridColor ?? 'blue';
@@ -222,6 +234,23 @@ export class SessionPage implements OnInit, OnDestroy {
     this.presenceUnsub = this.presenceService.listenPresence(id, (map) => {
       this.presenceMap = map;
       this.cd.detectChanges();
+    });
+  }
+
+  private fillMissingUsernames(session: Session): void {
+    const missing = session.players.filter(
+      uid => !session.playersUsernames?.[uid]
+    );
+    if (!missing.length) return;
+    missing.forEach(uid => {
+      const email = session.playerEmails?.[uid];
+      if (!email) return;
+      this.usernameService.getUsernameFromEmail(email).then(name => {
+        if (name && this.session) {
+          this.session.playersUsernames[uid] = name;
+          this.cd.detectChanges();
+        }
+      });
     });
   }
 
@@ -339,6 +368,11 @@ export class SessionPage implements OnInit, OnDestroy {
 
   get isMaster(): boolean {
     return !!this.currentUser && !!this.session && this.session.masterId === this.currentUser.uid;
+  }
+
+  get mySelectedCharacterId(): string {
+    if (!this.currentUser || !this.session?.selectedCharacters) return '';
+    return this.session.selectedCharacters[this.currentUser.uid] || '';
   }
 
   togglePlayerSelection(uid: string): void {
@@ -633,7 +667,7 @@ export class SessionPage implements OnInit, OnDestroy {
       .filter(uid => uid !== this.session!.masterId)
       .map(uid => ({
         uid,
-        username: this.session!.playersUsernames[uid] || uid,
+        username: this.session!.playersUsernames[uid] || this.session!.playerEmails[uid] || uid,
         avatarUrl: this.characters[uid]?.image || undefined,
       }));
   }

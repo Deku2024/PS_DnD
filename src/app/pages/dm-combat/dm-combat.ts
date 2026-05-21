@@ -10,18 +10,15 @@ import { MonsterSearchComponent } from '../../components/monster-search.componen
 import { User } from 'firebase/auth';
 import { MonsterData } from '../../services/monster.service';
 import { SheetInterface } from '../../interfaces/SheetInterface';
-import { DmFloatingMenuComponent } from '../../components/dm-floating-menu.component/dm-floating-menu.component';
-import { HistoryButtonComponent } from '../../components/history.button.component/history.button.component';
+
 
 @Component({
   selector: 'app-dm-combat',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    MonsterSearchComponent, 
-    DmFloatingMenuComponent, 
-    HistoryButtonComponent
+    CommonModule,
+    FormsModule,
+    MonsterSearchComponent
   ],
   templateUrl: './dm-combat.html',
   styleUrl: './dm-combat.css',
@@ -79,7 +76,7 @@ const session = await this.sessionService.getSession(id);
       // First time — roll initiative and sort
       await this.battleService.startPreparingCombat();
     }
-  
+
     this.activeTurnIndex = session?.activeTurnIndex ?? 0;
 
     this.unsubSession = this.sessionService.listenSession(id, (s) => {

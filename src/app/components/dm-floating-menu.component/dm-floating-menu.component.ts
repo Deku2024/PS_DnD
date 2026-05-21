@@ -15,9 +15,13 @@ export class DmFloatingMenuComponent {
   @Input() sessionId: string = '';
   @Input() isBattleActive: boolean = false;
   @Input() showLocalActions: boolean = true;
+  @Input() isDm: boolean = true;
+  @Input() myCharacterId: string = '';
+  @Input() sessionStatus: string = '';
 
   @Output() mapClick = new EventEmitter<void>();
   @Output() historyClick = new EventEmitter<void>();
+  @Output() toggleStatusClick = new EventEmitter<void>();
 
   showMenu = false;
 
@@ -54,10 +58,16 @@ export class DmFloatingMenuComponent {
 
   async goToCombat(): Promise<void> {
     if (!this.sessionId) return;
-    if (!this.isBattleActive) {
+    if (this.isDm && !this.isBattleActive) {
       await this.sessionService.updateStatus(this.sessionId, 'in-battle');
     }
     this.router.navigate(['/session', this.sessionId, 'dm-combat']);
+    this.showMenu = false;
+  }
+
+  goToMySheet(): void {
+    if (!this.sessionId || !this.myCharacterId) return;
+    this.router.navigate(['/player-sheet'], { queryParams: { sessionId: this.sessionId, characterId: this.myCharacterId } });
     this.showMenu = false;
   }
 
@@ -68,6 +78,11 @@ export class DmFloatingMenuComponent {
 
   onMap(): void {
     this.mapClick.emit();
+    this.showMenu = false;
+  }
+
+  toggleStatus(): void {
+    this.toggleStatusClick.emit();
     this.showMenu = false;
   }
 }
