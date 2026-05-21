@@ -1,0 +1,28 @@
+<div class="search-container">
+
+  <input
+    type="text"
+    [placeholder]="placeholder()"
+    [(ngModel)]="searchTerm"
+    (input)="filterItems()"
+  >
+
+  @if (filteredItems.length > 0) {
+
+    <div class="results">
+
+      @for (item of filteredItems; track item.id) {
+
+        <button
+          type="button"
+          (click)="selectItem(item)"
+        >
+          {{ item.name }}
+        </button>
+
+      }
+
+    </div>
+  }
+
+</div>

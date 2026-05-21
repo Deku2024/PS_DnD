@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SessionService } from '../../services/sessions.service';
 import { RollHistoryService } from '../../services/roll-history.service';
+import {GeneralThrowsButtonComponent} from '../general.throws.button.component/general.throws.button.component';
+import {ResultThrowFrameComponent} from '../result.throw.frame.component/result.throw.frame.component';
 
 @Component({
   selector: 'app-dm-floating-menu',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, GeneralThrowsButtonComponent, ResultThrowFrameComponent],
   templateUrl: './dm-floating-menu.component.html',
   styleUrls: ['./dm-floating-menu.component.css']
 })
@@ -22,6 +24,9 @@ export class DmFloatingMenuComponent {
   @Output() mapClick = new EventEmitter<void>();
   @Output() historyClick = new EventEmitter<void>();
   @Output() toggleStatusClick = new EventEmitter<void>();
+  @Output() showMerchants = new EventEmitter<void>();
+  @Output() showShops = new EventEmitter<void>();
+  @Output() addMerchant = new EventEmitter<void>();
 
   showMenu = false;
 
@@ -83,6 +88,21 @@ export class DmFloatingMenuComponent {
 
   toggleStatus(): void {
     this.toggleStatusClick.emit();
+    this.showMenu = false;
+  }
+
+  showMerchatsToggle() : void {
+    this.showMerchants.emit();
+    this.showMenu = false;
+  }
+
+  showSelectShopsToggle() : void {
+    this.showShops.emit();
+    this.showMenu = false;
+  }
+
+  toggleAddMerchant(): void {
+    this.addMerchant.emit();
     this.showMenu = false;
   }
 }

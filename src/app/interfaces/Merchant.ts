@@ -1,8 +1,9 @@
-import {Item} from './Item';
+import {MerchantItemInfo} from './Item';
 
 export interface Merchant {
-  id: string;
+  id?: string;
   name: string;
-  sellingList: Record<string, {price: number, quantity: number}>;
-  buyingList: Record<string, {price: number, quantity: number}>;
+  sellingList: MerchantItemInfo[]; //lista de objetos que vende el mercader
+  buyingList: MerchantItemInfo[]; //lista de objetos que compra el mercader
 }
+

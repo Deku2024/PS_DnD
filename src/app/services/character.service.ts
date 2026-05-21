@@ -1,11 +1,21 @@
-import { Injectable } from '@angular/core';
+import {Injectable, signal, WritableSignal} from '@angular/core';
 import {
-  collection, doc, getDoc, addDoc, query, where,
-  getDocs, updateDoc, onSnapshot, deleteDoc,
-  increment, arrayUnion
+  addDoc,
+  arrayUnion,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  query,
+  updateDoc,
+  where
 } from 'firebase/firestore';
-import { FirebaseService } from './firebase.service';
-import { SheetInterface } from '../interfaces/SheetInterface';
+import {FirebaseService} from './firebase.service';
+import {SheetInterface} from '../interfaces/SheetInterface';
+import {SessionService} from './sessions.service';
+import {AuthService} from './auth.service';
 
 export interface Money {
   ppt: number;
@@ -33,7 +43,9 @@ export interface CharacterWithId extends CharacterData {
 export class CharacterService {
   private readonly col = 'characters';
 
-  constructor(private firebase: FirebaseService) {}
+  selectedCharacter : WritableSignal<CharacterWithId> = signal<CharacterWithId>({} as CharacterWithId);
+
+  constructor(private firebase: FirebaseService, private sessionService: SessionService, private auth : AuthService) {}
 
   async getCharacterById(id: string): Promise<CharacterWithId | null> {
     const ref = doc(this.firebase.db, this.col, id);
@@ -122,5 +134,54 @@ export class CharacterService {
   async deleteCharacter(characterId: string) {
     const docRef = doc(this.firebase.db, `${this.col}/${characterId}`);
     return await deleteDoc(docRef);
+  }
+
+  getTotalValue(character: CharacterWithId): number {
+    const money = character.money ?? { ppt: 0, po: 0, pe: 0, pp: 0, pc: 0 };
+
+    return (
+      (money.ppt || 0) * 10 +
+      (money.po || 0) +
+      (money.pe || 0) * 0.5 +
+      (money.pp || 0) * 0.1 +
+      (money.pc || 0) * 0.01
+    );
+  }
+  hasThisCoin(character : CharacterWithId, coin :  {name : string, value : number}) : boolean {
+    switch (coin.value) {
+      case 10: return character.money.ppt > 0;
+      case 1: return character.money.po > 0;
+      case 0.5: return character.money.pe > 0;
+      case 0.1: return character.money.pp > 0;
+      case 0.01: return character.money.pc > 0;
+    }
+    return false;
+  }
+
+  getCoinAmount(character: CharacterWithId, coin: { name: string; value: number }): number {
+    switch (coin.value) {
+      case 10: return character.money.ppt;
+      case 1: return character.money.po;
+      case 0.5: return character.money.pe;
+      case 0.1: return character.money.pp;
+      case 0.01: return character.money.pc;
+      default: return 0;
+    }
+  }
+
+  async getSelectedCharacter(sessionId: string, userId?: string | undefined): Promise<CharacterWithId | null> {
+    const uid = userId ?? this.auth.getCurrentUser()?.uid;
+    if (!uid) {
+      return null;
+    }
+    const session = await this.sessionService.getSession(sessionId);
+    if (!session || !session.selectedCharacters) {
+      return null;
+    }
+    const characterId = session.selectedCharacters[uid];
+    if (!characterId) {
+      return null;
+    }
+    return this.getCharacterById(characterId);
   }
 }

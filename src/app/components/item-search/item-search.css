@@ -1,0 +1,139 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.search-container {
+  position: relative;
+  width: 100%;
+}
+
+.search-container input {
+  width: 100%;
+
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(198, 167, 71, 0.25);
+  border-radius: 4px;
+
+  color: #e8d5a0;
+
+  padding: 0.75rem 0.9rem;
+
+  font-family: inherit;
+  font-size: 0.92rem;
+
+  box-sizing: border-box;
+
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    box-shadow 0.15s;
+}
+
+.search-container input::placeholder {
+  color: #6a5428;
+  letter-spacing: 0.04em;
+}
+
+.search-container input:focus {
+  outline: none;
+
+  border-color: #c6a747;
+
+  background: rgba(198, 167, 71, 0.05);
+
+  box-shadow: 0 0 0 3px rgba(198, 167, 71, 0.08);
+}
+
+.results {
+  position: absolute;
+
+  top: calc(100% + 0.35rem);
+  left: 0;
+  right: 0;
+
+  z-index: 50;
+
+  background: #1e1208;
+
+  border: 1px solid rgba(198, 167, 71, 0.25);
+  border-radius: 4px;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(198, 167, 71, 0.04);
+
+  animation: fadeDropdown 0.14s ease;
+}
+
+.results button {
+  width: 100%;
+
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(198, 167, 71, 0.08);
+
+  color: #c6a747;
+
+  text-align: left;
+
+  padding: 0.75rem 0.9rem;
+
+  cursor: pointer;
+
+  font-family: inherit;
+  font-size: 0.9rem;
+
+  transition:
+    background 0.15s,
+    color 0.15s,
+    padding-left 0.15s;
+}
+
+/* Last item no border */
+
+.results button:last-child {
+  border-bottom: none;
+}
+
+/* Hover */
+
+.results button:hover {
+  background: rgba(198, 167, 71, 0.12);
+  color: #e8d5a0;
+
+  padding-left: 1.1rem;
+}
+
+/* Active */
+
+.results button:active {
+  background: rgba(198, 167, 71, 0.18);
+}
+
+/* ───────────────────────────── */
+/* ANIMATION */
+/* ───────────────────────────── */
+
+@keyframes fadeDropdown {
+
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+
+  .results button {
+    font-size: 0.85rem;
+    padding: 0.7rem 0.8rem;
+  }
+}

@@ -1,35 +1,51 @@
-import { Component, OnDestroy, OnInit, ChangeDetectorRef, ViewChild, ElementRef, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { SessionService, Session, AudioState } from '../../services/sessions.service';
-import { AuthService } from '../../services/auth.service';
-import { CharacterService, CharacterWithId } from '../../services/character.service';
-import { PresenceService } from '../../services/presence.service';
-import { RollHistoryService } from '../../services/roll-history.service';
-import { UsernameService } from '../../services/username.service';
-import { HistoryButtonComponent } from '../../components/history.button.component/history.button.component';
-import { CloudinaryService } from '../../services/cloudinary.service';
-import { HexMapComponent } from '../../components/hex-map.component/hex-map.component';
-import { User } from 'firebase/auth';
-import { Subscription } from 'rxjs';
-import { BattleButtonComponent } from '../../components/battle.button.component/battle.button.component';
-import { DmFloatingMenuComponent } from '../../components/dm-floating-menu.component/dm-floating-menu.component';
-import { ItemsService } from '../../services/items.service';
-import { Item } from '../../interfaces/Item';
-import { YouTubePlayer } from '@angular/youtube-player';
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  ViewChild,
+  WritableSignal
+} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {ActivatedRoute, Router} from '@angular/router';
+import {AudioState, Session, SessionService} from '../../services/sessions.service';
+import {AuthService} from '../../services/auth.service';
+import {CharacterService, CharacterWithId} from '../../services/character.service';
+import {PresenceService} from '../../services/presence.service';
+import {RollHistoryService} from '../../services/roll-history.service';
+import {HistoryButtonComponent} from '../../components/history.button.component/history.button.component';
+import {CloudinaryService} from '../../services/cloudinary.service';
+import {HexMapComponent} from '../../components/hex-map.component/hex-map.component';
+import {User} from 'firebase/auth';
+import {Subscription} from 'rxjs';
+import {BattleButtonComponent} from '../../components/battle.button.component/battle.button.component';
+import {ItemsService} from '../../services/items.service';
+import {Item} from '../../interfaces/Item';
+import {YouTubePlayer} from '@angular/youtube-player';
+import {Merchant} from '../../interfaces/Merchant';
+import {MerchantService} from '../../services/merchant.service';
+import {CommerceService} from '../../services/commerce.service';
+import {DmFloatingMenuComponent} from '../../components/dm-floating-menu.component/dm-floating-menu.component';
+import {MerchantForm} from '../../components/merchant-form/merchant-form';
+import {UsernameService} from '../../services/username.service';
+
 
 @Component({
   selector: 'app-session',
   standalone: true,
-imports: [
+  imports: [
     CommonModule,
     FormsModule,
     YouTubePlayer,
     BattleButtonComponent,
     HistoryButtonComponent,
     DmFloatingMenuComponent,
-    HexMapComponent
+    HexMapComponent,
+    MerchantForm
   ],
   templateUrl: './session.html',
   styleUrl: './session.css'
@@ -55,6 +71,7 @@ export class SessionPage implements OnInit, OnDestroy {
   localHexSize = 40;
   localGridColor: string = 'blue';
   localCustomColor: string = '#64c8ff';
+  private commerceService = inject(CommerceService);
 
   /** Returns false when gridColor is one of the 3 named presets */
   isPreset(color: string): boolean {
@@ -80,6 +97,13 @@ export class SessionPage implements OnInit, OnDestroy {
   private usernameCache: { [uid: string]: string } = {};
   isSidebarOpen = true;
 
+  showMerchantModal = signal<boolean>(false);
+  myMerchantsLoading = false;
+  showMyMerchants = false;
+  myMerchants: Merchant[] = [];
+  merchantUnsubscribe: (() => void) | undefined;
+  selectedMerchant: Merchant | null = null;
+
   selectedPlayerUids = new Set<string>();
   lifeAction: number = 0;
   goldAction: number = 0;
@@ -101,6 +125,16 @@ export class SessionPage implements OnInit, OnDestroy {
   // Listado de advertencias para que el Máster sepa si se alcanzaron umbrales
   dmAlerts: string[] = [];
 
+  defaultItems : WritableSignal<Item[]> = signal<Item[]>([]);
+
+  showCommerceModal : WritableSignal<boolean> = signal<boolean>(false);
+  showSelectShop : WritableSignal<boolean> = signal<boolean>(false);
+  currentMerchant : WritableSignal<Merchant> = signal({} as Merchant);
+  buyingItems: WritableSignal<Item[]> = signal([]);
+  sellingItems: WritableSignal<Item[]> = signal([]);
+  currentCharacter: WritableSignal<CharacterWithId | null> = signal(null);
+  sellMode: WritableSignal<boolean> = signal(false);
+
   private unsubscribe?: () => void;
   private authSub?: Subscription;
   private initializing = false;
@@ -116,7 +150,10 @@ export class SessionPage implements OnInit, OnDestroy {
     private characterService: CharacterService,
     private cd: ChangeDetectorRef,
     private presenceService: PresenceService,
-private rollHistoryService: RollHistoryService,    private usernameService: UsernameService,    private itemsService: ItemsService
+    private rollHistoryService: RollHistoryService,
+    private merchantService: MerchantService,
+    private itemsService: ItemsService,
+    private usernameService: UsernameService,
   ) {}
 
   ngOnInit(): void {
@@ -149,6 +186,7 @@ private rollHistoryService: RollHistoryService,    private usernameService: User
 
     const snap = await this.sessionService.getSession(id);
     const isDm = snap?.masterId === user.uid;
+    this.defaultItems.set(await this.itemsService.loadDefaultItems());
 
     if (!isDm) {
       const selected = snap?.selectedCharacters?.[user.uid];
@@ -158,7 +196,7 @@ private rollHistoryService: RollHistoryService,    private usernameService: User
       }
     } else {
       this.itemsUnsub = this.itemsService.readItems(user.uid, (items) => {
-        this.dmItems = items;
+        this.dmItems = [...this.defaultItems(), ...items];
         this.cd.detectChanges();
       });
     }
@@ -178,6 +216,7 @@ private rollHistoryService: RollHistoryService,    private usernameService: User
         }
         const isFirstLoad = !this.session;
         this.session = session;
+        if (isFirstLoad) this.loadMerchants();
         this.fillMissingUsernames(session);
         if (isFirstLoad && session.isMap) {
           this.localHexSize = session.hexSize ?? 40;
@@ -435,30 +474,46 @@ private rollHistoryService: RollHistoryService,    private usernameService: User
     const itemToGive = this.dmItems.find(item => item.id === this.selectedItemId);
     if (!itemToGive) return;
 
+    const resultAlerts: string[] = [];
+
     for (const uid of this.selectedPlayerUids) {
       const char = this.characters[uid];
       if (char) {
-        const freshChar = await this.characterService.getCharacterById(char.id);
-        let inventory = freshChar?.inventory ? [...freshChar.inventory] : (char.inventory ? [...char.inventory] : []);
+        try {
+          const freshChar = await this.characterService.getCharacterById(char.id);
+          let inventory = freshChar?.inventory ? [...freshChar.inventory] : (char.inventory ? [...char.inventory] : []);
 
-        const existingItemIndex = inventory.findIndex((i: any) =>
-          i.name?.trim().toLowerCase() === itemToGive.name?.trim().toLowerCase()
-        );
+          const existingItemIndex = inventory.findIndex((i: any) =>
+            i.name?.trim().toLowerCase() === itemToGive.name?.trim().toLowerCase()
+          );
 
-        if (existingItemIndex > -1) {
-          const currentQty = inventory[existingItemIndex].quantity || 1;
-          inventory[existingItemIndex].quantity = currentQty + this.itemQuantityToGive;
-        } else {
-          inventory.push({
-            ...itemToGive,
-            quantity: this.itemQuantityToGive
-          });
+          if (existingItemIndex > -1) {
+            const currentQty = inventory[existingItemIndex].quantity || 1;
+            inventory[existingItemIndex] = {
+              ...inventory[existingItemIndex],
+              quantity: currentQty + this.itemQuantityToGive
+            };
+          } else {
+            const newItem: { name: string; quantity: number; description: string; weight: number } = {
+              name: itemToGive.name,
+              description: itemToGive.description ?? '',
+              weight: itemToGive.weight ?? 0,
+              quantity: this.itemQuantityToGive
+            };
+            inventory.push(newItem);
+          }
+
+          await this.characterService.updateCharacter(char.id, { inventory } as any);
+          char.inventory = inventory;
+          resultAlerts.push(`✅ ${char.name} recibió x${this.itemQuantityToGive} ${itemToGive.name}`);
+        } catch (e) {
+          resultAlerts.push(`❌ Error al entregar "${itemToGive.name}" a ${char.name}`);
         }
-
-        await this.characterService.updateCharacter(char.id, { inventory: inventory } as any);
-        char.inventory = inventory;
       }
     }
+
+    this.dmAlerts = resultAlerts;
+    setTimeout(() => { this.dmAlerts = []; this.cd.detectChanges(); }, 5000);
 
     this.selectedItemId = '';
     this.itemQuantityToGive = 1;
@@ -486,6 +541,13 @@ private rollHistoryService: RollHistoryService,    private usernameService: User
     const myUid = this.currentUser.uid;
     const selected = this.session?.selectedCharacters?.[myUid];
     this.router.navigate(['/player-sheet'], {queryParams: {sessionId: this.session.id, characterId: selected}});
+  }
+
+  viewPlayerSheet(): void {
+    if (!this.session?.id || !this.modalCharacter) return;
+    const characterId = this.modalCharacter.id;
+    this.closeModal();
+    this.router.navigate(['/player-sheet'], {queryParams: {sessionId: this.session.id, characterId}});
   }
 
   changeMyCharacter(): void {
@@ -650,15 +712,212 @@ private rollHistoryService: RollHistoryService,    private usernameService: User
     await this.sessionService.updateTokenPosition(this.session.id, event.uid, event.row, event.col);
   }
 
+
+  //Mercaderes
+  loadMerchants(): void {
+    if (this.merchantUnsubscribe) return; // ya suscrito
+    if (this.session?.id) {
+      this.merchantUnsubscribe = this.merchantService.readMerchants(
+        this.session.id,
+        (merchants) => {
+          this.myMerchants = merchants;
+          this.cd.detectChanges();
+        }
+      );
+    }
+  }
+
+  closeMerchantModal(): void {
+    this.showMerchantModal.set(false);
+    this.selectedMerchant = null;
+  }
+
+  toggleMyMerchants(): void {
+    this.showMyMerchants = !this.showMyMerchants;
+  }
+
+  openMerchantModal(): void {
+    this.showMerchantModal.set(true);
+    this.selectedMerchant = null;
+  }
+
+  toggleMerchantModal(): void {
+    this.showMerchantModal.set(!this.showMerchantModal());
+    this.selectedMerchant = null;
+  }
+
   ngOnDestroy(): void {
     this.unsubscribe?.();
     this.authSub?.unsubscribe();
     this.presenceUnsub?.();
     this.itemsUnsub?.();
+    this.merchantUnsubscribe?.();
     Object.values(this.charUnsubs).forEach(unsub => unsub());
   }
 
-  // 🟢 Dispara el panel inferior del historial
+  saveMerchant(merchant: Merchant) {
+    if (this.session?.id)
+    this.merchantService.saveMerchant(this.session.id, merchant);
+    this.closeMerchantModal();
+  }
+
+  deleteMerchant(merchant: Merchant) {
+    if (this.session?.id && merchant.id) {
+      this.merchantService.deleteMerchant(this.session.id, merchant.id);
+    }
+  }
+
+  updateMerchant(merchant: Merchant) {
+    this.openMerchantModal();
+    this.selectedMerchant = merchant;
+  }
+
+  closeSelectShop() : void {
+    this.showSelectShop.set(false);
+  }
+
+  openSelectShop(): void {
+    this.showSelectShop.set(true);
+  }
+
+  async loadCurrentCharacter(): Promise<void> {
+    this.currentCharacter.set(await this.characterService.getSelectedCharacter(this.session?.id || ""));
+  }
+
+  protected async openThisShop(shop: Merchant) {
+    console.log("Cargando. " + shop.name)
+    this.currentMerchant.set(shop);
+    await this.loadCurrentCharacter();
+    await this.loadBuyingItems(shop);
+    await this.loadSellingItems(shop);
+    this.cd.detectChanges();
+    this.totalValueOnCharacter.set(this.characterService.getTotalValue(this.currentCharacter()!));
+    this.showCommerceModal.set(true);
+    this.showSelectShop.set(false);
+  }
+
+  closeCommerceModal(): void {
+    this.showCommerceModal.set(false);
+    this.currentMerchant.set({} as Merchant);
+  }
+
+  totalValueOnCharacter: WritableSignal<number> = signal(0);
+
+  async buyItem(item: Item): Promise<void> {
+    this.commerceService.buyItemFromMerchant(
+      this.currentCharacter()!,
+      item,
+      this.currentMerchant()
+    );
+    await this.refreshCurrentMerchant();
+
+    const merchant = this.currentMerchant();
+    if (merchant) {
+      await this.loadSellingItems(merchant);
+    }
+
+    await this.loadCurrentCharacter();
+    this.totalValueOnCharacter.set(this.characterService.getTotalValue(this.currentCharacter()!));
+
+    this.cd.detectChanges();
+  }
+
+  async sellItem(item: Item): Promise<void> {
+    this.commerceService.sellItemToMerchant(
+      this.currentCharacter()!,
+      item,
+      this.currentMerchant()
+    );
+    await this.refreshCurrentMerchant();
+
+    const merchant = this.currentMerchant();
+    if (merchant) {
+      await this.loadBuyingItems(merchant);
+    }
+
+    await this.loadCurrentCharacter();
+    this.totalValueOnCharacter.set(this.characterService.getTotalValue(this.currentCharacter()!));
+
+    this.cd.detectChanges();
+  }
+
+  private async refreshCurrentMerchant(): Promise<void> {
+    const currentMerchant = this.currentMerchant();
+    if (!currentMerchant || !currentMerchant.id) return;
+
+    const sessionId = this.session?.id || this.sessionService.getCurrentSessionId();
+    if (!sessionId) return;
+
+    const updatedMerchant = this.myMerchants.find(m => m.id === currentMerchant.id);
+    if (updatedMerchant) {
+      this.currentMerchant.set(updatedMerchant);
+    } else {
+      this.loadMerchants();
+      await this.delay(200);
+      const reloadedMerchant = this.myMerchants.find(m => m.id === currentMerchant.id);
+      if (reloadedMerchant) {
+        this.currentMerchant.set(reloadedMerchant);
+      }
+    }
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  alterMode(): void {
+    this.sellMode.set(!this.sellMode());
+  }
+
+  protected hasItemInInventory(item: Item) {
+    return this.currentCharacter()?.inventory ? this.currentCharacter()?.inventory.some(cItem => item.name === cItem.name) : false;
+  }
+
+  protected async loadBuyingItems(merchant: Merchant): Promise<void> {
+    const items: Item[] = [];
+    for (const merchantItem of merchant.buyingList || []) {
+      const item = await this.itemsService.getItemById(merchantItem.itemId);
+      if (item && this.currentCharacter()?.inventory?.some(cItem => cItem.name === item.name)) {
+        items.push(item);
+      }
+    }
+    this.buyingItems.set(items);
+  }
+
+  protected async loadSellingItems(merchant: Merchant): Promise<void> {
+    const items: Item[] = [];
+    for (const merchantItem of merchant.sellingList || []) {
+      try {
+        const item = await this.itemsService.getItemById(merchantItem.itemId);
+        if (item) {
+          items.push({
+            ...item,
+            quantity: merchantItem.quantity
+          });
+        }
+      } catch (error) {}
+    }
+    this.sellingItems.set(items);
+  }
+
+  private async refreshAfterTransaction(): Promise<void> {
+    await this.loadCurrentCharacter();
+
+    const merchant = this.currentMerchant();
+    if (merchant) {
+      await this.loadBuyingItems(merchant);
+      await this.loadSellingItems(merchant);
+    }
+
+    this.totalValueOnCharacter.set(this.characterService.getTotalValue(this.currentCharacter()!));
+
+    this.cd.detectChanges();
+  }
+
+  getValueOfThisItem(item : Item) {
+    return this.currentMerchant().buyingList?.find(mItem => mItem.itemId === item.id)?.price ?? 0;
+  }
+
   triggerHistoryDrawer(): void {
     // Busca el botón que está dentro de tu componente de historial y lo pulsa
     const historyNativeButton = document.querySelector('history-button-component button') as HTMLButtonElement;
@@ -669,5 +928,9 @@ private rollHistoryService: RollHistoryService,    private usernameService: User
       this.showHistory = !this.showHistory;
       this.cd.detectChanges();
     }
+  }
+
+  toggleShowSelectShop(): void {
+    this.showSelectShop.set(!this.showSelectShop());
   }
 }

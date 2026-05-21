@@ -1,13 +1,15 @@
-import {Component, inject, input, signal} from '@angular/core';
+import {Component, inject, input, InputSignal, signal} from '@angular/core';
 import {
   SingleCustomThrowButtonComponent
 } from '../single.custom.throw.button.component/single.custom.throw.button.component';
 import {DiceRollerService, TypeOfThrow} from '../../services/roll-dice.service';
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'general-throw-component',
   imports: [
-    SingleCustomThrowButtonComponent
+    SingleCustomThrowButtonComponent,
+    NgIf
   ],
   templateUrl: './general.throws.button.component.html',
   styleUrl: './general.throws.button.component.css',
@@ -17,6 +19,8 @@ export class GeneralThrowsButtonComponent {
   public isMenuOpen = signal(false);
   public dc = input<number>(-1);
   public errorMessage = signal<string>('');
+
+  switchStyle = input<boolean>(false);
 
   public TypeOfThrow = TypeOfThrow;
   public throwType = signal<TypeOfThrow>(TypeOfThrow.Normal);

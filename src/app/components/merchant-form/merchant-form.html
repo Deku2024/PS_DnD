@@ -1,0 +1,225 @@
+<form [formGroup]="merchantForm">
+
+    <!-- Nombre -->
+    <input
+        type="text"
+        placeholder="Nombre"
+        formControlName="name"
+    >
+
+    @if (nameControl?.invalid && nameControl?.touched) {
+
+        <div class="error">
+
+            @if (nameControl?.errors?.['required']) {
+            <span>El nombre es obligatorio</span>
+            }
+
+            @if (nameControl?.errors?.['minlength']) {
+            <span>Mínimo 3 caracteres</span>
+            }
+
+        </div>
+    }
+
+    <hr class="modal-divider" />
+
+    <h2>Objetos que vende</h2>
+
+    <app-item-search
+            [items]="items"
+            placeholder="Buscar objeto para vender..."
+            (itemSelected)="onSellingItemSelected($event)"
+    />
+
+    @if (sellingDuplicateError) {
+
+        <div class="error-message">
+            {{ sellingDuplicateError }}
+        </div>
+
+    }
+
+    @if (sellingList.length == 0) {
+        <span>Todavía no se han seleccionado objetos</span>
+    }
+
+    <div formArrayName="sellingList">
+
+        @for (group of sellingList.controls; track $index; let i = $index) {
+
+            <div class="item-card" [formGroupName]="i">
+
+                <p>
+                    {{
+                        getItemById(group.get('itemId')?.value)?.name
+                    }}
+                </p>
+
+                <label>
+                    Precio
+
+                    <input
+                        type="number"
+                        formControlName="price"
+                    >
+                </label>
+
+                @if (group.get('price')?.invalid && group.get('price')?.touched) {
+                    <div class="error">
+
+                        @if (group.get('price')?.errors?.['required']) {
+                        <span>El precio es obligatorio</span>
+                        }
+
+                        @if (group.get('price')?.errors?.['min']) {
+                        <span>El precio no puede ser negativo</span>
+                        }
+
+                        @if (group.get('price')?.errors?.['pattern']) {
+                        <span>Sólo números enteros</span>
+                        }
+
+                    </div>
+                }
+
+                <label>
+                    Cantidad
+
+                    <input
+                        type="number"
+                        formControlName="quantity"
+                    >
+                </label>
+
+
+                @if (group.get('quantity')?.invalid && group.get('quantity')?.touched) {
+                    <div class="error">
+
+                        @if (group.get('quantity')?.errors?.['required']) {
+                        <span>La cantidad es obligatoria</span>
+                        }
+
+                        @if (group.get('quantity')?.errors?.['min']) {
+                        <span>La cantidad no puede ser negativa</span>
+                        }
+
+                        @if (group.get('quantity')?.errors?.['pattern']) {
+                        <span>Sólo números enteros</span>
+                        }
+
+                    </div>
+                }
+
+            </div>
+
+        }
+
+    </div>
+
+    @if (
+        sellingList.errors?.['minArrayLength']
+        && merchantForm.touched
+    ) {
+
+        <div class="error">
+            Debe haber al menos un objeto en venta
+        </div>
+    }
+
+    <hr class="modal-divider" />
+
+    <h2>Objetos que compra</h2>
+
+    <app-item-search
+        [items]="items"
+        placeholder="Buscar objeto para comprar..."
+        (itemSelected)="onBuyingItemSelected($event)"
+    />
+
+    @if (buyingDuplicateError) {
+        <div class="error-message">
+            {{ buyingDuplicateError }}
+        </div>
+    }
+
+    @if (buyingList.length == 0) {
+        <span>Todavía no se han seleccionado objetos</span>
+    }
+
+
+    <div formArrayName="buyingList">
+
+        @for (group of buyingList.controls; track $index; let i = $index) {
+
+            <div [formGroupName]="i">
+
+                <p>
+                    {{
+                        getItemById(group.get('itemId')?.value)?.name
+                    }}
+                </p>
+
+                <label>
+                    Precio
+
+                    <input
+                        type="number"
+                        formControlName="price"
+                    >
+                </label>
+                @if (group.get('price')?.invalid && group.get('price')?.touched) {
+                    <div class="error">
+
+                        @if (group.get('price')?.errors?.['required']) {
+                        <span>El precio es obligatorio</span>
+                        }
+
+                        @if (group.get('price')?.errors?.['min']) {
+                        <span>El precio no puede ser negativo</span>
+                        }
+
+                        @if (group.get('price')?.errors?.['pattern']) {
+                        <span>Sólo números enteros</span>
+                        }
+
+                    </div>
+                }
+
+                <label>
+                    Cantidad
+
+                    <input
+                        type="number"
+                        formControlName="quantity"
+                    >
+                </label>
+
+                @if (group.get('quantity')?.invalid && group.get('quantity')?.touched) {
+                    <div class="error">
+
+                        @if (group.get('quantity')?.errors?.['required']) {
+                        <span>La cantidad es obligatoria</span>
+                        }
+
+                        @if (group.get('quantity')?.errors?.['min']) {
+                        <span>La cantidad no puede ser negativa</span>
+                        }
+
+                        @if (group.get('quantity')?.errors?.['pattern']) {
+                        <span>Sólo números enteros</span>
+                        }
+
+                    </div>
+                }
+
+            </div>
+
+        }
+
+    </div>
+
+    <button type="submit" (click)="saveMerchant()" [disabled]="merchantForm.invalid">Guardar</button>
+    <button type="button" (click)="cancel()">Cancelar</button>
+
+</form>
