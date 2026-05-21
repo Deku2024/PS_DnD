@@ -37,7 +37,30 @@
             <span class="session-badge badge-{{ s.status }}">{{ s.status }}</span>
           </div>
         </div>
-        <button class="btn-enter" (click)="enterSession(s.id!)">Entrar</button>
+        <div class="btn-container">
+          <button class="btn-enter" (click)="enterSession(s.id!)">Entrar</button>
+          <button class="btn-exit" *ngIf="currentUser?.uid === s.masterId" (click)="showConfirmDialogToThisSession(s.id!)">Borrar</button>
+          <button class="btn-exit" *ngIf="currentUser?.uid !== s.masterId" (click)="showConfirmDialogToThisSession(s.id!)">Salir</button>
+        </div>
+
+        @if (showConfirmDialog() && s.id === sessionId()) {
+          <div class="overlay" (click)="closeConfirmDialog()"></div>
+          <div class="confirm-modal">
+            @if (s.masterId === currentUser?.uid) {
+              <p>¿Estás seguro de querer borrar la sesión? Esta acción es irreversible</p>
+              <div class="btn-group">
+                <button class="btn-enter" (click)="closeConfirmDialog()">No</button>
+                <button class="btn-exit" (click)="deleteThisSession(s.id!)">Si</button>
+              </div>
+            } @else {
+              <p>¿Estás seguro de querer salir de la sesión? Siempre podrás volver a unirte luego</p>
+              <div class="btn-group">
+                <button class="btn-enter" (click)="closeConfirmDialog()">No</button>
+                <button class="btn-exit" (click)="removeCurrentPlayerFromSession(s.id!)">Si</button>
+              </div>
+            }
+          </div>
+        }
       </div>
     </div>
   </div>

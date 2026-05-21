@@ -266,10 +266,22 @@ button:disabled {
 
 .btn-enter {
   width: auto;
+  min-width: 6.5rem;
   flex-shrink: 0;
   padding: 0.4rem 1rem;
   font-size: 0.75rem;
   margin-top: 0;
+}
+
+.btn-exit {
+  width: auto;
+  min-width: 6.5rem;
+  flex-shrink: 0;
+  padding: 0.4rem 1rem;
+  font-size: 0.75rem;
+  margin-top: 0;
+  border-color: rgba(192, 57, 43, 0.4);
+  color: #e74c3c;
 }
 
 @media (max-width: 480px) {
@@ -279,16 +291,37 @@ button:disabled {
 
   .session-row {
     flex-wrap: wrap;
+    flex-direction: column;
+    align-items: unset;
     gap: 0.5rem;
   }
 
-  .btn-enter {
+  .btn-container {
     width: 100%;
+    gap: 2%;
+  }
+
+  .session-info {
+    display: flex;
+    align-items: center;
   }
 
   .session-name {
     font-size: 0.85rem;
   }
+
+  .confirm-modal{
+
+    div {
+      flex-direction: column;
+    }
+
+    .btn-enter, .btn-exit {
+      font-size: 10pt;
+      padding: 3% 0;
+    }
+  }
+
 }
 
 .message.error {
@@ -602,4 +635,50 @@ button:disabled {
     width: 100%;
     justify-content: flex-end;
   }
+}
+.btn-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.confirm-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #1a1008;
+  padding: 2rem;
+  border-radius: 8px;
+  border: 2px solid #a88a3a;
+  z-index: 1000;
+  min-width: 300px;
+
+
+  p {
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    color: #a88a3a;
+  }
+
+  #btn-exit {
+    margin-left: auto;
+  }
+
+  div {
+    display: flex;
+    justify-content: space-between;
+
+  }
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  cursor: pointer;
 }
