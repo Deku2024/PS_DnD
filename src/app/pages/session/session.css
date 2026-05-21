@@ -1607,7 +1607,7 @@ h2 {
 
   display: flex !important;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 
   overflow: auto !important;
   -webkit-overflow-scrolling: touch;
@@ -1634,6 +1634,8 @@ h2 {
   height: auto !important;
   max-width: 95% !important;
   max-height: 95% !important;
+
+  margin: auto;
 
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center center;
