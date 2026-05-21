@@ -60,24 +60,20 @@
 #menu_for_throws {
   position: fixed;
   top: 50%;
-  left: 0;
-  transform: translate(-120%, -50%);
+  left: 50%;
+  transform: translate(-50%, -50%);
   background: linear-gradient(135deg, #2a1a08 0%, #1a1008 100%);
   border: 2px solid #d4a056;
   border-radius: 20px;
-  width: 100%;
-  z-index: 999;
+  width: min(92vw, 360px);
+  z-index: 10000;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 24px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
   animation: slideIn 0.25s ease;
-}
-
-/* Estilo alternativo para speed dial */
-#menu_for_throws {
-  position: fixed;
-  left: 0;
-  width: 320px;
-  padding: 16px;
+  box-sizing: border-box;
 }
 
 /* Header */
@@ -291,7 +287,7 @@
 /* Responsive */
 @media (max-width: 550px) {
   #menu_for_throws {
-    width: 95%;
+    width: calc(100vw - 24px);
     padding: 16px;
   }
 
@@ -313,12 +309,6 @@
   .throw-modifiers label {
     padding: 4px 12px;
     font-size: 0.75rem;
-  }
-
-  #menu_for_throws.other-style {
-    width: 280px;
-    right: 10px;
-    bottom: 80px;
   }
 }
 
