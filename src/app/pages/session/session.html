@@ -61,7 +61,8 @@
             #youtubePlayer
             [videoId]="youtubeVideoId"
             [playerVars]="{ autoplay: 1, controls: 0 }"
-            (ready)="onPlayerReady($event)">
+            (ready)="onPlayerReady($event)"
+            (stateChange)="onPlayerStateChange($event)">
           </youtube-player>
         </div>
       </div>
