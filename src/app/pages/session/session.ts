@@ -790,6 +790,7 @@ export class SessionPage implements OnInit, OnDestroy {
 
   updateMerchant(merchant: Merchant) {
     this.openMerchantModal();
+    this.toggleMyMerchants();
     this.selectedMerchant = merchant;
   }
 
