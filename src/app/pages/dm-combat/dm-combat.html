@@ -15,7 +15,6 @@
 
     <div class="monster-search-wrapper card" *ngIf="showAddMenu">
       <h3>Bestiario del Tomo</h3>
-
       <app-monster-search (monsterSelected)="addMonsterToBattle($event)"></app-monster-search>
     </div>
   </div>
@@ -26,7 +25,6 @@
 
   <ng-container *ngIf="!loading">
 
-    <!-- Orden de combate activo -->
     <div class="card" *ngIf="activeCombatants.length > 0">
       <h3>Orden de batalla</h3>
       <p class="card-hint">Jugadores activos ordenados por turno</p>
@@ -69,7 +67,6 @@
 
     <hr class="divider" *ngIf="activeCombatants.length > 0 && combatants.length > 0" />
 
-    <!-- Gestión de jugadores (solo DM) -->
     <div class="card" *ngIf="isMaster">
       <h3>Jugadores en la sesión</h3>
       <p class="card-hint">Activa o desactiva y reordena manualmente</p>
@@ -108,9 +105,6 @@
     </div>
 
   </ng-container>
-</div>
-
-<!-- Damage modal -->
 <div class="modal-overlay" *ngIf="showDamageModal" (click)="closeDamageModal()">
   <div class="modal-card" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -158,4 +152,3 @@
     </div>
   </div>
 </div>
-

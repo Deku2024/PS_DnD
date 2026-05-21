@@ -1,25 +1,26 @@
 <main>
   <form [formGroup]="playerSheetForm" (ngSubmit)="onSubmit()" class="player-sheet-form">
     <div>
-      <img
-        id="player-image"
-        [src]="imagePreview || playerSheetForm.value.image"
-        (click)="fileInput.click()"
-        alt="Character image"
-      >
+<img
+  id="player-image"
+  [src]="imagePreview || playerSheetForm.value.image"
+  (click)="fileInput.click()"
+  alt="Character image"
+>
 
-      <input
-        #fileInput
-        type="file"
-        accept="image/*"
-        style="display: none"
-        (change)="onFileSelected($event)"
-      >
+<input
+  #fileInput
+  type="file"
+  accept="image/*"
+  style="display: none"
+  (change)="onFileSelected($event)"
+>
     </div>
 
     <div id="basic-info" class="form-section">
       <div class="field">
         <label for="name">Nombre:</label>
+
         <input type="text" id="name" formControlName="name" placeholder="Ej: Aragorn">
 
         @if (playerSheetForm.get('name')?.errors?.['required']) {
@@ -108,34 +109,20 @@
             <span class="error">La vida no puede ser mayor que la máxima</span>
           }
         </div>
-
         <div class="field">
           <label for="max-life">Vida máxima:</label>
-          <input type="number" id="max-life" formControlName="maxLife" min="0">
-
-          @if (playerSheetForm.get('maxLife')?.errors?.['required']) {
-            <span class="error">La vida máxima es requerida</span>
-          }
-
-          @if (playerSheetForm.get('maxLife')?.errors?.['min']) {
-            <span class="error">La vida máxima mínima es 0</span>
-          }
+          <input type="number" id="max-life" formControlName="maxLife">
         </div>
-
         <div class="field">
           <label for="temp-life">Vida temp:</label>
-          <input type="number" id="temp-life" formControlName="tempLife" min="0">
-
-          @if (playerSheetForm.get('tempLife')?.errors?.['min']) {
-            <span class="error">La vida temporal mínima es 0</span>
-          }
+          <input type="number" id="temp-life" formControlName="tempLife">
         </div>
       </div>
     </div>
 
     <div class="field">
       <label for="armour-class">Clase de armadura (CA):</label>
-      <input type="number" id="armour-class" formControlName="armourClass" min="1">
+<input type="number" id="armour-class" formControlName="armourClass" min="1">
 
       @if (playerSheetForm.get('armourClass')?.errors?.['required']) {
         <span class="error">La clase de armadura (CA) es requerida</span>
@@ -152,15 +139,15 @@
         @for (attr of getAttributesList(); track attr.name) {
           <div class="attribute-card">
             <label [for]="'attr-' + attr.name">{{ attr.label }}</label>
-            <input
-              type="number"
-              [id]="'attr-' + attr.name"
-              [formControlName]="attr.name"
-              [title]="attr.label"
-              min="1"
-              max="20"
-              #charValueInput
-            >
+<input
+  type="number"
+  [id]="'attr-' + attr.name"
+  [formControlName]="attr.name"
+  [title]="attr.label"
+  min="1"
+  max="20"
+  #charValueInput
+>
             <d20-roller [rollingForCharacteristic]="true" [charValue]="parseInt(charValueInput.value)"></d20-roller>
           </div>
         }
@@ -170,26 +157,35 @@
 
     <div class="form-section">
       <div class="section-header">
-        <h2>Inventario</h2>
+        <h2>Inventario y Carga</h2>
       </div>
 
-      <div class="inventario">
-        @if (!inventoryItems || inventoryItems.length === 0) {
-          <p class="empty-msg">El inventario está vacío.</p>
-        }
+      <div class="weight-status-card" [ngClass]="encumbranceStatus.class">
+        <div class="weight-info">
+          <span>Peso Total: <strong>{{ totalWeight | number:'1.1-2' }} lb</strong></span>
+          <span>Capacidad: <strong>{{ carryCapacity }} lb</strong></span>
+        </div>
+        <div class="weight-bar">
+          <div class="weight-fill" [style.width.%]="carryCapacity > 0 ? Math.min((totalWeight / carryCapacity) * 100, 100) : 0"></div>
+        </div> <p class="status-label">Estado: <strong>{{ encumbranceStatus.label }}</strong></p>
+        <p *ngIf="totalWeight > carryCapacity" class="weight-warning">⚠️ ¡Exceso de peso! Movimiento reducido.</p>
+      </div> <div class="inventario">
+      @if (inventoryFormArray.controls.length === 0) {
+        <p class="empty-msg">El inventario está vacío.</p>
+      }
 
-        @for (item of inventoryItems; track $index) {
-          <inventory-item
-            [isInInventory]="true"
-            [item]="item"
-            (remove)="onRemoveItem($event)"
-          />
-        }
-      </div>
+      @for (control of inventoryFormArray.controls; track $index) {
+        <inventory-item
+          [isInInventory]="true"
+          [item]="control.value"
+          (remove)="onRemoveItem($index)"
+        />
+      }
+    </div>
     </div>
 
     <div class="form-section">
-      <div class="section-header">
+<div class="section-header">
         <h2>Monedas</h2>
       </div>
       <money-section [moneyGroup]="$any(playerSheetForm.get('money'))" />
@@ -220,9 +216,9 @@
       <button type="button" class="btn-save" (click)="goBack()">Cancelar</button>
     </div>
   </form>
-
   <result-frame />
 </main>
+
 
 <div class="modal-overlay" *ngIf="showActionModal" (click)="cancelModalAction()">
   <div class="modal-card action-modal" (click)="$event.stopPropagation()">

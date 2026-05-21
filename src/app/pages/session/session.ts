@@ -7,12 +7,14 @@ import { AuthService } from '../../services/auth.service';
 import { CharacterService, CharacterWithId } from '../../services/character.service';
 import { PresenceService } from '../../services/presence.service';
 import { RollHistoryService } from '../../services/roll-history.service';
+import { UsernameService } from '../../services/username.service';
 import { HistoryButtonComponent } from '../../components/history.button.component/history.button.component';
 import { CloudinaryService } from '../../services/cloudinary.service';
 import { HexMapComponent } from '../../components/hex-map.component/hex-map.component';
 import { User } from 'firebase/auth';
 import { Subscription } from 'rxjs';
 import { BattleButtonComponent } from '../../components/battle.button.component/battle.button.component';
+import { DmFloatingMenuComponent } from '../../components/dm-floating-menu.component/dm-floating-menu.component';
 import { ItemsService } from '../../services/items.service';
 import { Item } from '../../interfaces/Item';
 import { YouTubePlayer } from '@angular/youtube-player';
@@ -20,7 +22,15 @@ import { YouTubePlayer } from '@angular/youtube-player';
 @Component({
   selector: 'app-session',
   standalone: true,
-  imports: [CommonModule, FormsModule, YouTubePlayer, BattleButtonComponent, HistoryButtonComponent, HexMapComponent],
+imports: [
+    CommonModule,
+    FormsModule,
+    YouTubePlayer,
+    BattleButtonComponent,
+    HistoryButtonComponent,
+    DmFloatingMenuComponent,
+    HexMapComponent
+  ],
   templateUrl: './session.html',
   styleUrl: './session.css'
 })
@@ -34,9 +44,9 @@ export class SessionPage implements OnInit, OnDestroy {
   imageUploadError = '';
   showErrorModal = false;
   imagePreviewUrl: string | null = null;
+  activeTab: 'players' | 'map' | 'audio' = 'players';
   private pendingFile: File | null = null;
   private cloudinaryService = inject(CloudinaryService);
-
   // Map settings
   pendingIsMap = false;
   pendingHexSize = 40;
@@ -67,11 +77,22 @@ export class SessionPage implements OnInit, OnDestroy {
   modalPlayerEmail = '';
   modalUid = '';
   presenceMap: { [uid: string]: boolean } = {};
+  private usernameCache: { [uid: string]: string } = {};
+  isSidebarOpen = true;
 
   selectedPlayerUids = new Set<string>();
   lifeAction: number = 0;
   goldAction: number = 0;
   xpAction: number = 0;
+  codeCopied = false;
+
+  copyCode(): void {
+    if (!this.session?.code) return;
+    navigator.clipboard.writeText(this.session.code).then(() => {
+      this.codeCopied = true;
+      setTimeout(() => this.codeCopied = false, 2000);
+    });
+  }
 
   dmItems: Item[] = [];
   selectedItemId: string = '';
@@ -95,8 +116,7 @@ export class SessionPage implements OnInit, OnDestroy {
     private characterService: CharacterService,
     private cd: ChangeDetectorRef,
     private presenceService: PresenceService,
-    private rollHistoryService: RollHistoryService,
-    private itemsService: ItemsService
+private rollHistoryService: RollHistoryService,    private usernameService: UsernameService,    private itemsService: ItemsService
   ) {}
 
   ngOnInit(): void {
@@ -158,6 +178,7 @@ export class SessionPage implements OnInit, OnDestroy {
         }
         const isFirstLoad = !this.session;
         this.session = session;
+        this.fillMissingUsernames(session);
         if (isFirstLoad && session.isMap) {
           this.localHexSize = session.hexSize ?? 40;
           this.localGridColor = session.gridColor ?? 'blue';
@@ -174,6 +195,33 @@ export class SessionPage implements OnInit, OnDestroy {
     this.presenceUnsub = this.presenceService.listenPresence(id, (map) => {
       this.presenceMap = map;
       this.cd.detectChanges();
+    });
+  }
+
+  private fillMissingUsernames(session: Session): void {
+    if (!session.playersUsernames) session.playersUsernames = {};
+
+    // Apply cached names synchronously before any async fetch
+    session.players.forEach(uid => {
+      if (!session.playersUsernames[uid] && this.usernameCache[uid]) {
+        session.playersUsernames[uid] = this.usernameCache[uid];
+      }
+    });
+
+    const missing = session.players.filter(
+      uid => !session.playersUsernames?.[uid]
+    );
+    if (!missing.length) return;
+    missing.forEach(uid => {
+      const email = session.playerEmails?.[uid];
+      if (!email) return;
+      this.usernameService.getUsernameFromEmail(email).then(name => {
+        if (name && this.session) {
+          this.usernameCache[uid] = name;
+          this.session.playersUsernames[uid] = name;
+          this.cd.detectChanges();
+        }
+      });
     });
   }
 
@@ -291,6 +339,11 @@ export class SessionPage implements OnInit, OnDestroy {
 
   get isMaster(): boolean {
     return !!this.currentUser && !!this.session && this.session.masterId === this.currentUser.uid;
+  }
+
+  get mySelectedCharacterId(): string {
+    if (!this.currentUser || !this.session?.selectedCharacters) return '';
+    return this.session.selectedCharacters[this.currentUser.uid] || '';
   }
 
   togglePlayerSelection(uid: string): void {
@@ -440,7 +493,9 @@ export class SessionPage implements OnInit, OnDestroy {
     this.closeModal();
     this.router.navigate(['/choose-character'], {queryParams: {sessionId: this.session.id}});
   }
-
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
   async kickPlayer(uid: string): Promise<void> {
     if (!this.session?.id || !this.isMaster) return;
     try {
@@ -583,7 +638,7 @@ export class SessionPage implements OnInit, OnDestroy {
       .filter(uid => uid !== this.session!.masterId)
       .map(uid => ({
         uid,
-        username: this.session!.playersUsernames[uid] || uid,
+        username: this.session!.playersUsernames[uid] || this.session!.playerEmails[uid] || uid,
         avatarUrl: this.characters[uid]?.image || undefined,
       }));
   }
@@ -601,5 +656,18 @@ export class SessionPage implements OnInit, OnDestroy {
     this.presenceUnsub?.();
     this.itemsUnsub?.();
     Object.values(this.charUnsubs).forEach(unsub => unsub());
+  }
+
+  // 🟢 Dispara el panel inferior del historial
+  triggerHistoryDrawer(): void {
+    // Busca el botón que está dentro de tu componente de historial y lo pulsa
+    const historyNativeButton = document.querySelector('history-button-component button') as HTMLButtonElement;
+    if (historyNativeButton) {
+      historyNativeButton.click();
+    } else {
+      // Alternativa por si el componente controla su propia visibilidad con la variable
+      this.showHistory = !this.showHistory;
+      this.cd.detectChanges();
+    }
   }
 }

@@ -3,24 +3,35 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BattleService, Combatant } from '../../services/battle.service';
-import { SessionService } from '../../services/sessions.service';
+import { SessionService, Session } from '../../services/sessions.service';
 import { AuthService } from '../../services/auth.service';
 import { CharacterService } from '../../services/character.service';
 import { MonsterSearchComponent } from '../../components/monster-search.component/monster-search.component';
-import {MonsterData} from '../../services/monster.service';
-import {SheetInterface} from '../../interfaces/SheetInterface';
+import { User } from 'firebase/auth';
+import { MonsterData } from '../../services/monster.service';
+import { SheetInterface } from '../../interfaces/SheetInterface';
+
 
 @Component({
   selector: 'app-dm-combat',
-  imports: [CommonModule, FormsModule, MonsterSearchComponent],
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MonsterSearchComponent
+  ],
   templateUrl: './dm-combat.html',
   styleUrl: './dm-combat.css',
 })
 export class DmCombat implements OnInit, OnDestroy {
+  sessionId = '';
   loading = true;
   isMaster = false;
-  private unsubSession?: () => void;
 
+  session: Session | null = null;
+  currentUser: User | null = null;
+
+  private unsubSession?: () => void;
   showAddMenu = false;
 
   // Turn tracking
@@ -46,14 +57,16 @@ export class DmCombat implements OnInit, OnDestroy {
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) { this.router.navigate(['/home']); return; }
+
+    this.sessionId = id;
     this.sessionService.setCurrentSessionId(id);
 
-    const user = await new Promise<any>(resolve =>
+    this.currentUser = await new Promise<any>(resolve =>
       this.authService.onAuthState().subscribe(u => resolve(u))
     );
 
-    const session = await this.sessionService.getSession(id);
-    this.isMaster = session?.masterId === user?.uid;
+const session = await this.sessionService.getSession(id);
+    this.isMaster = session?.masterId === this.currentUser?.uid;
 
     if (session?.combatOrder?.length) {
       // Combat already started — restore saved order without re-rolling initiative
@@ -63,10 +76,14 @@ export class DmCombat implements OnInit, OnDestroy {
       // First time — roll initiative and sort
       await this.battleService.startPreparingCombat();
     }
+
     this.activeTurnIndex = session?.activeTurnIndex ?? 0;
 
     this.unsubSession = this.sessionService.listenSession(id, (s) => {
       if (!s) { this.router.navigate(['/home']); return; }
+
+      this.session = s;
+      this.cd.detectChanges();
 
       if (s.status !== 'in-battle') {
         this.router.navigate(['/session', id]);
@@ -175,8 +192,8 @@ export class DmCombat implements OnInit, OnDestroy {
       // Persist updated HP in session so all screens see the change via listenSession
       this.saveOrder();
       this.closeDamageModal();
-    } catch (e: any) {
-      this.damageError = e.message || 'Error al aplicar el daño.';
+} catch (e: any) {
+      this.damageError = (e instanceof Error) ? e.message : 'Error al aplicar el daño.';
     } finally {
       this.isApplyingDamage = false;
       this.cd.detectChanges();
@@ -236,12 +253,11 @@ export class DmCombat implements OnInit, OnDestroy {
   }
 
   private saveOrder(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) this.battleService.saveOrder(id);
+    if (this.sessionId) this.battleService.saveOrder(this.sessionId);
   }
 
   async closeCombat(): Promise<void> {
-    const id = this.route.snapshot.paramMap.get('id');
+const id = this.route.snapshot.paramMap.get('id');
     if (!id || !this.isMaster) return;
     await this.sessionService.updateActiveTurn(id, 0);
     await this.battleService.endCombat(id);
@@ -249,8 +265,17 @@ export class DmCombat implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) this.router.navigate(['/session', id]);
+    if (this.sessionId) this.router.navigate(['/session', this.sessionId]);
     else this.router.navigate(['/home']);
+  }
+
+  triggerHistoryDrawer(): void {
+    const historyComp = document.querySelector('history-button-component');
+    if (historyComp) {
+      const triggerButton = historyComp.querySelector('button, .btn') || historyComp.firstElementChild;
+      if (triggerButton) {
+        (triggerButton as HTMLElement).click();
+      }
+    }
   }
 }

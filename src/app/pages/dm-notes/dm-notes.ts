@@ -28,8 +28,6 @@ export class DmNotes implements OnInit, OnDestroy {
   maxNotesExceeded: boolean = false;
   notes: NoteItem[] = [];
   sessionId: string = '';
-
-  // NUEVO: Variable para guardar el criterio de ordenación seleccionado
   sortCriteria: string = 'newest';
 
   unsubscribe: (() => void) | undefined;
@@ -42,14 +40,11 @@ export class DmNotes implements OnInit, OnDestroy {
     private cd: ChangeDetectorRef
   ) {}
 
-  ngOnInit() {
+  async ngOnInit() {
     const paramId = this.route.snapshot.queryParamMap.get('sessionId');
     const id = paramId || this.sessionsService.getCurrentSessionId();
 
-    if (!id) {
-      console.error('No hay id de la sesión.');
-      return;
-    }
+    if (!id) return;
 
     if (paramId) {
       this.sessionsService.setCurrentSessionId(paramId);
@@ -57,22 +52,17 @@ export class DmNotes implements OnInit, OnDestroy {
 
     this.sessionId = id;
 
-    console.log(this.sessionId)
-
     this.unsubscribe = this.dmNotesService.listenToNotes(
       this.sessionId,
       (notes) => {
         this.notes = notes;
-        // NUEVO: Ordenamos las notas automáticamente al recibirlas o al haber un cambio
         this.sortNotes();
         this.maxNotesExceeded = this.notes.length > this.maxNotes;
         this.cd.detectChanges();
       }
     );
-
   }
 
-  // NUEVO: Función para ordenar el array de notas según el criterio
   sortNotes() {
     if (!this.notes) return;
 
@@ -92,7 +82,6 @@ export class DmNotes implements OnInit, OnDestroy {
     });
   }
 
-  // NUEVO: Función auxiliar para extraer el tiempo de forma segura (sea Timestamp de Firebase o Date normal)
   private getTime(dateVal: any): number {
     if (!dateVal) return 0;
     if (typeof dateVal.toMillis === 'function') return dateVal.toMillis();
