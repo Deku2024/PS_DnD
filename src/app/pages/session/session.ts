@@ -777,8 +777,13 @@ export class SessionPage implements OnInit, OnDestroy {
   }
 
   saveMerchant(merchant: Merchant) {
-    if (this.session?.id)
-    this.merchantService.saveMerchant(this.session.id, merchant);
+    if (!this.session?.id) return;
+    if (merchant.id) {
+      const { id, ...data } = merchant;
+      this.merchantService.updateMerchant(this.session.id, id, data);
+    } else {
+      this.merchantService.saveMerchant(this.session.id, merchant);
+    }
     this.closeMerchantModal();
   }
 
