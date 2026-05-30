@@ -949,8 +949,11 @@ export class SessionPage implements OnInit, OnDestroy {
     this.cd.detectChanges();
   }
 
-  getValueOfThisItem(item : Item) {
+  getValueOfBuyThisItem(item : Item) {
     return this.currentMerchant().buyingList?.find(mItem => mItem.itemId === item.id)?.price ?? 0;
+  }
+  getValueOfSellOfThisItem(item : Item) {
+    return this.currentMerchant().sellingList?.find(mItem => mItem.itemId === item.id)?.price ?? 0;
   }
 
   triggerHistoryDrawer(): void {

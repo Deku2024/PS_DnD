@@ -18,6 +18,7 @@ export interface ThrowsResult {
   dc: number;
   side: number;
   amount: number;
+  animated: boolean;
 }
 
 export enum TypeOfThrow {
@@ -39,7 +40,7 @@ export class DiceRollerService {
     this.type = type;
   }
 
-  public rollDiceOf(throws: string, dc?: number): ThrowsResult {
+  public rollDiceOf(throws: string, dc?: number, animated? : boolean): ThrowsResult {
     const data = throws.split('d'); // formato esperado '4d6 + 4' (el bonus de manera opcional)
 
     let amount: number;
@@ -56,18 +57,21 @@ export class DiceRollerService {
       throw new Error('Los dados pasados no son válidos, se esperan números');
     }
 
-    let result = this.initializeResult(bonus, side, amount, dc ?? -1);
+    let result = this.initializeResult(bonus, side, amount, dc ?? -1, animated ?? true);
     result = this.roll(this.buildThrows(amount, side), dc ?? -1, result);
+
+    if (animated) result.animated = animated;
 
     this.lastResultSubject.next(result);
     return result;
   }
 
-  public rollAD20(bonus?: number, dc?: number, userId?: string): ThrowsResult {
-    let throwsResult = this.initializeResult(bonus ?? 0, 20, 1, dc ?? -1);
+  public rollAD20(bonus?: number, dc?: number, userId?: string, animated? : boolean): ThrowsResult {
+    let throwsResult = this.initializeResult(bonus ?? 0, 20, 1, dc ?? -1, animated ?? true);
     throwsResult = this.roll(this.buildThrows(1, 20), dc ?? -1, throwsResult);
     throwsResult.userId = userId;
     this.isCritic(throwsResult);
+    console.log(throwsResult);
     this.lastResultSubject.next(throwsResult);
     return throwsResult;
   }
@@ -110,7 +114,7 @@ export class DiceRollerService {
     };
   }
 
-  private initializeResult(bonus: number, side: number, amount: number, dc: number): ThrowsResult {
+  private initializeResult(bonus: number, side: number, amount: number, dc: number, animated: boolean): ThrowsResult {
     return {
       result: 0,
       throws: [],
@@ -121,7 +125,8 @@ export class DiceRollerService {
       success: false,
       dc: dc,
       side: side,
-      amount: amount
+      amount: amount,
+      animated: animated
     };
   }
 

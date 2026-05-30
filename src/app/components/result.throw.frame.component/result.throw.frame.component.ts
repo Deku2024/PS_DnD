@@ -33,6 +33,8 @@ export class ResultThrowFrameComponent implements OnInit, OnDestroy {
 
     this.subscription = this.diceRoller.lastResult$.subscribe((result) => {
 
+      if (!result.animated) return;
+
       this.inAnimation.set(true);
       this.stopChangingNumber.set(false);
       this.result.set(result);
