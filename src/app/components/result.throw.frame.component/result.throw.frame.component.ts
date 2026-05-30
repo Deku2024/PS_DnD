@@ -1,5 +1,6 @@
 import {Component, inject, OnDestroy, OnInit, OutputRefSubscription, signal} from '@angular/core';
 import {DiceRollerService, ThrowsResult, TypeOfThrow} from '../../services/roll-dice.service';
+import { DiceAssetCacheService } from '../../services/dice-asset-cache.service';
 
 @Component({
   selector: 'result-frame',
@@ -10,6 +11,7 @@ import {DiceRollerService, ThrowsResult, TypeOfThrow} from '../../services/roll-
 export class ResultThrowFrameComponent implements OnInit, OnDestroy {
 
   diceRoller = inject(DiceRollerService);
+  diceAssetCache = inject(DiceAssetCacheService);
 
   result = signal<ThrowsResult | undefined>(undefined);
   inAnimation = signal<boolean>(false);
@@ -27,6 +29,8 @@ export class ResultThrowFrameComponent implements OnInit, OnDestroy {
   private holdInterval: any = null;
 
   ngOnInit(): void {
+    this.diceAssetCache.preloadDiceImage();
+
     this.subscription = this.diceRoller.lastResult$.subscribe((result) => {
 
       this.inAnimation.set(true);

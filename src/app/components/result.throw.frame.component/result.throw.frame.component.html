@@ -2,7 +2,7 @@
 
   @if (inAnimation()) {
     <div class="animation-container">
-      <img src="/dice.png" alt="dice">
+      <img [src]="diceAssetCache.diceImageUrl()" alt="dice">
       <div class="rolling-number">{{ currentNumber() }}</div>
       <div class="golden-glow"></div>
     </div>
@@ -10,7 +10,7 @@
 
   @if (showBounce()) {
     <div class="animation-container bounce-result">
-      <img src="/dice.png" alt="dice">
+      <img [src]="diceAssetCache.diceImageUrl()" alt="dice">
       <div class="final-number">{{ result()?.result }}</div>
       <div class="golden-glow final-glow"></div>
     </div>

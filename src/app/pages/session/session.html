@@ -1,5 +1,12 @@
 <div class="session-page">
 
+  <!-- Overlay de rotación: visible solo en portrait cuando la API no puede bloquear la orientación -->
+  <div class="rotate-overlay">
+    <div class="rotate-icon">&#8635;</div>
+    <p>Gira el dispositivo</p>
+    <p class="rotate-sub">Esta página se visualiza en horizontal</p>
+  </div>
+
   <div class="loading-state" *ngIf="loading">
     <span class="spinner">⏳</span>
     <p>Cargando la sesión...</p>
@@ -221,7 +228,7 @@
     </div>
 
 
-    <div class="horizontal-layout">
+    <div class="horizontal-layout" [class.sidebar-closed]="!isSidebarOpen">
       <header class="landscape-header">
         <span class="ornament">🙤</span>
         <h1 class="server-title">{{ session.name }}</h1>

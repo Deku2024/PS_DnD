@@ -32,6 +32,7 @@ import {CommerceService} from '../../services/commerce.service';
 import {DmFloatingMenuComponent} from '../../components/dm-floating-menu.component/dm-floating-menu.component';
 import {MerchantForm} from '../../components/merchant-form/merchant-form';
 import {UsernameService} from '../../services/username.service';
+import { DiceAssetCacheService } from '../../services/dice-asset-cache.service';
 
 
 @Component({
@@ -63,6 +64,7 @@ export class SessionPage implements OnInit, OnDestroy {
   activeTab: 'players' | 'map' | 'audio' = 'players';
   private pendingFile: File | null = null;
   private cloudinaryService = inject(CloudinaryService);
+  private diceAssetCache = inject(DiceAssetCacheService);
   // Map settings
   pendingIsMap = false;
   pendingHexSize = 40;
@@ -157,6 +159,11 @@ export class SessionPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.diceAssetCache.preloadDiceImage();
+
+    // Forzar landscape; solo funciona en PWA/fullscreen; falla silenciosamente en navegador normal
+    (screen.orientation as any)?.lock?.('landscape')?.catch?.(() => {});
+
     if (!(window as any).YT) {
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
@@ -768,6 +775,7 @@ export class SessionPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    (screen.orientation as any)?.unlock?.();
     this.unsubscribe?.();
     this.authSub?.unsubscribe();
     this.presenceUnsub?.();
@@ -777,8 +785,13 @@ export class SessionPage implements OnInit, OnDestroy {
   }
 
   saveMerchant(merchant: Merchant) {
-    if (this.session?.id)
-    this.merchantService.saveMerchant(this.session.id, merchant);
+    if (!this.session?.id) return;
+    if (merchant.id) {
+      const { id, ...data } = merchant;
+      this.merchantService.updateMerchant(this.session.id, id, data);
+    } else {
+      this.merchantService.saveMerchant(this.session.id, merchant);
+    }
     this.closeMerchantModal();
   }
 

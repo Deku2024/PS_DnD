@@ -10,6 +10,9 @@ import { MonsterSearchComponent } from '../../components/monster-search.componen
 import { User } from 'firebase/auth';
 import { MonsterData } from '../../services/monster.service';
 import { SheetInterface } from '../../interfaces/SheetInterface';
+import { GeneralThrowsButtonComponent } from '../../components/general.throws.button.component/general.throws.button.component';
+import { ResultThrowFrameComponent } from '../../components/result.throw.frame.component/result.throw.frame.component';
+import { RollHistoryService } from '../../services/roll-history.service';
 
 
 @Component({
@@ -18,7 +21,9 @@ import { SheetInterface } from '../../interfaces/SheetInterface';
   imports: [
     CommonModule,
     FormsModule,
-    MonsterSearchComponent
+    MonsterSearchComponent,
+    GeneralThrowsButtonComponent,
+    ResultThrowFrameComponent
   ],
   templateUrl: './dm-combat.html',
   styleUrl: './dm-combat.css',
@@ -51,6 +56,7 @@ export class DmCombat implements OnInit, OnDestroy {
     private sessionService: SessionService,
     private authService: AuthService,
     private characterService: CharacterService,
+    private rollHistoryService: RollHistoryService,
     private cd: ChangeDetectorRef
   ) {}
 
@@ -83,6 +89,8 @@ const session = await this.sessionService.getSession(id);
       if (!s) { this.router.navigate(['/home']); return; }
 
       this.session = s;
+      this.rollHistoryService.setSessionStatus(s.status);
+      this.rollHistoryService.startListening(id);
       this.cd.detectChanges();
 
       if (s.status !== 'in-battle') {

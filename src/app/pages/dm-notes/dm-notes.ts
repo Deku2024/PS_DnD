@@ -19,7 +19,7 @@ interface NoteItem {
 @Component({
   selector: 'app-dm-notes',
   standalone: true,
-  imports: [CommonModule, Note, FormsModule, ResultThrowFrameComponent, GeneralThrowsButtonComponent],
+  imports: [CommonModule, Note, FormsModule, ResultThrowFrameComponent],
   templateUrl: './dm-notes.html',
   styleUrl: './dm-notes.css',
 })
