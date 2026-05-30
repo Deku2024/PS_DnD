@@ -207,7 +207,7 @@ export class BattleService {
   }
 
   public addToCombat(character: SheetInterface, playerUid?: string): void {
-    const result = this.rollerService.rollAD20(this.characterService.calculateBonus(character.attributes.dexterity), -1, playerUid);
+    const result = this.rollerService.rollAD20(this.characterService.calculateBonus(character.attributes.dexterity), -1, playerUid, false);
     this.combatOrder.set(character.name, result.result);
     this.combatEntities.push(character);
   }

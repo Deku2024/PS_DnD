@@ -25,6 +25,7 @@ export class CommerceService {
     const merchantItem = merchant.sellingList.find(mItem => item.id === mItem.itemId);
     const characterItem = character.inventory.find(cItem => item.name === cItem.name);
     this.addItemToCharacter(characterItem, character, item, merchantItem?.price!);
+    console.log(merchantItem?.price);
     this.reduceStock(merchantItem, merchant, item);
     this.updateFiles(character, merchant);
   }
@@ -69,17 +70,19 @@ export class CommerceService {
           Math.floor(remainingPrice / coin.value),
           this.characterService.getCoinAmount(character, coin)
         );
-        this.removeCoins(coinsToUse, coin, character);
-        remainingPrice = Math.round((coinsToUse * coin.value) * 100) / 100;
+
+        character = this.removeCoins(coinsToUse, coin, character);
+        if (coinsToUse !== 0) remainingPrice = Math.round((coinsToUse * coin.value) * 100) / 100;
       }
       if (remainingPrice <= 0) break;
     }
   }
 
-  private removeCoins(coinsToUse: number, coin: { name: string; value: number }, character: CharacterWithId) {
+  private removeCoins(coinsToUse: number, coin: { name: string; value: number }, character: CharacterWithId) : CharacterWithId{
     for (let i = 0; i < coinsToUse; i++) {
       this.removeTypeOfCoin(coin, character);
     }
+    return character;
   }
 
   private addChange(price: number, character: CharacterWithId) {

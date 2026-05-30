@@ -602,7 +602,7 @@
           </button>
         </div>
 
-        @if (!sellMode()) {
+        @if (sellMode()) {
           <section class="buy-section">
             <div class="section-header">
               <h4>Items disponibles para comprar</h4>
@@ -615,7 +615,7 @@
                   <div class="item-info">
                     <div class="item-header">
                       <span class="item-name">{{ merchantItem.name }}</span>
-                      <span class="item-price">{{ getValueOfThisItem(merchantItem) }} po</span>
+                      <span class="item-price">{{ getValueOfSellOfThisItem(merchantItem) }} po</span>
                     </div>
                     <div class="item-details">
                       <span class="item-stock">Stock: {{ merchantItem.quantity }}</span>
@@ -625,7 +625,7 @@
                   <button
                     class="buy-btn"
                     (click)="buyItem(merchantItem)"
-                    [disabled]="(merchantItem.quantity ?? 0) <= 0 || totalValueOnCharacter() < getValueOfThisItem(merchantItem)"
+                    [disabled]="(merchantItem.quantity ?? 0) <= 0 || totalValueOnCharacter() < getValueOfBuyThisItem(merchantItem)"
                   >
                     Comprar
                   </button>
@@ -648,7 +648,7 @@
                   <div class="item-info">
                     <div class="item-header">
                       <span class="item-name">{{ merchantItem.name }}</span>
-                      <span class="item-price">{{ getValueOfThisItem(merchantItem) }} po</span>
+                      <span class="item-price">{{ getValueOfBuyThisItem(merchantItem) }} po</span>
                     </div>
                     <div class="item-details">
                       <span class="item-weight">Peso: {{ merchantItem.weight }} lb.</span>
